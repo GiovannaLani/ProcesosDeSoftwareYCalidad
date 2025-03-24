@@ -1,7 +1,7 @@
-package com.example.restapi.service;
+package com.spq.vinted.service;
 
-import com.example.restapi.model.Book;
-import com.example.restapi.repository.BookRepository;
+import com.spq.vinted.model.Book;
+import com.spq.vinted.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

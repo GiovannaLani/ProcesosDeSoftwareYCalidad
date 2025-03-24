@@ -1,4 +1,4 @@
-package com.example.restapi.model;
+package com.spq.vinted.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

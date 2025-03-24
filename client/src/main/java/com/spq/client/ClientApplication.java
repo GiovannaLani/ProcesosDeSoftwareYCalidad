@@ -1,14 +1,13 @@
-package com.example.restapi;
+package com.spq.client;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RestApiApplication {
+public class ClientApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RestApiApplication.class, args);
+		SpringApplication.run(ClientApplication.class, args);
 	}
 
 }
-

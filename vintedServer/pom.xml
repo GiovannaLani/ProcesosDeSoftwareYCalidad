@@ -9,10 +9,10 @@
 		<version>3.4.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>rest-api</artifactId>
+	<groupId>com.spq</groupId>
+	<artifactId>vinted</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>rest-api</name>
+	<name>vinted</name>
 	<description>Demo project for Spring Boot REST API</description>
 	<url />
 	<licenses>
@@ -87,7 +87,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>com.example.restapi.client.BookManager</mainClass>
+					<mainClass>com.spq.vinted.client.BookManager</mainClass>
 					<arguments>
 						<argument>${server.hostname}</argument>
 						<argument>${server.port}</argument>

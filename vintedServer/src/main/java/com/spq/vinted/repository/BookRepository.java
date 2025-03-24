@@ -1,5 +1,5 @@
-package com.example.restapi.repository;
-import com.example.restapi.model.Book;
+package com.spq.vinted.repository;
+import com.spq.vinted.model.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package com.example.restapi.controller;
+package com.spq.vinted.controller;
 
-import com.example.restapi.model.Book;
-import com.example.restapi.service.BookService;
+import com.spq.vinted.model.Book;
+import com.spq.vinted.service.BookService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
