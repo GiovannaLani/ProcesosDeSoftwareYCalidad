@@ -7,9 +7,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "clothes")
 public class Clothes extends Item {
+    @Column(nullable = false)
     private String size;
+    @Column(nullable = false)
     private String brand;
-
     @Column(nullable = false)
     private Category category;
 
