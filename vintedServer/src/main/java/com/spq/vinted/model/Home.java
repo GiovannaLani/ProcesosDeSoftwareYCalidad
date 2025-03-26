@@ -1,5 +1,7 @@
 package com.spq.vinted.model;
 
+import com.spq.vinted.dto.HomeDTO;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -14,4 +16,7 @@ public class Home extends Item {
         super(id, title, description, price, image, seller);
     }
     
+    public HomeDTO toDTO() {
+        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getImage());
+    }
 }

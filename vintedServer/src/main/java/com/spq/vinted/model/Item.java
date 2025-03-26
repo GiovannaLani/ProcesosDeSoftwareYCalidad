@@ -1,5 +1,7 @@
 package com.spq.vinted.model;
 
+import com.spq.vinted.dto.ItemDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -83,5 +85,9 @@ public abstract class Item {
 
     public void setSeller(User seller) {
         this.seller = seller;
+    }
+
+    public ItemDTO toDTO() {
+        return new ItemDTO(id, title, description, price, image);
     }
 }

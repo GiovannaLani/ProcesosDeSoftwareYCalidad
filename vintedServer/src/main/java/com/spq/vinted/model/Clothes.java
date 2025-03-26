@@ -1,5 +1,7 @@
 package com.spq.vinted.model;
 
+import com.spq.vinted.dto.ClothesDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -7,9 +9,11 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "clothes")
 public class Clothes extends Item {
+    
+    @Column(nullable = false)
     private String size;
+    @Column(nullable = false)
     private String brand;
-
     @Column(nullable = false)
     private Category category;
 
@@ -45,5 +49,9 @@ public class Clothes extends Item {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public ClothesDTO toDTO() {
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getImage(), size, brand, category);
     }
 }
