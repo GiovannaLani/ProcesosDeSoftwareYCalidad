@@ -52,8 +52,9 @@
     else {
         var posWrapHeader = 0;
     }
-    
-
+    $(headerDesktop).addClass('fix-menu-desktop');
+    $(wrapMenu).css('top',posWrapHeader - $(this).scrollTop());
+    /*
     if($(window).scrollTop() > posWrapHeader) {
         $(headerDesktop).addClass('fix-menu-desktop');
         $(wrapMenu).css('top',0); 
@@ -72,7 +73,7 @@
             $(headerDesktop).removeClass('fix-menu-desktop');
             $(wrapMenu).css('top',posWrapHeader - $(this).scrollTop()); 
         } 
-    });
+    });*/
 
 
     /*==================================================================
@@ -280,3 +281,16 @@
 
 
 })(jQuery);
+
+
+document.getElementById('toggle-button').addEventListener('click', function() {
+    const toggleDiv = document.getElementById('toggle-div');
+    
+    // Alternar la visibilidad del div
+    if (toggleDiv.style.display === 'none' || toggleDiv.style.display === '') {
+      toggleDiv.style.display = 'block';
+    } else {
+      toggleDiv.style.display = 'none';
+    }
+  });
+  

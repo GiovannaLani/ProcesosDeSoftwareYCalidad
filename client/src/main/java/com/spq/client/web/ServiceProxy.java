@@ -1,13 +1,37 @@
 package com.spq.client.web;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.Spec;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
+import com.spq.client.data.Pet;
+import com.spq.client.data.MultipartInputStreamFileResource;
+import com.spq.client.data.Signup;
+import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Item;
+import com.spq.client.data.Category;
+import com.spq.client.data.Clothes;
+import com.spq.client.data.Electronics;
+import com.spq.client.data.Entertainment;
+import com.spq.client.data.Home;
+
+import java.util.List;
 
 @Service
 public class ServiceProxy implements IVintedServiceProxy {
@@ -21,9 +45,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
     @Override
-	public void createUser(User user) {
+	public void createUser(Signup user) {
 		try {
-			restTemplate.postForObject(apiBaseUrl + "/users", user, Void.class);
+			restTemplate.postForObject(apiBaseUrl + "/users/signup", user, Void.class);
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
 			case 409 -> throw new RuntimeException("User already exists");
@@ -45,6 +69,68 @@ public class ServiceProxy implements IVintedServiceProxy {
 			case 404 -> throw new RuntimeException("User not found");
 			default -> throw new RuntimeException("Failed to login: " + e.getStatusText());
 			}
+		}
+	}
+	@Override
+	public List<Item> getItems() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/items", HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+    	} catch (HttpStatusCodeException e) {
+        	throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+    	}
+	}
+
+	@Override
+	public List<Clothes> getClothes() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/clothes", HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch clothes: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public List<Clothes> getClothesByCategory(Category category) {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/clothes/" + category, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch clothes: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public List<Electronics> getElectronics() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/electronics", HttpMethod.GET, null, new ParameterizedTypeReference<List<Electronics>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch electronics: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public List<Home> getHomeItems() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/home", HttpMethod.GET, null, new ParameterizedTypeReference<List<Home>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch home items: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public List<Pet> getItemsForPet() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/pet", HttpMethod.GET, null, new ParameterizedTypeReference<List<Pet>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch pet items: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public List<Entertainment> getItemsForEntertainment() {
+		try{
+			return restTemplate.exchange(apiBaseUrl + "/entertainment", HttpMethod.GET, null, new ParameterizedTypeReference<List<Entertainment>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch entertainment items: " + e.getStatusText(), e);
 		}
 	}
 
@@ -90,4 +176,152 @@ public class ServiceProxy implements IVintedServiceProxy {
         }
     }
 
+	public void deleteUser(long token) {
+		try {
+			restTemplate.delete(apiBaseUrl + "/users/delete?token=" + token);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to delete user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage) {
+		updateUserData(token, name, surname, description);
+		if (profileImage != null && !profileImage.isEmpty()) {
+			updateProfileImage(token, profileImage);
+		}
+	}
+	
+	public void updateUserData(long token, String name, String surname, String description) {
+		EditUser editUser = new EditUser(name, surname, description);
+		try {
+			restTemplate.put(apiBaseUrl + "/users/editUserData?token=" + token, editUser);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404:
+					throw new RuntimeException("User not found");
+				default:
+					throw new RuntimeException("Failed to update user: " + e.getStatusText());
+			}
+		}
+	}
+	
+	public void updateProfileImage(long token, MultipartFile profileImage) {
+		try {
+			String url = apiBaseUrl + "/users/editProfileImage?token=" + token;
+	
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+	
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("profileImage", new MultipartInputStreamFileResource(profileImage.getInputStream(), profileImage.getOriginalFilename()));
+	
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+	
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			if (e.getStatusCode().value() == 404) {
+				throw new RuntimeException("User not found");
+			} else {
+				throw new RuntimeException("Failed to update user: " + e.getStatusText());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+	
+
+
+	@Override
+	public User getUser(long id, long token) {
+		try {
+			User user = restTemplate.getForObject(apiBaseUrl + "/users/profile/"+id+"?token=" + token, User.class);
+			return user;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to get user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public Long getUserIdFromToken(Long token) {
+		try {
+			Long id = restTemplate.getForObject(apiBaseUrl + "/users/userId?token=" + token, Long.class);
+			return id;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to get user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void uploadItemData(long token, String title, String description, String category, float price,
+			String brand, String size, String clothCategory, String species) {
+				System.out.println("Uploading item data...");
+		if(category.equals("clothes")){
+			System.out.println("Uploading clothes data...");
+			Category categoryEnum = Category.WOMAN;
+			System.out.println("Category: " + categoryEnum);
+			Clothes clothes = new Clothes(title, description, price, categoryEnum, brand, size);
+			System.out.println("Clothes object created: " + clothes);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, clothes, Void.class);
+				
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("electronics")){
+			Electronics electronics = new Electronics(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, electronics, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("home")){
+			Home home = new Home(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, home, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("pet")){
+			Species speciesEnum = Species.valueOf(species.toUpperCase());
+			Pet pet = new Pet(title, description, price, speciesEnum);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, pet, Void.class);
+				
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("entertainment")){
+			Entertainment entertainment = new Entertainment(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, entertainment, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		}
+	}
 }
