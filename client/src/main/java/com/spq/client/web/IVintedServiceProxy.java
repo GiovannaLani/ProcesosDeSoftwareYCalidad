@@ -1,5 +1,8 @@
 package com.spq.client.web;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
@@ -12,7 +15,7 @@ import com.spq.client.data.Home;
 import java.util.List;
 
 public interface IVintedServiceProxy {
-    public void createUser(User user);
+    public void createUser(Signup user);
 	public Long login(String email, String password);
 	public List<Item> getItems();
 	public List<Clothes> getClothes();
@@ -22,4 +25,8 @@ public interface IVintedServiceProxy {
 	public List<Pet> getItemsForPet();
 	public List<Entertainment> getItemsForEntertainment();
 	public void logout(long token);
+	public void deleteUser(long token);
+	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);
+	public User getUser(long id, long token);
+	public Long getUserIdFromToken(Long token);
 }
