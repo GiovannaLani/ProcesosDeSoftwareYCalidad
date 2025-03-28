@@ -6,7 +6,10 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spq.vinted.dto.ClothesDTO;
@@ -22,7 +25,9 @@ import com.spq.vinted.model.Entertainment;
 import com.spq.vinted.model.Home;
 import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Pet;
+import com.spq.vinted.model.User;
 import com.spq.vinted.service.ItemService;
+import com.spq.vinted.service.UserService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -32,14 +37,101 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Item Controller", description = "API for managing items")
 public class ItemController {
     private ItemService itemService;
+    private UserService userService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, UserService userService) {
         super();
         this.itemService = itemService;
+        this.userService = userService;
     }
     
+    @PostMapping("/itemData")
+    public ResponseEntity<Void> uploadItemData(
+            @RequestParam("token") long token,
+            @RequestBody ItemDTO itemDTO) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
 
+        if (itemDTO instanceof ClothesDTO) {
+            ClothesDTO clothes = (ClothesDTO) itemDTO;
+            Clothes clothesItem = new Clothes(
+                    clothes.getTitle(),
+                    clothes.getDescription(),
+                    clothes.getPrice(),
+                    null,
+                    clothes.getSize(),
+                    clothes.getBrand(),
+                    clothes.getCategory(),
+                    user
+            );
+            itemService.saveItem(clothesItem);
+            System.out.println("titulo: " + clothes.getTitle()+
+                    " descripcion: " + clothes.getDescription() +
+                    " precio: " + clothes.getPrice() +
+                    " categoria: " + clothes.getCategory() +
+                    " talla: " + clothes.getSize() );
+        } else if (itemDTO instanceof ElectronicsDTO) {
+            ElectronicsDTO electronics = (ElectronicsDTO) itemDTO;
+            Electronics electronicsItem = new Electronics(
+                    electronics.getTitle(),
+                    electronics.getDescription(),
+                    electronics.getPrice(),
+                    null,
+                    user
+            );
+            itemService.saveItem(electronicsItem);
+            System.out.println("title"+ ": " + electronics.getTitle() +
+                    " description: " + electronics.getDescription() +
+                    " price: " + electronics.getPrice() );
+        } else if (itemDTO instanceof PetDTO) {
+            PetDTO pet = (PetDTO) itemDTO;
+            Pet petItem = new Pet(
+                    pet.getTitle(),
+                    pet.getDescription(),
+                    pet.getPrice(),
+                    null,
+                    pet.getSpecies(),
+                    user
+            );
+            itemService.saveItem(petItem);
+            System.out.println("titulo: " + pet.getTitle() +
+                    " descripcion: " + pet.getDescription() +
+                    " precio: " + pet.getPrice() +
+                    " tipo: " + pet.getSpecies() );
+        } else if (itemDTO instanceof HomeDTO){
+            HomeDTO home = (HomeDTO) itemDTO;
+            Home homeItem = new Home(
+                    home.getTitle(),
+                    home.getDescription(),
+                    home.getPrice(),
+                    null,
+                    user
+            );
+            itemService.saveItem(homeItem);
+            System.out.println("titulo: " + home.getTitle() +
+                    " descripcion: " + home.getDescription() +
+                    " precio: " + home.getPrice() );
+        }else if(itemDTO instanceof EntertainmentDTO){
+            EntertainmentDTO entertainment = (EntertainmentDTO) itemDTO;
+            Entertainment entertainmentItem = new Entertainment(
+                    entertainment.getTitle(),
+                    entertainment.getDescription(),
+                    entertainment.getPrice(),
+                    null,
+                    user
+            );
+            itemService.saveItem(entertainmentItem);
+            System.out.println("titulo: " + entertainment.getTitle() +
+                    " descripcion: " + entertainment.getDescription() +
+                    " precio: " + entertainment.getPrice());
+        }
 
+        return ResponseEntity.ok().build();
+    }
+
+/* 
     @GetMapping("/items")
     public ResponseEntity<List<ItemDTO>> getItems() {
         try {
@@ -52,7 +144,7 @@ public class ItemController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-    }
+    }*/
 
 
     @GetMapping("/clothes")

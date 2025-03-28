@@ -141,9 +141,13 @@
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						<button class="button-green">
-							Vender ahora
-						</button>
+						<form th:action="@{/uploadItem(token=${token})}" method="get" th:if="${token != null}">
+							<input type="hidden" name="token" th:value="${token}">
+							<button class="button-green">
+								Vender ahora
+							</button>
+						</form>
+						
 					</div>
 				</nav>
 			</div>

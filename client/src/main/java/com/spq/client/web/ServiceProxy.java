@@ -3,6 +3,7 @@ package com.spq.client.web;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.Spec;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpEntity;
@@ -20,6 +21,7 @@ import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
 import com.spq.client.data.Signup;
+import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
@@ -225,6 +227,70 @@ public class ServiceProxy implements IVintedServiceProxy {
 			switch (e.getStatusCode().value()) {
 			case 404 -> throw new RuntimeException("User not found");
 			default -> throw new RuntimeException("Failed to get user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void uploadItemData(long token, String title, String description, String category, float price,
+			String brand, String size, String clothCategory, String species) {
+				System.out.println("Uploading item data...");
+		if(category.equals("clothes")){
+			System.out.println("Uploading clothes data...");
+			Category categoryEnum = Category.WOMAN;
+			System.out.println("Category: " + categoryEnum);
+			Clothes clothes = new Clothes(title, description, price, categoryEnum, brand, size);
+			System.out.println("Clothes object created: " + clothes);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, clothes, Void.class);
+				
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("electronics")){
+			Electronics electronics = new Electronics(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, electronics, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("home")){
+			Home home = new Home(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, home, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("pet")){
+			Species speciesEnum = Species.valueOf(species.toUpperCase());
+			Pet pet = new Pet(title, description, price, speciesEnum);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, pet, Void.class);
+				
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
+			}
+		} else if(category.equals("entertainment")){
+			Entertainment entertainment = new Entertainment(title, description, price);
+			try {
+				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, entertainment, Void.class);
+			} catch (HttpStatusCodeException e) {
+				switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+				}
 			}
 		}
 	}

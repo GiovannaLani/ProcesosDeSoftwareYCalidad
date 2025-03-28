@@ -102,37 +102,37 @@ public class UserController {
 		}
 	}
 	@PutMapping("/editUserData")
-public ResponseEntity<Void> updateUserData(
-        @RequestParam("token") long token,
-        @RequestBody EditUserDTO userEditDTO) {  // Recibes el DTO con los datos del usuario en JSON
+	public ResponseEntity<Void> updateUserData(
+			@RequestParam("token") long token,
+			@RequestBody EditUserDTO userEditDTO) {
 
-    try {
-        authService.editUserData(token, userEditDTO.name(), userEditDTO.surname(), userEditDTO.description());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } catch (RuntimeException e) {
-        if ("User not found".equals(e.getMessage())) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-@PutMapping(value = "/editProfileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<Void> updateProfileImage(
-        @RequestParam("token") long token,
-        @RequestPart(value = "profileImage") MultipartFile profileImage) {
+		try {
+			authService.editUserData(token, userEditDTO.name(), userEditDTO.surname(), userEditDTO.description());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	@PutMapping(value = "/editProfileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Void> updateProfileImage(
+			@RequestParam("token") long token,
+			@RequestPart(value = "profileImage") MultipartFile profileImage) {
 
-    try {
-        authService.editProfileImage(token, profileImage);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } catch (RuntimeException e) {
-        if ("User not found".equals(e.getMessage())) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
+		try {
+			authService.editProfileImage(token, profileImage);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 
 	@GetMapping("/profile/{userId}")

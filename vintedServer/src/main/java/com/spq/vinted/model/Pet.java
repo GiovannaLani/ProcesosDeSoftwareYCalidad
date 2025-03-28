@@ -10,26 +10,26 @@ import jakarta.persistence.Table;
 @Table(name = "pets")
 public class Pet extends Item{
     @Column(nullable = false)
-    private String species;
+    private Species species;
 
     public Pet() {
     }
 
-    public Pet(long id, String title, String description, float price, String image, String species, User seller) {
-        super(id, title, description, price, image, seller);
+    public Pet(String title, String description, float price, String image, Species species, User seller) {
+        super(title, description, price, image, seller);
         this.species = species;
     }
 
-    public String getSpecies() {
+    public Species getSpecies() {
         return species;
     }
     
-    public void setSpecies(String species) {
+    public void setSpecies(Species species) {
         this.species = species;
     }
 
     public PetDTO toDTO() {
-        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), getImage(), species);
+        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species);
     }
     
 }

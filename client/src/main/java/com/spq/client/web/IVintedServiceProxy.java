@@ -29,4 +29,5 @@ public interface IVintedServiceProxy {
 	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);
 	public User getUser(long id, long token);
 	public Long getUserIdFromToken(Long token);
+	public void uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String species);
 }

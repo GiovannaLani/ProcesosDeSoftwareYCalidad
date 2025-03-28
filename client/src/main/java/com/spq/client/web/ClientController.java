@@ -284,4 +284,51 @@ public class ClientController {
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "editUser";
 	}
+
+	@GetMapping("/uploadItem")
+	public String showUploadItem(
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		model.addAttribute("redirectUrl", redirectUrl);
+		return "uploadItem";
+	}
+	
+	@PostMapping("/uploadItem")
+	public String uploadItem(
+			@RequestParam("token") Long token,
+			@RequestParam("title") String title,
+			@RequestParam("description") String description,
+			@RequestParam("category") String category,
+			@RequestParam("price") Float price,
+			@RequestParam(value = "brand", required = false) String brand,
+			@RequestParam(value = "size", required = false) String size,
+			@RequestParam(value = "clothCategory", required = false) String clothCategory,
+			@RequestParam(value = "species", required = false) String species,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			//@RequestParam(value = "profileImage", required = false) MultipartFile itemImage,
+			RedirectAttributes redirectAttributes) {
+
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			System.out.println("Uploading item with title: " + title);
+			vintedService.uploadItemData(token, title, description, category, price, brand, size, clothCategory, species);
+			System.out.println("Item uploaded successfully.");
+			return "redirect:" + redirectUrl;
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado.");
+			}
+			return "redirect:/editUser?redirectUrl=" + redirectUrl;
+		}
+	} 
 }

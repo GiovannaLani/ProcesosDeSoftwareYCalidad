@@ -20,8 +20,8 @@ public class Clothes extends Item {
     public Clothes() {
     }
 
-    public Clothes(long id, String title, String description, float price, String image, String size, String brand, Category category, User seller) {
-        super(id, title, description, price, image, seller);
+    public Clothes(String title, String description, float price, String image, String size, String brand, Category category, User seller) {
+        super(title, description, price, image, seller);
         this.size = size;
         this.brand = brand;
         this.category = category;
@@ -52,6 +52,6 @@ public class Clothes extends Item {
     }
 
     public ClothesDTO toDTO() {
-        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getImage(), size, brand, category);
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), size, brand, category);
     }
 }

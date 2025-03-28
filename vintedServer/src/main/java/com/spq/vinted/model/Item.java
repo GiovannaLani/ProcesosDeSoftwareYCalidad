@@ -21,7 +21,7 @@ public abstract class Item {
     private String description;
     @Column(nullable = false)
     private float price;
-    @Column(nullable = false)
+    @Column
     private String image;
     @ManyToOne
 	@JoinColumn(name = "seller_id")
@@ -30,12 +30,11 @@ public abstract class Item {
     public Item() {
     }
     
-    public Item(long id, String title, String description, float price, String image, User seller) {
-        this.id = id;
+    public Item(String title, String description, float price, String image, User seller) {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.image = image;
+        this.image = "image";
         this.seller = seller;
     }
 
@@ -87,7 +86,4 @@ public abstract class Item {
         this.seller = seller;
     }
 
-    public ItemDTO toDTO() {
-        return new ItemDTO(id, title, description, price, image);
-    }
 }

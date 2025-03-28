@@ -49,5 +49,8 @@ public class ItemService {
     public List<Entertainment> getItemsforEntertainment(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Entertainment).map(item -> (Entertainment) item).collect(Collectors.toList());
     }
+    public void saveItem(Item item) {
+        itemRepository.save(item);
+    }
     
 }

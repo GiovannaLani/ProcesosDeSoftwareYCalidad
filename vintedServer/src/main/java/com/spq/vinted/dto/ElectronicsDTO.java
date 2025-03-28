@@ -7,7 +7,7 @@ public class ElectronicsDTO extends ItemDTO {
     }
 
     
-    public ElectronicsDTO(long id, String title, String description, float price, String image) {
-        super(id, title, description, price, image);
+    public ElectronicsDTO(long id, String title, String description, float price) {
+        super(id, title, description, price);
     }
 }
