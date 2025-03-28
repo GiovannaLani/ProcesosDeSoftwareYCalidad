@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register</title>
+    <title>Log in</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -135,12 +135,12 @@
 								</ul>
 							</div>
 						</div>
+						
 						<form th:unless="${token}" th:action="@{/login}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						
 						<button class="button-green">
 							Vender ahora
 						</button>
@@ -290,45 +290,39 @@
 	<section class="bg0 p-t-104 p-b-116">
 		<div class="container">
 			<div class="flex-w flex-tr flex-login">
-				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<form th:action="@{/register(redirectUrl=${redirectUrl})}" method="post" name="sentMessage">
+				<div th:unless="${token}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+					<form th:action="@{/login(redirectUrl=${redirectUrl})}" method="post" name="sentMessage">
 						<h4 class="mtext-105 cl2 txt-center p-b-30">
-							Registrarse
+							Iniciar Sesión
 						</h4>
 						<div class="m-b-20">
-							<label for="email" class="stext-111 cl2 p-b-10 login-label">Correo electrónico</label>
 							<input class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
 								   type="email" name="email" placeholder="Tu correo electrónico" required>
 						</div>
 					
 						<div class="m-b-20">
-							<label for="password" class="stext-111 cl2 p-b-10 login-label">Contraseña</label>
 							<input class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
 								   type="password" name="password" placeholder="Tu contraseña" required>
 						</div>
-						<div class="m-b-20">
-						<label for="username" class="stext-111 cl2 p-b-10 login-label">Nombre de usuario</label>
-							<input id="username" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="username" placeholder="Introduce tu nombre de usuario" required>
-						</div>
-						<p>*No se puede cambiar.</p>
-						<div class="m-b-20">
-							<label for="name" class="stext-111 cl2 p-b-10 login-label">Nombre</label>
-							<input id="name" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="name" placeholder="Introduce tu nombre" required>
-						</div>
-						<div class="m-b-20">
-							<label for="surname" class="stext-111 cl2 p-b-10 login-label">Apellido</label>
-							<input id="surname" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="surname" placeholder="Introduce tu apellido" required>
-						</div>
-						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
-							Registrarse
+
+						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
+							Iniciar sesión
 						</button>
 						<div th:if="${errorMessage}">
 							<p class="errorMessage txt-center"><span th:text=${errorMessage}></span></p>
 						</div>
-						<p class="txt-center">¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
+						<p class="txt-center">¿Todavía no tienes una cuenta?<a th:href="@{/register}"> Registarse</a></p>
+					</form>
+				</div>
+				<div th:if="${token}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+					<form th:action="@{/login(redirectUrl=${redirectUrl})}" method="post" name="sentMessage">
+						<h4 class="mtext-105 cl2 txt-center p-b-30">
+							Iniciar Sesión
+						</h4>
+						
+						<div>
+							<p class="errorMessage txt-center">Ya has iniciado sesión.</p>
+						</div>
 					</form>
 				</div>
 			</div>
