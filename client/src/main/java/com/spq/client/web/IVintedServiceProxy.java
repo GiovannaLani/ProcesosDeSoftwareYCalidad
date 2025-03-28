@@ -16,6 +16,7 @@ import com.spq.client.data.Home;
 import java.util.List;
 
 public interface IVintedServiceProxy {
+	public Item getItemById(Long itemId);
     public void createUser(Signup user);
 	public Long login(String email, String password);
 	public List<Item> getItems();

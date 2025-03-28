@@ -17,6 +17,7 @@ import com.spq.client.data.User;
 import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Purchase;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -330,5 +331,95 @@ public class ClientController {
 			}
 			return "redirect:/editUser?redirectUrl=" + redirectUrl;
 		}
-	} 
+	}
+
+	@GetMapping("/createPurchase/{itemId}")
+	public String showPurchasePage(
+			@PathVariable Long itemId,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				return "redirect:/login";
+			}
+	
+			Item item = vintedService.getItemById(itemId);
+			if (item == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
+				return "redirect:/items";
+			}
+	
+			model.addAttribute("item", item);
+			model.addAttribute("buyerId", buyerId);
+			model.addAttribute("token", token);
+	
+			return "purchase";  // Tengo que hacer la pagina purchase.html, pero como soy un huevon de momento dejo la de prueba
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al mostrar la compra: " + e.getMessage());
+			return "redirect:/items";
+		}
+	}	
+
+	@PostMapping("/createPurchase/{itemId}")
+	public String createPurchase(
+			@PathVariable Long itemId,
+			@RequestParam("token") Long token,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				return "redirect:/login";
+			}
+	
+			Item item = vintedService.getItemById(itemId);
+			if (item == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
+				return "redirect:/items";
+			}
+	
+			Purchase purchase = new Purchase(
+				0,
+				itemId,
+				vintedService.getUser(buyerId, token).username(),  // pensaba que el user iba a tener email, pero como me da que no pongo username
+				vintedService.getUser(buyerId, token).username(),  // como el item no se asocia al usuario de ninguna forma lo dejo asi de momento
+				item.getPrice(),
+				paymentMethod,
+				"PENDING"
+			);
+	
+			vintedService.createPurchase(purchase);
+			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Ahora selecciona un método de pago.");
+			return "redirect:/payment?purchaseId=" + purchase.id(); 
+	
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra: " + e.getMessage());
+			return "redirect:/items";
+		}
+	}
+	
+
+	@PostMapping("/processPayment/{purchaseId}")
+	public String processPayment(
+			@PathVariable Long purchaseId,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod);
+			if (paymentSuccess) {
+				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Error en el pago.");
+			}
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago: " + e.getMessage());
+		}
+		return "redirect:/items";
+	}
+	
+
 }

@@ -269,10 +269,10 @@ public class ServiceProxy implements IVintedServiceProxy {
 			System.out.println("Uploading clothes data...");
 			Category categoryEnum = Category.WOMAN;
 			System.out.println("Category: " + categoryEnum);
-			Clothes clothes = new Clothes(title, description, price, categoryEnum, brand, size);
-			System.out.println("Clothes object created: " + clothes);
+			//Clothes clothes = new Clothes(title, description, price, categoryEnum, brand, size);
+			//System.out.println("Clothes object created: " + clothes);
 			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, clothes, Void.class);
+				//restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, clothes, Void.class);
 				
 			} catch (HttpStatusCodeException e) {
 				switch (e.getStatusCode().value()) {
@@ -324,4 +324,18 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+	public Item getItemById(Long itemId) {
+		try {
+			return restTemplate.getForObject(apiBaseUrl + "/items/" + itemId, Item.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item not found");
+				default -> throw new RuntimeException("Failed to get item: " + e.getStatusText());
+			}
+		}
+	}
+	
+
 }

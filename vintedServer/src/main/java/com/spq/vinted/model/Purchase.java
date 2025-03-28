@@ -16,9 +16,8 @@ public class Purchase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+    @Column(name = "item_id", nullable = false)
+    private Long itemId;
 
     @ManyToOne
     @JoinColumn(name = "buyer_id", nullable = false)
@@ -40,8 +39,8 @@ public class Purchase {
     public Purchase() {
     }
 
-    public Purchase(Item item, User buyer, User seller, float price, String paymentMethod, String status) {
-        this.item = item;
+    public Purchase(Long itemId, User buyer, User seller, float price, String paymentMethod, String status) {
+        this.itemId = itemId;
         this.buyer = buyer;
         this.seller = seller;
         this.price = price;
@@ -53,8 +52,8 @@ public class Purchase {
         return id;
     }
 
-    public Item getItem() {
-        return item;
+    public Long getItemId() {
+        return itemId;
     }
 
     public User getBuyer() {

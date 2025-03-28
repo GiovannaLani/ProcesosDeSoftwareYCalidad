@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compra de artículo</title>
+</head>
+<body>
+    <h1>Comprar: ${item.title}</h1>
+    <p>Descripción: ${item.description}</p>
+    <p>Precio: ${item.price}</p>
+    <form action="/createPurchase/${item.id}" method="POST">
+        <input type="hidden" name="token" value="${token}">
+        <input type="hidden" name="itemId" value="${item.id}">
+        
+        <label for="paymentMethod">Método de pago:</label>
+        <select name="paymentMethod" id="paymentMethod">
+            <option value="credit_card">Tarjeta de crédito</option>
+            <option value="paypal">PayPal</option>
+            <option value="bank_transfer">Transferencia bancaria</option>
+        </select>
+        
+        <button type="submit">Confirmar compra</button>
+    </form>
+</body>
+</html>
