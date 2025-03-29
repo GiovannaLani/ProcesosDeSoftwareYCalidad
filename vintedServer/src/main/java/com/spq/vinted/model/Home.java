@@ -1,6 +1,7 @@
 package com.spq.vinted.model;
 
 import com.spq.vinted.dto.HomeDTO;
+import com.spq.vinted.dto.ItemDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -25,7 +26,9 @@ public class Home extends Item {
     public void setType(HomeType type) {
         this.type = type;
     }
-    public HomeDTO toDTO() {
-        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getType());
+
+    @Override
+    public ItemDTO toDTO() {
+        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getType(), getImages());
     }
 }

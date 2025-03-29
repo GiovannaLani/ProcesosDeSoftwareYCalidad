@@ -1,6 +1,7 @@
 package com.spq.vinted.model;
 
 import com.spq.vinted.dto.ElectronicsDTO;
+import com.spq.vinted.dto.ItemDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -24,7 +25,8 @@ public class Electronics extends Item {
         this.type = type;
     }
 
-    public ElectronicsDTO toDTO() {
-        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getType());
+    @Override
+    public ItemDTO toDTO() {
+        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getType(), getImages());
     }
 }

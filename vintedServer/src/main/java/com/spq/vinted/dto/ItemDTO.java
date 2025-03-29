@@ -1,6 +1,10 @@
 package com.spq.vinted.dto;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -17,15 +21,17 @@ public abstract class ItemDTO {
     private String title;
     private String description;
     private float price;
+    private List<String> images = new ArrayList<>();
     
     public ItemDTO() {
     }
 
-    public ItemDTO(long id, String title, String description, float price) {
+    public ItemDTO(long id, String title, String description, float price, List<String> images) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
+        this.images = images;
     }
 
     public long getId() {
@@ -58,6 +64,13 @@ public abstract class ItemDTO {
 
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public List<String> getImages(){
+        return images;
+    }
+    public void setImages(List<String> images){
+        this.images = images;
     }
 
 }

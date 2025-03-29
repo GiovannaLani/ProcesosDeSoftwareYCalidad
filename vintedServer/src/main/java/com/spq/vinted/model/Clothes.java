@@ -1,6 +1,7 @@
 package com.spq.vinted.model;
 
 import com.spq.vinted.dto.ClothesDTO;
+import com.spq.vinted.dto.ItemDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,7 +52,8 @@ public class Clothes extends Item {
         this.category = category;
     }
 
-    public ClothesDTO toDTO() {
-        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getType(), getCategory());
+    @Override
+    public ItemDTO toDTO() {
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getType(), getCategory(), getImages());
     }
 }
