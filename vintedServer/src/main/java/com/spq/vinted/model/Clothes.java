@@ -1,5 +1,7 @@
 package com.spq.vinted.model;
 
+import com.spq.vinted.dto.ClothesDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -7,37 +9,38 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "clothes")
 public class Clothes extends Item {
+    
     @Column(nullable = false)
-    private String size;
+    private ClothesSize size;
     @Column(nullable = false)
-    private String brand;
+    private ClothesType type;
     @Column(nullable = false)
     private Category category;
 
     public Clothes() {
     }
 
-    public Clothes(long id, String title, String description, float price, String image, String size, String brand, Category category, User seller) {
-        super(id, title, description, price, image, seller);
+    public Clothes(String title, String description, float price, ClothesSize size, ClothesType type, Category category, User seller) {
+        super(title, description, price, seller);
         this.size = size;
-        this.brand = brand;
+        this.type = type;
         this.category = category;
     }
 
-    public String getSize() {
+    public ClothesSize getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(ClothesSize size) {
         this.size = size;
     }
 
-    public String getBrand() {
-        return brand;
+    public ClothesType getType() {
+        return type;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setType(ClothesType type) {
+        this.type = type;
     }
 
     public Category getCategory() {
@@ -46,5 +49,9 @@ public class Clothes extends Item {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public ClothesDTO toDTO() {
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getType(), getCategory());
     }
 }

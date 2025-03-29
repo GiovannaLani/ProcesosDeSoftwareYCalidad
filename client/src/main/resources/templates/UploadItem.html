@@ -62,7 +62,7 @@
 
 					<!-- Logo desktop -->
 					<a href="#" class="logo">
-						<img src="images/icons/vinted.svg" alt="IMG-LOGO">
+						<img th:src="@{/images/icons/vinted.svg}" alt="IMG-LOGO">
 					</a>
 
 					<!-- Menu desktop -->
@@ -221,7 +221,7 @@
 				<ul class="header-cart-wrapitem w-full">
 					<li class="header-cart-item flex-w flex-t m-b-12">
 						<div class="header-cart-item-img">
-							<img src="images/item-cart-01.jpg" alt="IMG">
+							<img th:src="@{/images/item-cart-01.jpg}" alt="IMG">
 						</div>
 
 						<div class="header-cart-item-txt p-t-8">
@@ -237,7 +237,7 @@
 
 					<li class="header-cart-item flex-w flex-t m-b-12">
 						<div class="header-cart-item-img">
-							<img src="images/item-cart-02.jpg" alt="IMG">
+							<img th:src="@{/images/item-cart-02.jpg}" alt="IMG">
 						</div>
 
 						<div class="header-cart-item-txt p-t-8">
@@ -253,7 +253,7 @@
 
 					<li class="header-cart-item flex-w flex-t m-b-12">
 						<div class="header-cart-item-img">
-							<img src="images/item-cart-03.jpg" alt="IMG">
+							<img th:src="@{/images/item-cart-03.jpg}" alt="IMG">
 						</div>
 
 						<div class="header-cart-item-txt p-t-8">
@@ -289,55 +289,85 @@
 		</div>
 	</div>
 
-	<!-- Content page -->
-	<section class="bg0 p-t-104 p-b-116">
-		<div class="container">
-			<div class="flex-w flex-tr flex-login">
-				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<form th:action="@{/register(redirectUrl=${redirectUrl})}" method="post" name="sentMessage">
-						<h4 class="mtext-105 cl2 txt-center p-b-30">
-							Registrarse
-						</h4>
+		<!-- Content page -->
+		<section class="bg0 p-t-104 p-b-116">
+			<div class="container">
+				<h4 class="mtext-105 cl2 txt-center p-b-30">
+					Subir item
+				</h4>
+				<form th:action="@{/uploadItem}" method="post" enctype="multipart/form-data">
+					<div class="flex-w flex-tr flex-login">
+					  <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
+						<p>Sube hasta 5 fotos.</p>
+						<input type="hidden" name="token" th:value="${token}">
+						
+						<div class="image-container">
+						  <div class="image-box">
+							<input id="itemImage" name="itemImages" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" />
+							<button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+						  </div>
+						  <div class="image-box hidden">
+							<input id="itemImage1" name="itemImages" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" />
+							<button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+						  </div>
+						  <div class="image-box hidden">
+							<input id="itemImage2" name="itemImages" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" />
+							<button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+						  </div>
+						  <div class="image-box hidden">
+							<input id="itemImage3" name="itemImages" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" />
+							<button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+						  </div>
+						  <div class="image-box hidden">
+							<input id="itemImage4" name="itemImages" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" />
+							<button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+						  </div>
+						</div>
+					  </div>
+				  
+					  <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
 						<div class="m-b-20">
-							<label for="email" class="stext-111 cl2 p-b-10 login-label">Correo electrónico</label>
-							<input class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="email" name="email" placeholder="Tu correo electrónico" required>
+						  <label for="title" class="stext-111 cl2 p-b-10 login-label">Título</label>
+						  <input id="title" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" type="text" name="title" placeholder="Titulo del Item" required>
 						</div>
-					
+					  
 						<div class="m-b-20">
-							<label for="password" class="stext-111 cl2 p-b-10 login-label">Contraseña</label>
-							<input class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="password" name="password" placeholder="Tu contraseña" required>
+						  <label for="description" class="stext-111 cl2 p-b-10 login-label">Descripción</label>
+						  <input id="description" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" type="text" name="description" placeholder="Descripción del Item" required>
 						</div>
+					  
 						<div class="m-b-20">
-						<label for="username" class="stext-111 cl2 p-b-10 login-label">Nombre de usuario</label>
-						<p style="color: lightgray; font-size: 10px;">*No se puede cambiar.</p>
-							<input id="username" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="username" placeholder="Introduce tu nombre de usuario" required>
+						  <label for="price" class="stext-111 cl2 p-b-10 login-label">Precio</label>
+						  <input type="number" id="price" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" name="price" step="0.01" min="0.01" required>
 						</div>
+					  </div>
+				  
+					  <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
 						<div class="m-b-20">
-							<label for="name" class="stext-111 cl2 p-b-10 login-label">Nombre</label>
-							<input id="name" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="name" placeholder="Introduce tu nombre" required>
+						  <select id="category" name="category" required onchange="updateFields()" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+							<option value="" disabled selected>Select a category</option>
+							<option value="clothes">Clothes</option>
+							<option value="electronics">Electronics</option>
+							<option value="entertainment">Entertainment</option>
+							<option value="home">Home</option>
+							<option value="pet">Pet</option>
+						  </select>
 						</div>
-						<div class="m-b-20">
-							<label for="surname" class="stext-111 cl2 p-b-10 login-label">Apellido</label>
-							<input id="surname" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="surname" placeholder="Introduce tu apellido" required>
-						</div>
-						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
-							Registrarse
-						</button>
-						<div th:if="${errorMessage}">
-							<p class="errorMessage txt-center"><span th:text=${errorMessage}></span></p>
-						</div>
-						<p class="txt-center">¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
-					</form>
-				</div>
+						<div id="extra-fields"></div>
+					  </div>
+				  
+					  <button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
+						Subir
+					  </button>
+					  
+					  <div th:if="${errorMessage}">
+						<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
+					  </div>
+					</div>
+				  </form>
+				  
 			</div>
-		</div>
-	</section>
-
+		</section>
 
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
@@ -456,23 +486,23 @@
 			<div class="p-t-40">
 				<div class="flex-c-m flex-w p-b-18">
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-01.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-02.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-03.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-04.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-05.png}" alt="ICON-PAY">
 					</a>
 				</div>
 
@@ -499,14 +529,14 @@
 	</div>
 
 	<!--===============================================================================================-->
-	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script th:src="@{/vendor/jquery/jquery-3.2.1.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/bootstrap/js/popper.js"></script>
-	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}" ></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}" ></script>
 	<!--===============================================================================================-->
-	<script src="vendor/select2/select2.min.js"></script>
+	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
 		$(".js-select2").each(function () {
 			$(this).select2({
@@ -516,9 +546,9 @@
 		})
 	</script>
 	<!--===============================================================================================-->
-	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -536,9 +566,9 @@
 	</script>
 	<!--===============================================================================================-->
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
-	<script src="js/map-custom.js"></script>
+	<script th:src="@{/js/map-custom.js}"></script>
 	<!--===============================================================================================-->
-	<script src="js/main.js"></script>
+	<script th:src="@{/js/main.js}"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
         const userMenuToggle = document.querySelector(".user-menu-toggle");
@@ -556,6 +586,146 @@
         });
     });
 	</script>
+<script>
+    function previewImage(event) {
+        var output = document.getElementById('imagePreview');
+        var imageContainer = document.getElementById('imagePreviewContainer');
+
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                output.src = e.target.result;
+                output.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            output.style.display = 'none'; 
+        }
+    }
+</script>
+<script>
+	function validateForm() {
+	  const priceInput = document.getElementById("price");
+	  const price = parseFloat(priceInput.value);
+	
+	  if (isNaN(price) || price <= 0) {
+		alert("Please enter a valid price greater than 0.");
+		return false;
+	  }
+	  
+	  return true;
+	}
+	
+	function updateFields() {
+	  const category = document.getElementById("category").value;
+	  const extraFields = document.getElementById("extra-fields");
+	  extraFields.innerHTML = "";
+	
+	  if (category === "clothes") {
+		extraFields.innerHTML = `
+			<label for="size">Talla:</label>
+			<select id="size" name="size" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona una talla</option>
+				<option value="S">S</option>
+				<option value="M">M</option>
+				<option value="L">L</option>
+				<option value="XL">XL</option>
+			</select>
+
+			<label for="clothCategory">Para:</label>
+			<select id="clothCategory" name="clothCategory" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona un tipo</option>
+				<option value="man">Hombre</option>
+				<option value="woman">Mujer</option>
+				<option value="boy">Niño</option>
+				<option value="girl">Niña</option>
+
+			</select>
+			<label for="clothingType">Tipo de ropa:</label>
+			<select id="clothingType" name="clothingType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona un tipo de ropa</option>
+				<option value="Tshirt">Camiseta</option>
+				<option value="pants">Pantalón</option>
+				<option value="jacket">Chaqueta</option>
+				<option value="skirt">Falda</option>
+				<option value="dress">Vestido</option>
+				<option value="sweater">Suéter</option>
+				<option value="shorts">Short</option>
+			</select>
+		`;
+	  } else if (category === "pet") {
+		extraFields.innerHTML = `
+			  <label for="species">Especie:</label>
+			  <select id="species" name="species" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo de animal</option>
+				<option value="DOG">Perro</option>
+				<option value="CAT">Gato</option>
+			</select>
+		`;
+	  } else if (category === "home") {
+		extraFields.innerHTML = `
+			  <label for="homeType">Tipo:</label>
+			  <select id="homeType" name="homeType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="decoration">Decoración</option>
+				<option value="furniture">Mueble</option>
+			</select>
+		`;
+	  }else if (category === "electronics") {
+		extraFields.innerHTML = `
+			  <label for="electronicsType">Tipo:</label>
+			  <select id="electronicsType" name="electronicsType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="device">Dispositivo</option>
+				<option value="videogame">Videojuegos</option>
+			</select>
+		`;
+	  }else if (category === "entertainment") {
+		extraFields.innerHTML = `
+			  <label for="entertainmentType">Tipo:</label>
+			  <select id="entertainmentType" name="entertainmentType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="game">Juegos</option>
+				<option value="book">Libros</option>
+			</select>
+		`;
+	  }
+	}
+</script>
+<script>
+	function previewImage(event, inputElement) {
+	const file = event.target.files[0];
+	const imageBox = inputElement.closest('.image-box');
+	const button = imageBox.querySelector('.upload-btn');
+	const img = document.createElement('img');
+
+	const reader = new FileReader();
+
+	reader.onload = function (e) {
+		img.src = e.target.result;
+		imageBox.appendChild(img);
+		button.style.display = 'none';
+	};
+
+	reader.readAsDataURL(file);
+
+	setTimeout(() => {
+		enableNextBox(imageBox);
+	}, 300);
+	}
+
+	function enableNextBox(currentBox) {
+	const nextBox = currentBox.nextElementSibling;
+	if (nextBox && nextBox.classList.contains('image-box')) {
+		nextBox.classList.remove('hidden');
+		nextBox.querySelector('.file-input').disabled = false;
+	}
+	}
+
+</script>
 
 </body>
 

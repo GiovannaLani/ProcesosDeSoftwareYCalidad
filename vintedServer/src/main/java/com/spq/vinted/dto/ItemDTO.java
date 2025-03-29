@@ -1,6 +1,17 @@
 package com.spq.vinted.dto;
 
-public class ItemDTO {
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = ClothesDTO.class, name = "clothes"),
+    @JsonSubTypes.Type(value = ElectronicsDTO.class, name = "electronics"),
+    @JsonSubTypes.Type(value = PetDTO.class, name = "pet"),
+    @JsonSubTypes.Type(value = EntertainmentDTO.class, name = "entertainment"),
+    @JsonSubTypes.Type(value = HomeDTO.class, name = "home")
+})
+public abstract class ItemDTO {
 
     private long id;
     private String title;
@@ -12,12 +23,11 @@ public class ItemDTO {
     public ItemDTO() {
     }
 
-    public ItemDTO(long id, String title, String description, float price, String image) {
+    public ItemDTO(long id, String title, String description, float price) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
-        this.image = image;
     }
 
     public long getId() {

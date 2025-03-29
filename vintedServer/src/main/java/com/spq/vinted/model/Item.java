@@ -1,14 +1,24 @@
 package com.spq.vinted.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.InheritanceType;
 
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,8 +29,10 @@ public abstract class Item {
     private String description;
     @Column(nullable = false)
     private float price;
-    @Column(nullable = false)
-    private String image;
+    @ElementCollection
+    @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
+    @Column(name = "image_url")
+    private List<String> images = new ArrayList<>();
     @ManyToOne
 	@JoinColumn(name = "seller_id")
     private User seller;   
@@ -28,12 +40,10 @@ public abstract class Item {
     public Item() {
     }
     
-    public Item(long id, String title, String description, float price, String image, User seller) {
-        this.id = id;
+    public Item(String title, String description, float price, User seller) {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.image = image;
         this.seller = seller;
     }
 
@@ -69,12 +79,12 @@ public abstract class Item {
         this.price = price;
     }
 
-    public String getImage() {
-        return image;
+    public List<String> getImages() {
+        return images;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 
     public User getSeller() {
@@ -83,5 +93,11 @@ public abstract class Item {
 
     public void setSeller(User seller) {
         this.seller = seller;
+    }
+    public List<Item> getItemsForSale() {
+        return itemsForSale;
+    }
+    public void setItemsForSale(List<Item> itemsForSale) {
+        this.itemsForSale = itemsForSale;
     }
 }
