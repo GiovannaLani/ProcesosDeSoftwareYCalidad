@@ -135,7 +135,7 @@
 								</ul>
 							</div>
 						</div>
-						<form th:unless="${token}" th:action="@{/login}" method="get">
+						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>

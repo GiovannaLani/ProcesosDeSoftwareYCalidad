@@ -26,9 +26,14 @@ import com.spq.client.data.User;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.Clothes;
+import com.spq.client.data.ClothesSize;
+import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
+import com.spq.client.data.ElectronicsType;
 import com.spq.client.data.Entertainment;
+import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
+import com.spq.client.data.HomeType;
 
 import java.util.List;
 
@@ -232,66 +237,72 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public void uploadItemData(long token, String title, String description, String category, float price,
-			String brand, String size, String clothCategory, String species) {
-				System.out.println("Uploading item data...");
-		if(category.equals("clothes")){
-			System.out.println("Uploading clothes data...");
-			Category categoryEnum = Category.WOMAN;
-			System.out.println("Category: " + categoryEnum);
-			Clothes clothes = new Clothes(title, description, price, categoryEnum, brand, size);
-			System.out.println("Clothes object created: " + clothes);
-			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, clothes, Void.class);
-				
-			} catch (HttpStatusCodeException e) {
-				switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("User not found");
-				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
-				}
+	public void uploadItem(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType, List<MultipartFile> images){
+		long itemId = uploadItemData(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType);
+		uploadItemImage(itemId, images);
+	}
+	@Override
+	public long uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType) {
+		System.out.println("Uploading item data...");
+		
+		String url = apiBaseUrl + "/items/itemData?token=" + token;
+		
+		Item item = switch (category.toLowerCase()) {
+			case "clothes" -> new Clothes(title, description, price, ClothesSize.L, Category.WOMAN, ClothesType.SWEATER);
+			case "electronics" -> new Electronics(title, description, price, ElectronicsType.DEVICE);
+			case "home" -> new Home(title, description, price, HomeType.DECORATION);
+			case "pet" -> new Pet(title, description, price, Species.valueOf(species.toUpperCase()));
+			case "entertainment" -> new Entertainment(title, description, price, EntertainmentType.BOOK);
+			default -> throw new RuntimeException("Invalid category");
+		};
+		
+		try {
+			Long itemId = restTemplate.postForObject(url, item, Long.class);
+			if (itemId == null) {
+				throw new RuntimeException("Failed to get item ID");
 			}
-		} else if(category.equals("electronics")){
-			Electronics electronics = new Electronics(title, description, price);
-			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, electronics, Void.class);
-			} catch (HttpStatusCodeException e) {
-				switch (e.getStatusCode().value()) {
+			return itemId;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
 				case 404 -> throw new RuntimeException("User not found");
 				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
-				}
-			}
-		} else if(category.equals("home")){
-			Home home = new Home(title, description, price);
-			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, home, Void.class);
-			} catch (HttpStatusCodeException e) {
-				switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("User not found");
-				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
-				}
-			}
-		} else if(category.equals("pet")){
-			Species speciesEnum = Species.valueOf(species.toUpperCase());
-			Pet pet = new Pet(title, description, price, speciesEnum);
-			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, pet, Void.class);
-				
-			} catch (HttpStatusCodeException e) {
-				switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("User not found");
-				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
-				}
-			}
-		} else if(category.equals("entertainment")){
-			Entertainment entertainment = new Entertainment(title, description, price);
-			try {
-				restTemplate.postForObject(apiBaseUrl + "/items/itemData?token=" + token, entertainment, Void.class);
-			} catch (HttpStatusCodeException e) {
-				switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("User not found");
-				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
-				}
 			}
 		}
 	}
+
+	@Override
+public void uploadItemImage(long itemId, List<MultipartFile> images) {
+    try {
+        System.out.println("Uploading item images...");
+        String url = apiBaseUrl + "/items/itemImage?itemId=" + itemId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        for (MultipartFile image : images) {
+			if(image.isEmpty() && image.getSize() == 0) {
+				continue;
+			}
+            body.add("images", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+            System.out.println("Image name: " + image.getOriginalFilename());
+        }
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        System.out.println("Request entity: " + requestEntity);
+
+        restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+        System.out.println("Images uploaded successfully for item ID: " + itemId);
+    } catch (HttpStatusCodeException e) {
+        if (e.getStatusCode().value() == 404) {
+            throw new RuntimeException("Item not found");
+        } else {
+            throw new RuntimeException("Failed to upload item images: " + e.getStatusText());
+        }
+    } catch (IOException e) {
+        throw new RuntimeException("Error reading image file", e);
+    }
+}
+
 }
