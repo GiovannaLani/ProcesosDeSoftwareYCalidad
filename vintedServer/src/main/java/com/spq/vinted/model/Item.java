@@ -36,8 +36,6 @@ public abstract class Item {
     @ManyToOne
 	@JoinColumn(name = "seller_id")
     private User seller;   
-    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Item> itemsForSale = new ArrayList<>();
     
     public Item() {
     }
