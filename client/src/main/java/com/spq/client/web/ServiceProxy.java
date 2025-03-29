@@ -271,38 +271,95 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-public void uploadItemImage(long itemId, List<MultipartFile> images) {
-    try {
-        System.out.println("Uploading item images...");
-        String url = apiBaseUrl + "/items/itemImage?itemId=" + itemId;
+	public void uploadItemImage(long itemId, List<MultipartFile> images) {
+		try {
+			System.out.println("Uploading item images...");
+			String url = apiBaseUrl + "/items/itemImage?itemId=" + itemId;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-        for (MultipartFile image : images) {
-			if(image.isEmpty() && image.getSize() == 0) {
-				continue;
+			for (MultipartFile image : images) {
+				if(image.isEmpty() && image.getSize() == 0) {
+					continue;
+				}
+				body.add("images", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+				System.out.println("Image name: " + image.getOriginalFilename());
 			}
-            body.add("images", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
-            System.out.println("Image name: " + image.getOriginalFilename());
-        }
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        System.out.println("Request entity: " + requestEntity);
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+			System.out.println("Request entity: " + requestEntity);
 
-        restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
-        System.out.println("Images uploaded successfully for item ID: " + itemId);
-    } catch (HttpStatusCodeException e) {
-        if (e.getStatusCode().value() == 404) {
-            throw new RuntimeException("Item not found");
-        } else {
-            throw new RuntimeException("Failed to upload item images: " + e.getStatusText());
-        }
-    } catch (IOException e) {
-        throw new RuntimeException("Error reading image file", e);
-    }
-}
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+			System.out.println("Images uploaded successfully for item ID: " + itemId);
+		} catch (HttpStatusCodeException e) {
+			if (e.getStatusCode().value() == 404) {
+				throw new RuntimeException("Item not found");
+			} else {
+				throw new RuntimeException("Failed to upload item images: " + e.getStatusText());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+
+	@Override
+	public void addItemToCart(Long token, Long itemId) {
+		try {
+			String url = apiBaseUrl + "/cart/add";
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("token", token);
+			body.add("itemId", itemId);
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item or user not found");
+				default -> throw new RuntimeException("Failed to add item to cart: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<Item> getCartItems(Long token) {
+		try {
+			String url = apiBaseUrl + "/cart?token=" + token;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch cart items: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void removeItemFromCart(Long token, Long itemId) {
+		try {
+			String url = apiBaseUrl + "/cart/remove";
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("token", token);
+			body.add("itemId", itemId);
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item or user not found");
+				default -> throw new RuntimeException("Failed to remove item from cart: " + e.getStatusText());
+			}
+		}
+	}
 
 }

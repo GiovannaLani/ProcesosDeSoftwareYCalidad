@@ -337,4 +337,71 @@ public class ClientController {
 			return "redirect:/editUser?redirectUrl=" + redirectUrl;
 		}
 	} 
+
+	@GetMapping("/cart")
+	public String showCart(
+			@RequestParam("token") Long token,
+			Model model) {
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			List<Item> cartItems = vintedService.getCartItems(token);
+			model.addAttribute("cartItems", cartItems);
+			return "cart"; 
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar el carrito.");
+			e.printStackTrace();
+			return "error"; 
+		}
+	}
+
+
+	@PostMapping("/cart/add")
+	public String addItemToCart(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			vintedService.addItemToCart(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo añadido al carrito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al añadir el artículo al carrito.");
+			e.printStackTrace();
+		}
+		return "redirect:" + redirectUrl;
+	}
+
+
+	@PostMapping("/cart/remove")
+	public String removeItemFromCart(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			vintedService.removeItemFromCart(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado del carrito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el artículo del carrito.");
+			e.printStackTrace();
+		}
+
+		return "redirect:" + redirectUrl;
+	}
 }
