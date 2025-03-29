@@ -7,6 +7,7 @@ public class ItemDTO {
     private String description;
     private float price;
     private String image;  
+    private long sellerId;
     
     public ItemDTO() {
     }
@@ -57,6 +58,14 @@ public class ItemDTO {
     
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(long sellerId) {
+        this.sellerId = sellerId;
     }
 }
 
