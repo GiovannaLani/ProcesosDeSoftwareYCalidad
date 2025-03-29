@@ -107,4 +107,10 @@ public class User {
     public UserDTO toDTO() {
         return new UserDTO(id, username, name, surname, description, profileImage);
     }
+    public List<Item> getItemsForSale() {
+        return itemsForSale;
+    }
+    public void setItemsForSale(List<Item> itemsForSale) {
+        this.itemsForSale = itemsForSale;
+    }
 }
