@@ -9,26 +9,26 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "entertainment")
 public class Entertainment extends Item {
-    public EntertainmentType type;
+    public EntertainmentType entreinmentType;
 
     public Entertainment() {
     }
     
     public Entertainment(String title, String description, float price, User seller, EntertainmentType type) {
         super(title, description, price, seller);
-        this.type = type;
+        this.entreinmentType = type;
     }
 
-    public EntertainmentType getType() {
-        return type;
+    public EntertainmentType getEntreinmentType() {
+        return entreinmentType;
     }
-    public void setType(EntertainmentType type) {
-        this.type = type;
+    public void setEntreinmentType(EntertainmentType type) {
+        this.entreinmentType = type;
     }
 
     @Override
     public ItemDTO toDTO() {
-        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getType(), getImages());
+        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getEntreinmentType(), getImages());
     }
 
 }

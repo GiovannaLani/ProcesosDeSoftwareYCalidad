@@ -416,7 +416,7 @@ public class ClientController {
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
 	
-			return "purchase";  // Tengo que hacer la pagina purchase.html, pero como soy un huevon de momento dejo la de prueba
+			return "purchase";
 		} catch (RuntimeException e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al mostrar la compra: " + e.getMessage());
 			return "redirect:/items";
@@ -445,8 +445,8 @@ public class ClientController {
 			Purchase purchase = new Purchase(
 				0,
 				itemId,
-				vintedService.getUser(buyerId, token).username(),  // pensaba que el user iba a tener email, pero como me da que no pongo username
-				vintedService.getUser(buyerId, token).username(),  // como el item no se asocia al usuario de ninguna forma lo dejo asi de momento
+				vintedService.getUser(buyerId, token).username(),
+				vintedService.getUser(buyerId, token).username(),
 				item.getPrice(),
 				paymentMethod,
 				"PENDING"

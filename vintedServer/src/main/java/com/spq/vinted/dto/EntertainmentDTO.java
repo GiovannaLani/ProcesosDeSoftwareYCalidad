@@ -5,19 +5,19 @@ import java.util.List;
 import com.spq.vinted.model.EntertainmentType;
 
 public class EntertainmentDTO extends ItemDTO {
-    public EntertainmentType type;
+    public EntertainmentType entreainmentType;
     public EntertainmentDTO() {
     }
 
     public EntertainmentDTO(long id, String title, String description, float price, EntertainmentType type,List<String> images) {
         super(id, title, description, price,images);
-        this.type = type;
+        this.entreainmentType = type;
     }
-    public EntertainmentType getType() {
-        return type;
+    public EntertainmentType getEntreainmentType() {
+        return entreainmentType;
     }
-    public void setType(EntertainmentType type) {
-        this.type = type;
+    public void setEntreainmentType(EntertainmentType type) {
+        this.entreainmentType = type;
     }
     
 }

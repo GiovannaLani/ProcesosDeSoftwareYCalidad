@@ -9,7 +9,7 @@ import com.spq.vinted.model.ClothesType;
 public class ClothesDTO extends ItemDTO {
     
     private ClothesSize size;
-    private ClothesType type;
+    private ClothesType clothesType;
     private Category category;
 
     public ClothesDTO() {
@@ -19,7 +19,7 @@ public class ClothesDTO extends ItemDTO {
     public ClothesDTO(long id, String title, String description, float price, ClothesSize size, ClothesType type, Category category,List<String> images) {
         super(id, title, description, price,images); 
         this.size = size;
-        this.type = type;
+        this.clothesType = type;
         this.category = category;
     }
 
@@ -31,12 +31,12 @@ public class ClothesDTO extends ItemDTO {
         this.size = size;
     }
 
-    public ClothesType getType() {
-        return type;
+    public ClothesType getClothesType() {
+        return clothesType;
     }
     
-    public void setType(ClothesType type) {
-        this.type = type;
+    public void setClothesType(ClothesType type) {
+        this.clothesType = type;
     }
 
     public Category getCategory() {
