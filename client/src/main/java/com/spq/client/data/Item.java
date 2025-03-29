@@ -1,6 +1,7 @@
 package com.spq.client.data;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,5 +42,10 @@ public abstract class Item {
     
     public List<String> getImages() { return images; }
     public void setImages (List<String> images){this.images = images;}
+
+    public String getType() {
+        JsonTypeName annotation = this.getClass().getAnnotation(JsonTypeName.class);
+        return annotation != null ? annotation.value() : "unknown";
+    }
 }
 

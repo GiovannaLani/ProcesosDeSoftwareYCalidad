@@ -5,7 +5,7 @@ import java.util.List;
 import com.spq.vinted.model.ElectronicsType;
 
 public class ElectronicsDTO extends ItemDTO {
-    public ElectronicsType type;
+    public ElectronicsType electronicsType;
     
      public ElectronicsDTO() {
     }
@@ -13,13 +13,13 @@ public class ElectronicsDTO extends ItemDTO {
     
     public ElectronicsDTO(long id, String title, String description, float price, ElectronicsType type,List<String> images) {
         super(id, title, description, price,images);
-        this.type = type;
+        this.electronicsType = type;
     }
 
-    public ElectronicsType getType() {
-        return type;
+    public ElectronicsType getElectronicsType() {
+        return electronicsType;
     }
-    public void setType(ElectronicsType type) {
-        this.type = type;
+    public void setElectronicsType(ElectronicsType type) {
+        this.electronicsType = type;
     }
 }

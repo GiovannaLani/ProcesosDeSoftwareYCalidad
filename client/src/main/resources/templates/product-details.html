@@ -159,39 +159,41 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Mujer</a>
+								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
 							</li>
 
 							<li>
-								<a href="product.html">Hombre</a>
+								<a th:href="@{/clothes(token=${token})}">Ropa</a>
 							</li>
 
 							<li>
-								<a href="shoping-cart.html">Moda de diseño</a>
+								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
 							</li>
 
 							<li>
-								<a href="blog.html">Niños</a>
+								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
 							</li>
 
 							<li>
-								<a href="about.html">Hogar</a>
+								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
 							</li>
 
 							<li>
-								<a href="contact.html">Electrónica</a>
+								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
+							</li>
+
+							<li>
+								<a th:href="@{/home(token=${token})}">Hogar</a>
+							</li>
+
+							<li>
+								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
 							</li>
 							<li>
-								<a href="contact.html">Entretenimiento</a>
+								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
 							</li>
 							<li>
-								<a href="contact.html">Mascotas</a>
-							</li>
-							<li>
-								<a href="contact.html">Sobre Vinted</a>
-							</li>
-							<li>
-								<a href="contact.html">Nuestra Plataforma</a>
+								<a th:href="@{/pet(token=${token})}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -290,20 +292,27 @@
 	</div>
 
 	<!-- Product Detail -->
-	<section class="sec-product-detail bg0 p-t-65 p-b-60">
+	<section class="sec-product-detail bg0 p-t-104 p-b-116">
 		<div class="container">
 			<div class="row">
+
 				<div class="col-md-6 col-lg-7 p-b-30">
 					<div class="p-l-25 p-r-30 p-lr-0-lg">
 						<div class="wrap-slick3 flex-sb flex-w">
 							<div class="wrap-slick3-dots"></div>
 							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
-	
+				
 							<div class="slick3 gallery-lb">
-								<div class="item-slick3" th:each="image, iterStat : ${item.images}" th:data-thumb="@{${itemImageBaseUrl + image}}">
+								<div th:if="${item.images != null and not #lists.isEmpty(item.images)}"
+									 th:each="image : ${item.images}" 
+									 class="item-slick3" 
+									 th:data-thumb="@{${itemImageBaseUrl + image}}">
+									 
 									<div class="wrap-pic-w pos-relative">
 										<img th:src="@{${itemImageBaseUrl + image}}" alt="IMG-PRODUCT">
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" th:href="@{${itemImageBaseUrl + image}}">
+				
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
+										   th:href="@{${itemImageBaseUrl + image}}">
 											<i class="fa fa-expand"></i>
 										</a>
 									</div>
@@ -312,6 +321,8 @@
 						</div>
 					</div>
 				</div>
+
+				
 	
 				<div class="col-md-6 col-lg-5 p-b-30">
 					<div class="p-r-50 p-t-5 p-lr-0-lg">
@@ -323,34 +334,35 @@
 						
 						<!-- Additional Details -->
 						<div class="p-t-33">
-							<div class="flex-w flex-r-m p-b-10">
+							<div class="flex-w p-b-10">
 								<div class="size-203 flex-c-m respon6">
 									<div th:if="${item?.type == 'clothes'}">
-										<p>Size: <span th:text="${item?.size ?: 'No especificado'}"></span></p>
+										<p>Talla: <span th:text="${item?.size ?: 'No especificado'}"></span></p>
+										<p>Tipo: <span th:text="${item?.clothesType.displayName ?: 'No especificado'}"></span></p>
+										<p>Para: <span th:text="${item?.category.displayName ?: 'No especificado'}"></span></p>
 									</div>
 	
 									<div th:if="${item?.type == 'electronics'}">
-										<p>Brand: <span th:text="${item?.brand ?: 'No especificado'}"></span></p>
+										<p>Tipo: <span th:text="${item?.electronicsType ?: 'No especificado'}"></span></p>
 									</div>
+									<div th:if="${item?.type == 'entertainment'}">
+										<p>Tipo: <span th:text="${item?.entertainmentType ?: 'No especificado'}"></span></p>
+									</div>
+									<div th:if="${item?.type == 'home'}">
+										<p>Tipo: <span th:text="${item?.homeType ?: 'No especificado'}"></span></p>
+									</div>
+									<div th:if="${item?.type == 'pet'}">
+										<p>Especie: <span th:text="${item?.species ?: 'No especificado'}"></span></p>
+									</div>
+
 								</div>
 							</div>
 	
 							<div class="flex-w flex-r-m p-b-10">
 								<div class="size-204 flex-w flex-m respon6-next">
-									<div class="wrap-num-product flex-w m-r-20 m-tb-10">
-										<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-minus"></i>
-										</div>
-	
-										<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
-	
-										<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-plus"></i>
-										</div>
-									</div>
 	
 									<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
-										Add to cart
+										Añadir al carrito
 									</button>
 								</div>
 							</div>
@@ -599,6 +611,8 @@
         });
     });
 	</script>
+	<script th:src="@{/vendor/slick/slick.min.js}"></script>
+	<script th:src="@{/js/slick-custom.js}"></script>
 
 </body>
 

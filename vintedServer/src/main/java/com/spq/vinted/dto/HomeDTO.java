@@ -5,18 +5,18 @@ import java.util.List;
 import com.spq.vinted.model.HomeType;
 
 public class HomeDTO extends ItemDTO {
-    public HomeType type;
+    public HomeType homeType;
     public HomeDTO() {
     }
 
     public HomeDTO(long id, String title, String description, float price, HomeType type, List<String> images) {
         super(id, title, description, price,images);
-        this.type = type;
+        this.homeType = type;
     }
-    public HomeType getType() {
-        return type;
+    public HomeType getHomeType() {
+        return homeType;
     }
-    public void setType(HomeType type) {
-        this.type = type;
+    public void setHomeType(HomeType type) {
+        this.homeType = type;
     }
 }

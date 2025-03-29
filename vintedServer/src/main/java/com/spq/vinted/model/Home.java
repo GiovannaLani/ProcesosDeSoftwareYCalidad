@@ -10,25 +10,25 @@ import jakarta.persistence.Table;
 @Table(name = "home")
 public class Home extends Item {
 
-    public HomeType type;
+    public HomeType homeType;
 
     public Home() {
     }
 
     public Home(String title, String description, float price, User seller, HomeType type) {
         super(title, description, price, seller);
-        this.type = type;
+        this.homeType = type;
     }
     
-    public HomeType getType() {
-        return type;
+    public HomeType getHomeType() {
+        return homeType;
     }
-    public void setType(HomeType type) {
-        this.type = type;
+    public void setHomeType(HomeType type) {
+        this.homeType = type;
     }
 
     @Override
     public ItemDTO toDTO() {
-        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getType(), getImages());
+        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getHomeType(), getImages());
     }
 }

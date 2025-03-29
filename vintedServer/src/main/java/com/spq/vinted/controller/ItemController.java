@@ -67,22 +67,22 @@ public class ItemController {
         }
         Item savedItem = null;
         if (itemDTO instanceof ClothesDTO clothes) {
-            System.out.println("ClothesDTO: " + clothes.getTitle() + ", " + clothes.getDescription() + ", " + clothes.getPrice() + ", " + clothes.getSize() + ", " + clothes.getType() + ", " + clothes.getCategory());
+            System.out.println("ClothesDTO: " + clothes.getTitle() + ", " + clothes.getDescription() + ", " + clothes.getPrice() + ", " + clothes.getSize() + ", " + clothes.getClothesType() + ", " + clothes.getCategory());
             Clothes clothesItem = new Clothes(clothes.getTitle(), clothes.getDescription(), clothes.getPrice(),
-                    clothes.getSize(), clothes.getType(), clothes.getCategory(), user);
+                    clothes.getSize(), clothes.getClothesType(), clothes.getCategory(), user);
             savedItem = itemService.saveItem(clothesItem);
         } else if (itemDTO instanceof ElectronicsDTO electronics) {
             Electronics electronicsItem = new Electronics(electronics.getTitle(), electronics.getDescription(),
-                    electronics.getPrice(), user, electronics.getType());
+                    electronics.getPrice(), user, electronics.getElectronicsType());
             savedItem = itemService.saveItem(electronicsItem);
         } else if (itemDTO instanceof PetDTO pet) {
             Pet petItem = new Pet(pet.getTitle(), pet.getDescription(), pet.getPrice(), pet.getSpecies(), user);
             savedItem = itemService.saveItem(petItem);
         } else if (itemDTO instanceof HomeDTO home) {
-            Home homeItem = new Home(home.getTitle(), home.getDescription(), home.getPrice(), user, home.getType());
+            Home homeItem = new Home(home.getTitle(), home.getDescription(), home.getPrice(), user, home.getHomeType());
             savedItem = itemService.saveItem(homeItem);
         } else if (itemDTO instanceof EntertainmentDTO entertainment) {
-            Entertainment entertainmentItem = new Entertainment(entertainment.getTitle(), entertainment.getDescription(), entertainment.getPrice(), user, entertainment.getType());
+            Entertainment entertainmentItem = new Entertainment(entertainment.getTitle(), entertainment.getDescription(), entertainment.getPrice(), user, entertainment.getEntertainmentType());
             savedItem = itemService.saveItem(entertainmentItem);
         }
         if (savedItem == null) {
