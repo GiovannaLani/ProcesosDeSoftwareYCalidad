@@ -21,6 +21,7 @@ public abstract class ItemDTO {
     private String title;
     private String description;
     private float price;
+    private long sellerId;
     private List<String> images = new ArrayList<>();
     
     public ItemDTO() {
@@ -73,6 +74,13 @@ public abstract class ItemDTO {
         this.images = images;
     }
 
+    public long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(long sellerId) {
+        this.sellerId = sellerId;
+    }
 }
 
 

@@ -7,9 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.MalformedURLException;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,7 +58,47 @@ public class ItemController {
         this.itemService = itemService;
         this.userService = userService;
     }
+
+    @PostMapping("/add-to-cart")
+    public ResponseEntity<Void> addItemToCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.addItemToCart(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
     
+
+    @GetMapping("/cart")
+    public ResponseEntity<List<ItemDTO>> getCart(@RequestParam("token") long token) {
+        try {
+            List<Item> cartItems = itemService.getCartItems(token);
+            if (cartItems == null || cartItems.isEmpty()) {
+                return ResponseEntity.ok(null);
+            }
+            List<ItemDTO> cartItemDTOs = new ArrayList<ItemDTO>();
+            for (Item item : cartItems) {
+                cartItemDTOs.add(item.toDTO());
+            }
+            return ResponseEntity.ok(cartItemDTOs);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/cart/remove")
+    public ResponseEntity<Void> deleteItemFromCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.removeItemFromCart(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     @PostMapping("/itemData")
     public ResponseEntity<Long> uploadItemData(
             @RequestParam("token") long token,
@@ -67,7 +109,6 @@ public class ItemController {
         }
         Item savedItem = null;
         if (itemDTO instanceof ClothesDTO clothes) {
-            System.out.println("ClothesDTO: " + clothes.getTitle() + ", " + clothes.getDescription() + ", " + clothes.getPrice() + ", " + clothes.getSize() + ", " + clothes.getType() + ", " + clothes.getCategory());
             Clothes clothesItem = new Clothes(clothes.getTitle(), clothes.getDescription(), clothes.getPrice(),
                     clothes.getSize(), clothes.getType(), clothes.getCategory(), user);
             savedItem = itemService.saveItem(clothesItem);
@@ -95,15 +136,11 @@ public class ItemController {
     @PutMapping(value = "/itemImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateItemImage(
             @RequestParam("itemId") long itemId,
-            @RequestPart("images") List<MultipartFile> images) { // CAMBIADO
+            @RequestPart("images") List<MultipartFile> images) {
     
         try {
-            System.out.println("Item ID: " + itemId + ", Images: " + images.size() + " files received.");
             
-            // Llamar al servicio para guardar las imágenes
             itemService.uploadItemImages(itemId, images);
-            
-            System.out.println("Images uploaded successfully for item ID: " + itemId);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             if ("Item not found".equals(e.getMessage())) {
@@ -144,15 +181,11 @@ public class ItemController {
     @GetMapping("/clothes")
     public ResponseEntity<List<ClothesDTO>> getClothes() {
         try {
-            System.out.println("Fetching all clothes items...");
             List<Clothes> clothes = itemService.getClothes();
-            System.out.println("Number of clothes items fetched: " + clothes.size());
             List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
-            System.out.println("Converting clothes items to DTOs...");
             for(Clothes c: clothes){
                 clothesDTOs.add((ClothesDTO) c.toDTO());
             }
-            System.out.println("Conversion complete. Number of DTOs: " + clothesDTOs.size());
             return ResponseEntity.ok(clothesDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

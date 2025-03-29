@@ -36,4 +36,7 @@ public interface IVintedServiceProxy {
 	public void uploadItem(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType, List<MultipartFile> images);
 	public long uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType);
 	public void uploadItemImage(long token, List<MultipartFile> images);
+	public List<Item> getCartItems(Long token);
+	public void addItemToCart(Long token, Long itemId);
+	public void removeItemFromCart(Long token, Long itemId);
 }

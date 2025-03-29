@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,14 +23,25 @@ import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Pet;
 import com.spq.vinted.repository.ItemRepository;
 
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.model.Item;
+import com.spq.vinted.model.User;
+import com.spq.vinted.repository.UserRepository;
+
 
 @Service
 public class ItemService {
+    @Autowired
+    private UserService userService;
+    private final UserRepository userRepository;
 
+
+    
     ItemRepository itemRepository;
-
-    public ItemService(ItemRepository itemRepository) {
+    
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Item> getItems() {
@@ -40,6 +52,7 @@ public class ItemService {
         return itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found"));
     }
 
+    
     public List<Clothes> getClothes(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Clothes).map(item -> (Clothes) item).collect(Collectors.toList());
     }
@@ -67,26 +80,84 @@ public class ItemService {
    public void uploadItemImages(long id, List<MultipartFile> itemImages) throws IOException {
     String uploadDir = "uploads/items/";
     Item item = itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found"));
-
+    
     File uploadPath = new File(uploadDir);
     if (!uploadPath.exists()) {
-        uploadPath.mkdirs(); // Crea la carpeta si no existe
+        uploadPath.mkdirs(); 
     }
 
-    List<String> imageNames = new ArrayList<>(); // Para guardar los nombres de las imágenes
-
+    List<String> imageNames = new ArrayList<>(); 
+    
     for (MultipartFile itemImage : itemImages) {
         String uniqueFileName = UUID.randomUUID().toString() + "_" + itemImage.getOriginalFilename();
         Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();
 
         Files.copy(itemImage.getInputStream(), filePath);
 
-        imageNames.add(uniqueFileName); // Agregar el nombre de la imagen a la lista
+        imageNames.add(uniqueFileName); 
     }
 
-    // Guardar la lista de imágenes en el Item
-    item.setImages(imageNames); // item.setImage() debe cambiarse a una lista en la entidad
-    itemRepository.save(item);
-}
+   
+    item.setImages(imageNames); 
+    itemRepository.save(item);}
+    
+    public void addItemToCart(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+            
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
+             
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || !user.getCartItems().contains(item)) {
+            user.getCartItems().add(item);
+            item.getUsersWithItemInCart().add(user);
+    
+            userRepository.save(user);
+            itemRepository.save(item);
+        }
+    }
+    
+    public List<Item> getCartItems(long token) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío.");
+        }
+
+        return user.getCartItems() != null ? user.getCartItems() : null;
+    }
+
+    public void removeItemFromCart(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío.");
+        }
+
+        Item itemToRemove = cartItems.stream()
+                .filter(item -> item.getId() == itemId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado en el carrito"));
+
+        cartItems.remove(itemToRemove);
+
+        itemToRemove.getUsersWithItemInCart().remove(user);
+
+        userRepository.save(user);
+        itemRepository.save(itemToRemove); 
+    }
 
 }
+
+
