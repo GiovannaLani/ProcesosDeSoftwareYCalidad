@@ -1,9 +1,15 @@
 package com.spq.client.data;
 
-public record Entertainment(
-    long id,
-    String title,
-    String description,
-    float price,
-    String image
-) {}
+public class Entertainment extends Item {
+    public EntertainmentType entertainmentType;
+    public Entertainment(String title, String description, float price, EntertainmentType entertainmentType) {
+        super(title, description, price);
+        this.entertainmentType = entertainmentType;
+    }
+    public EntertainmentType getEntertainmentType() {
+        return entertainmentType;
+    }
+    public void setEntertainmentType(EntertainmentType entertainmentType) {
+        this.entertainmentType = entertainmentType;
+    }
+}

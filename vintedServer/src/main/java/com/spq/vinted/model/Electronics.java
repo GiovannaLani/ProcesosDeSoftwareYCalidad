@@ -8,15 +8,23 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "electronics")
 public class Electronics extends Item {
-
+    public ElectronicsType type;
     public Electronics() {
     }
 
-    public Electronics(long id, String title, String description, float price, String image, User seller) {
-        super(id, title, description, price, image, seller);
+    public Electronics(String title, String description, float price, User seller, ElectronicsType type) {
+        super(title, description, price, seller);
+        this.type = type;
     }
     
+    public ElectronicsType getType() {
+        return type;
+    }
+    public void setType(ElectronicsType type) {
+        this.type = type;
+    }
+
     public ElectronicsDTO toDTO() {
-        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getImage());
+        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getType());
     }
 }

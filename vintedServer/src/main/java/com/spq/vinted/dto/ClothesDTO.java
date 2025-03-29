@@ -1,38 +1,40 @@
 package com.spq.vinted.dto;
 
 import com.spq.vinted.model.Category;
+import com.spq.vinted.model.ClothesSize;
+import com.spq.vinted.model.ClothesType;
 
 public class ClothesDTO extends ItemDTO {
     
-    private String size;
-    private String brand;
+    private ClothesSize size;
+    private ClothesType type;
     private Category category;
 
     public ClothesDTO() {
 
     }
 
-    public ClothesDTO(long id, String title, String description, float price, String image, String size, String brand, Category category) {
-        super(id, title, description, price, image); 
+    public ClothesDTO(long id, String title, String description, float price, ClothesSize size, ClothesType type, Category category) {
+        super(id, title, description, price); 
         this.size = size;
-        this.brand = brand;
+        this.type = type;
         this.category = category;
     }
 
-    public String getSize() {
+    public ClothesSize getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(ClothesSize size) {
         this.size = size;
     }
 
-    public String getBrand() {
-        return brand;
+    public ClothesType getType() {
+        return type;
     }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
+    
+    public void setType(ClothesType type) {
+        this.type = type;
     }
 
     public Category getCategory() {

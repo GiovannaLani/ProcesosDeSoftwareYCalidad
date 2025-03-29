@@ -1,21 +1,39 @@
 package com.spq.client.web;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.Spec;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
+import com.spq.client.data.MultipartInputStreamFileResource;
+import com.spq.client.data.Signup;
+import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.Clothes;
+import com.spq.client.data.ClothesSize;
+import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
+import com.spq.client.data.ElectronicsType;
 import com.spq.client.data.Entertainment;
+import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
+import com.spq.client.data.HomeType;
 
 import java.util.List;
 
@@ -31,9 +49,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
     @Override
-	public void createUser(User user) {
+	public void createUser(Signup user) {
 		try {
-			restTemplate.postForObject(apiBaseUrl + "/users", user, Void.class);
+			restTemplate.postForObject(apiBaseUrl + "/users/signup", user, Void.class);
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
 			case 409 -> throw new RuntimeException("User already exists");
@@ -131,4 +149,160 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+	public void deleteUser(long token) {
+		try {
+			restTemplate.delete(apiBaseUrl + "/users/delete?token=" + token);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to delete user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage) {
+		updateUserData(token, name, surname, description);
+		if (profileImage != null && !profileImage.isEmpty()) {
+			updateProfileImage(token, profileImage);
+		}
+	}
+	
+	public void updateUserData(long token, String name, String surname, String description) {
+		EditUser editUser = new EditUser(name, surname, description);
+		try {
+			restTemplate.put(apiBaseUrl + "/users/editUserData?token=" + token, editUser);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404:
+					throw new RuntimeException("User not found");
+				default:
+					throw new RuntimeException("Failed to update user: " + e.getStatusText());
+			}
+		}
+	}
+	
+	public void updateProfileImage(long token, MultipartFile profileImage) {
+		try {
+			String url = apiBaseUrl + "/users/editProfileImage?token=" + token;
+	
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+	
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("profileImage", new MultipartInputStreamFileResource(profileImage.getInputStream(), profileImage.getOriginalFilename()));
+	
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+	
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			if (e.getStatusCode().value() == 404) {
+				throw new RuntimeException("User not found");
+			} else {
+				throw new RuntimeException("Failed to update user: " + e.getStatusText());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+	
+
+
+	@Override
+	public User getUser(long id, long token) {
+		try {
+			User user = restTemplate.getForObject(apiBaseUrl + "/users/profile/"+id+"?token=" + token, User.class);
+			return user;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to get user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public Long getUserIdFromToken(Long token) {
+		try {
+			Long id = restTemplate.getForObject(apiBaseUrl + "/users/userId?token=" + token, Long.class);
+			return id;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("User not found");
+			default -> throw new RuntimeException("Failed to get user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void uploadItem(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType, List<MultipartFile> images){
+		long itemId = uploadItemData(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType);
+		uploadItemImage(itemId, images);
+	}
+	@Override
+	public long uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType) {
+		System.out.println("Uploading item data...");
+		
+		String url = apiBaseUrl + "/items/itemData?token=" + token;
+		
+		Item item = switch (category.toLowerCase()) {
+			case "clothes" -> new Clothes(title, description, price, ClothesSize.L, Category.WOMAN, ClothesType.SWEATER);
+			case "electronics" -> new Electronics(title, description, price, ElectronicsType.DEVICE);
+			case "home" -> new Home(title, description, price, HomeType.DECORATION);
+			case "pet" -> new Pet(title, description, price, Species.valueOf(species.toUpperCase()));
+			case "entertainment" -> new Entertainment(title, description, price, EntertainmentType.BOOK);
+			default -> throw new RuntimeException("Invalid category");
+		};
+		
+		try {
+			Long itemId = restTemplate.postForObject(url, item, Long.class);
+			if (itemId == null) {
+				throw new RuntimeException("Failed to get item ID");
+			}
+			return itemId;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to upload item: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+public void uploadItemImage(long itemId, List<MultipartFile> images) {
+    try {
+        System.out.println("Uploading item images...");
+        String url = apiBaseUrl + "/items/itemImage?itemId=" + itemId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        for (MultipartFile image : images) {
+			if(image.isEmpty() && image.getSize() == 0) {
+				continue;
+			}
+            body.add("images", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+            System.out.println("Image name: " + image.getOriginalFilename());
+        }
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        System.out.println("Request entity: " + requestEntity);
+
+        restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+        System.out.println("Images uploaded successfully for item ID: " + itemId);
+    } catch (HttpStatusCodeException e) {
+        if (e.getStatusCode().value() == 404) {
+            throw new RuntimeException("Item not found");
+        } else {
+            throw new RuntimeException("Failed to upload item images: " + e.getStatusText());
+        }
+    } catch (IOException e) {
+        throw new RuntimeException("Error reading image file", e);
+    }
+}
+
 }

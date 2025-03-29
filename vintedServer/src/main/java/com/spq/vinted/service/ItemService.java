@@ -1,9 +1,17 @@
 package com.spq.vinted.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.vinted.model.Category;
 import com.spq.vinted.model.Clothes;
@@ -49,5 +57,32 @@ public class ItemService {
     public List<Entertainment> getItemsforEntertainment(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Entertainment).map(item -> (Entertainment) item).collect(Collectors.toList());
     }
-    
+    public Item saveItem(Item item) {
+        return itemRepository.save(item);
+    }
+   public void uploadItemImages(long id, List<MultipartFile> itemImages) throws IOException {
+    String uploadDir = "uploads/items/";
+    Item item = itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found"));
+
+    File uploadPath = new File(uploadDir);
+    if (!uploadPath.exists()) {
+        uploadPath.mkdirs(); // Crea la carpeta si no existe
+    }
+
+    List<String> imageNames = new ArrayList<>(); // Para guardar los nombres de las imágenes
+
+    for (MultipartFile itemImage : itemImages) {
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + itemImage.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();
+
+        Files.copy(itemImage.getInputStream(), filePath);
+
+        imageNames.add(uniqueFileName); // Agregar el nombre de la imagen a la lista
+    }
+
+    // Guardar la lista de imágenes en el Item
+    item.setImages(imageNames); // item.setImage() debe cambiarse a una lista en la entidad
+    itemRepository.save(item);
+}
+
 }
