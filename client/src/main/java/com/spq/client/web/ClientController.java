@@ -375,7 +375,7 @@ public class ClientController {
 		}
 	} 
 
-	@GetMapping("/cart")
+	@GetMapping("/shoppingCart")
 	public String showCart(
 			@RequestParam("token") Long token,
 			Model model) {
@@ -385,7 +385,9 @@ public class ClientController {
 		try {
 			List<Item> cartItems = vintedService.getCartItems(token);
 			model.addAttribute("cartItems", cartItems);
-			return "cart"; 
+			model.addAttribute("cartSize", cartItems.size());
+			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));
+			return "shoppingCart"; 
 		} catch (RuntimeException e) {
 			model.addAttribute("errorMessage", "Error al cargar el carrito.");
 			e.printStackTrace();
@@ -394,7 +396,7 @@ public class ClientController {
 	}
 
 
-	@PostMapping("/cart/add")
+	@PostMapping("/shoppingCart/add")
 	public String addItemToCart(
 			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
@@ -418,7 +420,7 @@ public class ClientController {
 	}
 
 
-	@PostMapping("/cart/remove")
+	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
 			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,

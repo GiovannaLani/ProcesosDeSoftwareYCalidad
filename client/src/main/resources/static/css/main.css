@@ -4257,3 +4257,25 @@ a{
 .hidden {
   display: none; /* Esconde los divs inicialmente */
 }
+
+.align-total {
+  display: flex; /* Activa el diseño flexible */
+  align-items: center; /* Alinea verticalmente los elementos */
+  justify-content: space-between; /* Espacia los elementos horizontalmente */
+}
+
+.size-208, .size-209 {
+  flex: 1; /* Asegura que ambos elementos ocupen el mismo espacio */
+  text-align: left; /* Alinea el texto a la izquierda */
+}
+
+.mtext-101 {
+  font-size: 16px; /* Ajusta el tamaño del texto si es necesario */
+  font-weight: normal; /* Opcional: ajusta el peso del texto */
+}
+
+.mtext-110 {
+  font-size: 16px; /* Ajusta el tamaño del texto si es necesario */
+  font-weight: bold; /* Resalta el precio */
+  text-align: right; /* Alinea el precio a la derecha */
+}
