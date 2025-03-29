@@ -351,7 +351,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public void addItemToCart(Long token, Long itemId) {
 		try {
-			String url = apiBaseUrl + "/cart/add";
+			String url = apiBaseUrl + "/shoppingCart/add";
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -373,7 +373,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Item> getCartItems(Long token) {
 		try {
-			String url = apiBaseUrl + "/cart?token=" + token;
+			String url = apiBaseUrl + "/items/shoppingCart?token=" + token;
 			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
@@ -386,7 +386,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public void removeItemFromCart(Long token, Long itemId) {
 		try {
-			String url = apiBaseUrl + "/cart/remove";
+			String url = apiBaseUrl + "/items/shoppingCart/remove";
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 

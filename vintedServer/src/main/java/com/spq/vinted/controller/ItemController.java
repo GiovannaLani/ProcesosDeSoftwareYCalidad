@@ -70,10 +70,11 @@ public class ItemController {
     }
     
 
-    @GetMapping("/cart")
+    @GetMapping("/shoppingCart")
     public ResponseEntity<List<ItemDTO>> getCart(@RequestParam("token") long token) {
         try {
             List<Item> cartItems = itemService.getCartItems(token);
+            System.out.println("Cart items: " + cartItems);
             if (cartItems == null || cartItems.isEmpty()) {
                 return ResponseEntity.ok(null);
             }
@@ -88,7 +89,7 @@ public class ItemController {
         }
     }
 
-    @DeleteMapping("/cart/remove")
+    @DeleteMapping("/shoppingCart/remove")
     public ResponseEntity<Void> deleteItemFromCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
         try {
             itemService.removeItemFromCart(token, itemId);

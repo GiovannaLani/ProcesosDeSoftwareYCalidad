@@ -424,6 +424,26 @@ public class ClientController {
 			}
 			return "redirect:/editUser?redirectUrl=" + redirectUrl;
 		}
+	} 
+
+	@GetMapping("/shoppingCart")
+	public String showCart(
+			@RequestParam("token") Long token,
+			Model model) {
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			List<Item> cartItems = vintedService.getCartItems(token);
+			model.addAttribute("cartItems", cartItems);
+			model.addAttribute("cartSize", cartItems.size());
+			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));
+			return "shoppingCart"; 
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar el carrito.");
+			e.printStackTrace();
+			return "error"; 
+		}
 	}
 
 	@GetMapping("/createPurchase/{itemId}")
@@ -533,7 +553,7 @@ public class ClientController {
 		return "redirect:/items";
 	}	
 
-	@PostMapping("/cart/add")
+	@PostMapping("/shoppingCart/add")
 	public String addItemToCart(
 			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
@@ -557,7 +577,7 @@ public class ClientController {
 	}
 
 
-	@PostMapping("/cart/remove")
+	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
 			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
