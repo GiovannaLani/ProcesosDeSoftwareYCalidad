@@ -1,6 +1,7 @@
 package com.spq.vinted.model;
 
 import com.spq.vinted.dto.EntertainmentDTO;
+import com.spq.vinted.dto.ItemDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -25,8 +26,9 @@ public class Entertainment extends Item {
         this.type = type;
     }
 
-    public EntertainmentDTO toDTO() {
-        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getType());
+    @Override
+    public ItemDTO toDTO() {
+        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getType(), getImages());
     }
 
 }

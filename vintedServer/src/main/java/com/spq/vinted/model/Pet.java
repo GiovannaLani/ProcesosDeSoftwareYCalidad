@@ -1,5 +1,6 @@
 package com.spq.vinted.model;
 
+import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.PetDTO;
 
 import jakarta.persistence.Column;
@@ -28,8 +29,9 @@ public class Pet extends Item{
         this.species = species;
     }
 
-    public PetDTO toDTO() {
-        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species);
+    @Override
+    public ItemDTO toDTO() {
+        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species, getImages());
     }
     
 }

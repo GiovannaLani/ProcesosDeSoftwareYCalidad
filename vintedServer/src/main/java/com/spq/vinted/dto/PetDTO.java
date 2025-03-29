@@ -1,5 +1,7 @@
 package com.spq.vinted.dto;
 
+import java.util.List;
+
 import com.spq.vinted.model.Species;
 
 public class PetDTO extends ItemDTO {
@@ -9,8 +11,8 @@ public class PetDTO extends ItemDTO {
     public PetDTO() {
     }
 
-    public PetDTO(long id, String title, String description, float price, Species species) {
-        super(id, title, description, price);
+    public PetDTO(long id, String title, String description, float price, Species species,List<String> images) {
+        super(id, title, description, price, images);
         this.species = species;
     }
     public Species getSpecies() {

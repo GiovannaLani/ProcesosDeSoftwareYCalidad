@@ -3,6 +3,9 @@ package com.spq.vinted.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.net.MalformedURLException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -17,8 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 import com.spq.vinted.dto.ClothesDTO;
 import com.spq.vinted.dto.ElectronicsDTO;
@@ -142,16 +148,34 @@ public class ItemController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+ 
+    @GetMapping("/items")
+    public ResponseEntity<List<ItemDTO>> getItems() {
+        try {
+            List<Item> items = itemService.getItems();
+            List<ItemDTO> itemDTOs = new ArrayList<ItemDTO>();
+            for(Item item: items){
+                itemDTOs.add(item.toDTO());
+            }
+            return ResponseEntity.ok(itemDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 
     @GetMapping("/clothes")
     public ResponseEntity<List<ClothesDTO>> getClothes() {
         try {
+            System.out.println("Fetching all clothes items...");
             List<Clothes> clothes = itemService.getClothes();
+            System.out.println("Number of clothes items fetched: " + clothes.size());
             List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
+            System.out.println("Converting clothes items to DTOs...");
             for(Clothes c: clothes){
-                clothesDTOs.add(c.toDTO());
+                clothesDTOs.add((ClothesDTO) c.toDTO());
             }
+            System.out.println("Conversion complete. Number of DTOs: " + clothesDTOs.size());
             return ResponseEntity.ok(clothesDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -164,7 +188,7 @@ public class ItemController {
             List<Clothes> clothes = itemService.getClothesByCategory(category);
             List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
             for(Clothes c: clothes){
-                clothesDTOs.add(c.toDTO());
+                clothesDTOs.add((ClothesDTO) c.toDTO());
             }
             return ResponseEntity.ok(clothesDTOs);
         } catch (Exception e) {
@@ -178,7 +202,7 @@ public class ItemController {
             List<Electronics> electronics = itemService.getElectronics();
             List<ElectronicsDTO> electronicsDTOs = new ArrayList<ElectronicsDTO>();
             for(Electronics e: electronics){
-                electronicsDTOs.add(e.toDTO());
+                electronicsDTOs.add((ElectronicsDTO) e.toDTO());
             }
             return ResponseEntity.ok(electronicsDTOs);
         } catch (Exception e) {
@@ -192,7 +216,7 @@ public class ItemController {
             List<Home> homeItems = itemService.getHomeItems();
             List<HomeDTO> homeDTOs = new ArrayList<HomeDTO>();
             for(Home homeItem: homeItems){
-                homeDTOs.add(homeItem.toDTO());
+                homeDTOs.add((HomeDTO) homeItem.toDTO());
             }
             return ResponseEntity.ok(homeDTOs);
         } catch (Exception e) {
@@ -206,7 +230,7 @@ public class ItemController {
             List<Pet> petItems = itemService.getItemsForPet();
             List<PetDTO> petDTOs = new ArrayList<PetDTO>();
             for(Pet petItem: petItems){
-                petDTOs.add(petItem.toDTO());
+                petDTOs.add((PetDTO) petItem.toDTO());
             }
             return ResponseEntity.ok(petDTOs);
         } catch (Exception e) {
@@ -220,11 +244,25 @@ public class ItemController {
             List<Entertainment> entertainmentItems = itemService.getItemsforEntertainment();
             List<EntertainmentDTO> entertainmentDTOs = new ArrayList<EntertainmentDTO>();
             for(Entertainment entertainmentItem: entertainmentItems){
-                entertainmentDTOs.add(entertainmentItem.toDTO());
+                entertainmentDTOs.add((EntertainmentDTO) entertainmentItem.toDTO());
             }
             return ResponseEntity.ok(entertainmentDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/images/{nombreImagen}")
+	@ResponseBody
+	public ResponseEntity<Resource> showImagen(@PathVariable String nombreImagen) throws MalformedURLException {
+		Path rutaArchivo = Paths.get("uploads/items").resolve(nombreImagen).toAbsolutePath();
+		Resource recurso = new UrlResource(rutaArchivo.toUri());
+
+		if (recurso.exists() && recurso.isReadable()) {
+			return ResponseEntity.ok()
+				.contentType(MediaType.IMAGE_JPEG)
+				.body(recurso);
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }
