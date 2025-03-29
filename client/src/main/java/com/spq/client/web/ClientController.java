@@ -122,14 +122,19 @@ public class ClientController {
 
 	@GetMapping("/allItems")
 	public String getItems(
-		@RequestParam(value = "token", required = false) Long token,
-		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-		Model model
-	) {
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
 		try {
 			List<Item> items = vintedService.getItems();
 			model.addAttribute("items", items);
-			return "product"; 
+	
+			if (token != null) {
+				List<Item> cartItems = vintedService.getCartItems(token);
+				model.addAttribute("cartItems", cartItems);
+			}
+	
+			return "product";
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -139,14 +144,20 @@ public class ClientController {
 
 	@GetMapping("/item/{id}")
 	public String getItemById(
-		@RequestParam(value = "token", required = false) Long token,
-		@PathVariable Long id,
-		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-		Model model) {
+			@RequestParam(value = "token", required = false) Long token,
+			@PathVariable Long id,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
 		try {
 			Item item = vintedService.getItemById(id);
 			model.addAttribute("item", item);
-			return "product-details"; 
+	
+			if (token != null) {
+				List<Item> cartItems = vintedService.getCartItems(token);
+				model.addAttribute("cartItems", cartItems);
+			}
+	
+			return "product-details";
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -285,20 +296,30 @@ public class ClientController {
 	@GetMapping("/userProfile/{id}")
 	public String showUserProfile(
 			@PathVariable("id") Long id,
-			@RequestParam(value="token") Long token,
+			@RequestParam(value = "token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
+	
 		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-
+	
 		boolean isMyProfile = (id.equals(userId));
-    	model.addAttribute("isMyProfile", isMyProfile);
-
+		model.addAttribute("isMyProfile", isMyProfile);
+	
+		try {
+			List<Item> cartItems = vintedService.getCartItems(token); 
+			model.addAttribute("cartItems", cartItems);
+		} catch (RuntimeException e) {
+			System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+			e.printStackTrace();
+		}
+	
 		return "userProfile";
 	}
+
 	@PostMapping("/editUser")
 	public String editUser(
 			@RequestParam("token") Long token,
@@ -354,6 +375,15 @@ public class ClientController {
 		if (token == null) {
 			return "redirect:/login";
 		}
+	
+		try {
+			List<Item> cartItems = vintedService.getCartItems(token);
+			model.addAttribute("cartItems", cartItems);
+		} catch (RuntimeException e) {
+			System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+			e.printStackTrace();
+		}
+	
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
 	}
