@@ -160,39 +160,41 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Mujer</a>
+								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
 							</li>
 
 							<li>
-								<a href="product.html">Hombre</a>
+								<a th:href="@{/clothes(token=${token})}">Ropa</a>
 							</li>
 
 							<li>
-								<a href="shoping-cart.html">Moda de diseño</a>
+								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
 							</li>
 
 							<li>
-								<a href="blog.html">Niños</a>
+								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
 							</li>
 
 							<li>
-								<a href="about.html">Hogar</a>
+								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
 							</li>
 
 							<li>
-								<a href="contact.html">Electrónica</a>
+								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
+							</li>
+
+							<li>
+								<a th:href="@{/home(token=${token})}">Hogar</a>
+							</li>
+
+							<li>
+								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
 							</li>
 							<li>
-								<a href="contact.html">Entretenimiento</a>
+								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
 							</li>
 							<li>
-								<a href="contact.html">Mascotas</a>
-							</li>
-							<li>
-								<a href="contact.html">Sobre Vinted</a>
-							</li>
-							<li>
-								<a href="contact.html">Nuestra Plataforma</a>
+								<a th:href="@{/pet(token=${token})}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
