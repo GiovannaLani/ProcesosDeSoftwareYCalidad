@@ -40,7 +40,7 @@ El proyecto ha sido realizado con fines educativos como parte de una asignatura,
 ## Creadores
 Este proyecto ha sido desarrollado por:
 - **Giovanna Lani** - [GiovannaLani](https://github.com/GiovannaLani)
-- **Joana Artexe** - [jArtetxe](https://github.com/jArtetxe)
+- **Joana Artetxe** - [jArtetxe](https://github.com/jArtetxe)
 - **Patricia Rodriguez** - [PatriciaRdrz](https://github.com/PatriciaRdrz)
 - **Iñaki Ruiz de Alegría** - [InakiRuizDeAlegria](https://github.com/InakiRuizDeAlegria)
 - **Sofía Fernandez** - [soferpel](https://github.com/soferpel)
