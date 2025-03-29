@@ -94,10 +94,4 @@ public abstract class Item {
     public void setSeller(User seller) {
         this.seller = seller;
     }
-    public List<Item> getItemsForSale() {
-        return itemsForSale;
-    }
-    public void setItemsForSale(List<Item> itemsForSale) {
-        this.itemsForSale = itemsForSale;
-    }
 }
