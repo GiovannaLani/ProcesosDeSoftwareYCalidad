@@ -1554,7 +1554,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 											</div>
 										</div>
 
-										<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+										<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" data-product-id="1">
 											Add to cart
 										</button>
 									</div>
@@ -1664,11 +1664,76 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 
 		$('.js-addcart-detail').each(function(){
 			var nameProduct = $(this).parent().parent().parent().parent().find('.js-name-detail').html();
+
+			var productId = $(this).data('product-id'); 
+			var token = "USER_TOKEN";
+
 			$(this).on('click', function(){
 				swal(nameProduct, "is added to cart !", "success");
+
+				$.ajax({
+					url: '/items/add-to-cart',
+					method: 'POST',
+					data: {
+						token: token,
+						itemId: productId
+					},
+					success: function () {
+						swal("Success", "Product added to cart!", "success");
+						loadCart();
+					},
+					error: function () {
+						swal("Error", "Failed to add product to cart.", "error");
+					}
+            	});
+
+
 			});
 		});
+
+
+
 	
+	</script>
+
+	<script>
+		function loadCart() {
+			var token = "USER_TOKEN"; 
+
+			$.ajax({
+				url: '/items/cart',
+				method: 'GET',
+				data: {
+					token: token
+				},
+				success: function (cartItems) {
+					var cartHtml = '';
+					cartItems.forEach(function (item) {
+						cartHtml += `
+							<li class="header-cart-item flex-w flex-t m-b-12">
+								<div class="header-cart-item-img">
+									<img src="${item.image}" alt="IMG">
+								</div>
+								<div class="header-cart-item-txt p-t-8">
+									<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+										${item.title}
+									</a>
+									<span class="header-cart-item-info">
+										$${item.price}
+									</span>
+								</div>
+							</li>
+						`;
+					});
+					$('.header-cart-wrapitem').html(cartHtml);
+				},
+				error: function () {
+					swal("Error", "Failed to load cart.", "error");
+				}
+			});
+		}
+
+		loadCart();
 	</script>
 <!--===============================================================================================-->
 	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
