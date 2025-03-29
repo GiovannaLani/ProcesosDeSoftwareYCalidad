@@ -48,6 +48,10 @@ public class UserService {
 	}
 	
 	public User getUserByToken(long token) {
+		System.out.println("Active users: ");
+		for (Map.Entry<Long, User> entry : activeUsers.entrySet()) {
+			System.out.println("Token: " + entry.getKey() + ", User: " + entry.getValue());
+		}
 		User user = activeUsers.get(token);
 		return user;
 	}

@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.spq.vinted.dto.ItemDTO;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.InheritanceType;
 
 @Entity
@@ -31,13 +31,15 @@ public abstract class Item {
     private String description;
     @Column(nullable = false)
     private float price;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
     @ManyToOne
 	@JoinColumn(name = "seller_id")
     private User seller;   
+    @ManyToMany(mappedBy = "cartItems", fetch = FetchType.EAGER)
+    private List<User> usersWithItemInCart = new ArrayList<>(); 
     
     public Item() {
     }
@@ -96,7 +98,13 @@ public abstract class Item {
     public void setSeller(User seller) {
         this.seller = seller;
     }
+    public List<User> getUsersWithItemInCart() {
+        return usersWithItemInCart;
+    }
 
+    public void setUsersWithItemInCart(List<User> usersWithItemInCart) {
+        this.usersWithItemInCart = usersWithItemInCart;
+    }
     public abstract ItemDTO toDTO();
 
 }

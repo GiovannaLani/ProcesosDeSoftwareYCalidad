@@ -12,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -29,8 +31,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    private List<Item> cartItems;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_cart",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private List<Item> cartItems = new ArrayList<>();
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -80,6 +87,7 @@ public class User {
         this.password = password;
     }
     public List<Item> getCartItems() {
+        System.out.println("Cart items: " + cartItems.size());
         return cartItems;
     }
     public void setCartItems(List<Item> cartItems) {

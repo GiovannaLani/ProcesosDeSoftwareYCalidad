@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ import com.spq.vinted.repository.UserRepository;
 
 @Service
 public class ItemService {
+    @Autowired
     private UserService userService;
     private final UserRepository userRepository;
 
@@ -96,18 +98,22 @@ public class ItemService {
     
     public void addItemToCart(long token, long itemId) {
         User user = userService.getUserByToken(token);
+        
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-    
+            
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
-    
-        if (!user.getCartItems().contains(item)) { 
+             
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || !user.getCartItems().contains(item)) {
             user.getCartItems().add(item);
-            userRepository.save(user); 
+            item.getUsersWithItemInCart().add(user);
+    
+            userRepository.save(user);
+            itemRepository.save(item);
         }
-        
     }
     
     public List<Item> getCartItems(long token) {
@@ -115,7 +121,12 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-        return user.getCartItems();
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío.");
+        }
+
+        return user.getCartItems() != null ? user.getCartItems() : null;
     }
 
     public void removeItemFromCart(long token, long itemId) {
@@ -123,15 +134,25 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-    
-        Item itemToRemove = user.getCartItems().stream()
+
+        List<Item> cartItems = user.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío.");
+        }
+
+        Item itemToRemove = cartItems.stream()
                 .filter(item -> item.getId() == itemId)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado en el carrito"));
 
-        user.getCartItems().remove(itemToRemove);
-        userService.saveUser(user);
+        cartItems.remove(itemToRemove);
+
+        itemToRemove.getUsersWithItemInCart().remove(user);
+
+        userRepository.save(user);
+        itemRepository.save(itemToRemove); 
     }
+
 }
 
 
