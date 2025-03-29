@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -123,10 +124,9 @@ public class ItemService {
         }
         List<Item> cartItems = user.getCartItems();
         if (cartItems == null || cartItems.isEmpty()) {
-            throw new RuntimeException("El carrito está vacío.");
+            return Collections.emptyList();        
         }
-
-        return user.getCartItems() != null ? user.getCartItems() : null;
+        return cartItems;
     }
 
     public void removeItemFromCart(long token, long itemId) {
