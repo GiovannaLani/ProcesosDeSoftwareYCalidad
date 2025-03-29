@@ -1,5 +1,8 @@
 package com.spq.client.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("pet")
 public class Pet extends Item {
     public Species species;
     public Pet(String title, String description, float price, Species species) {

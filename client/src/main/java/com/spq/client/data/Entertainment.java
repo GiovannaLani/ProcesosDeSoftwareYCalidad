@@ -1,5 +1,8 @@
 package com.spq.client.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("entertainment")
 public class Entertainment extends Item {
     public EntertainmentType entertainmentType;
     public Entertainment(String title, String description, float price, EntertainmentType entertainmentType) {
