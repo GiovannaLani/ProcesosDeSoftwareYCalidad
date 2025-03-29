@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,19 +52,37 @@ public class ItemController {
         this.itemService = itemService;
         this.userService = userService;
     }
+
     @PostMapping("/add-to-cart")
-    public ResponseEntity<Void> addItemToCart(@RequestParam("token") long token, @RequestParam ItemDTO item) {
-        // User seller = userRepository.findById(item.getSellerId()).orElseThrow(() -> new RuntimeException("Seller not found"));
-        // itemService.addItemToCart(token, item);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> addItemToCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.addItemToCart(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
     
 
     @GetMapping("/cart")
     public ResponseEntity<List<Item>> getCart(@RequestParam("token") long token) {
-        List<Item> cartItems = itemService.getCartItems(token);
-        return ResponseEntity.ok(cartItems);
-}
+        try {
+            List<Item> cartItems = itemService.getCartItems(token);
+            return ResponseEntity.ok(cartItems);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/cart/remove")
+    public ResponseEntity<Void> deleteItemFromCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.removeItemFromCart(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
     @PostMapping("/itemData")
     public ResponseEntity<Long> uploadItemData(
@@ -123,20 +142,6 @@ public class ItemController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-/* 
-    @GetMapping("/items")
-    public ResponseEntity<List<ItemDTO>> getItems() {
-        try {
-            List<Item> items = itemService.getItems();
-            List<ItemDTO> itemDTOs = new ArrayList<ItemDTO>();
-            for(Item item: items){
-                itemDTOs.add(item.toDTO());
-            }
-            return ResponseEntity.ok(itemDTOs);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }*/
 
 
     @GetMapping("/clothes")

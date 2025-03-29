@@ -146,8 +146,15 @@ public class UserService {
 	
 		return uniqueFileName;
 	}
+
 	public Long getUserIdByToken(Long token) {
 		User user = activeUsers.get(token);
 		return user != null ? user.getId() : null;
 	}
+
+	//cambiar
+	public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
 }

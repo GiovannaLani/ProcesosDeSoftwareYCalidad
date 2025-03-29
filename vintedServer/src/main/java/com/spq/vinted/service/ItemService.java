@@ -76,10 +76,10 @@ public class ItemService {
     
     File uploadPath = new File(uploadDir);
     if (!uploadPath.exists()) {
-        uploadPath.mkdirs(); // Crea la carpeta si no existe
+        uploadPath.mkdirs(); 
     }
 
-    List<String> imageNames = new ArrayList<>(); // Para guardar los nombres de las imágenes
+    List<String> imageNames = new ArrayList<>(); 
     
     for (MultipartFile itemImage : itemImages) {
         String uniqueFileName = UUID.randomUUID().toString() + "_" + itemImage.getOriginalFilename();
@@ -87,53 +87,28 @@ public class ItemService {
 
         Files.copy(itemImage.getInputStream(), filePath);
 
-        imageNames.add(uniqueFileName); // Agregar el nombre de la imagen a la lista
+        imageNames.add(uniqueFileName); 
     }
 
-    // Guardar la lista de imágenes en el Item
-    item.setImages(imageNames); // item.setImage() debe cambiarse a una lista en la entidad
+   
+    item.setImages(imageNames); 
     itemRepository.save(item);}
-
-
-    // public ItemService(AuthService authService, UserRepository userRepository) {
-    //     super();
-    //     this.authService = authService;
-    //     this.userRepository = userRepository;
-    // }
     
-    //public void createItem(long id, String title, String description, float price, String image, long sellerId) {
-    //pasar a ItemDTO que se puede hacer poniendo toDTO en el item
-    public void createItem(ItemDTO itemDTO) {
-        User seller = userRepository.findById(String.valueOf(itemDTO.getSellerId())).orElseThrow(() -> new RuntimeException("Vendedor no encontrado"));
-        //Item item = new Item(itemDTO.getId(), itemDTO.getTitle(), itemDTO.getDescription(), itemDTO.getPrice(), itemDTO.getImage(), seller);
-    }
-    
-    public void addItemToCart(long token, Item item) {
-        User user = userService.getUserByToken(token);
-        if(user != null) {
-            user.getCartItems().add(item);
-        }else{
-            throw new RuntimeException("Usuario no encontrado");
-        }
-        
-    }
-    
-    /*
     public void addItemToCart(long token, long itemId) {
-        User user = authService.getUser(token);
+        User user = userService.getUserByToken(token);
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
     
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
     
-        user.getCartItems().add(item);
-        userRepository.save(user);
+        if (!user.getCartItems().contains(item)) { 
+            user.getCartItems().add(item);
+            userRepository.save(user); 
+        }
+        
     }
-    */
-    
-    
     
     public List<Item> getCartItems(long token) {
         User user = userService.getUserByToken(token);
@@ -141,6 +116,21 @@ public class ItemService {
             throw new RuntimeException("Usuario no encontrado");
         }
         return user.getCartItems();
+    }
+
+    public void removeItemFromCart(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+    
+        Item itemToRemove = user.getCartItems().stream()
+                .filter(item -> item.getId() == itemId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado en el carrito"));
+
+        user.getCartItems().remove(itemToRemove);
+        userService.saveUser(user);
     }
 }
 
