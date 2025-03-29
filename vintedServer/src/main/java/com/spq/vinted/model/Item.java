@@ -3,6 +3,8 @@ package com.spq.vinted.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.spq.vinted.dto.ItemDTO;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -94,4 +96,7 @@ public abstract class Item {
     public void setSeller(User seller) {
         this.seller = seller;
     }
+
+    public abstract ItemDTO toDTO();
+
 }

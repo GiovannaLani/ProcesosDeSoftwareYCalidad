@@ -3,7 +3,6 @@ package com.spq.client.web;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.Spec;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpEntity;
@@ -79,7 +78,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Item> getItems() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/items", HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/items", HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
     	} catch (HttpStatusCodeException e) {
         	throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
     	}
@@ -88,8 +87,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Clothes> getClothes() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/clothes", HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
-		} catch (HttpStatusCodeException e) {
+			List<Clothes> clothes = restTemplate.exchange(apiBaseUrl + "/items/clothes", HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+			return clothes;
+		}catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch clothes: " + e.getStatusText(), e);
 		}
 	}
@@ -97,7 +97,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Clothes> getClothesByCategory(Category category) {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/clothes/" + category, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/clothes/" + category, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch clothes: " + e.getStatusText(), e);
 		}
@@ -106,7 +106,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Electronics> getElectronics() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/electronics", HttpMethod.GET, null, new ParameterizedTypeReference<List<Electronics>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/electronics", HttpMethod.GET, null, new ParameterizedTypeReference<List<Electronics>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch electronics: " + e.getStatusText(), e);
 		}
@@ -115,7 +115,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Home> getHomeItems() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/home", HttpMethod.GET, null, new ParameterizedTypeReference<List<Home>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/home", HttpMethod.GET, null, new ParameterizedTypeReference<List<Home>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch home items: " + e.getStatusText(), e);
 		}
@@ -124,7 +124,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Pet> getItemsForPet() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/pet", HttpMethod.GET, null, new ParameterizedTypeReference<List<Pet>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/pet", HttpMethod.GET, null, new ParameterizedTypeReference<List<Pet>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch pet items: " + e.getStatusText(), e);
 		}
@@ -133,7 +133,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Entertainment> getItemsForEntertainment() {
 		try{
-			return restTemplate.exchange(apiBaseUrl + "/entertainment", HttpMethod.GET, null, new ParameterizedTypeReference<List<Entertainment>>() {}).getBody();
+			return restTemplate.exchange(apiBaseUrl + "/items/entertainment", HttpMethod.GET, null, new ParameterizedTypeReference<List<Entertainment>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch entertainment items: " + e.getStatusText(), e);
 		}
