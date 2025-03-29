@@ -130,6 +130,16 @@ public class ItemController {
         }
     }
 
+    @GetMapping("/items/{id}")
+    public ResponseEntity<ItemDTO> getItemById(@PathVariable long id) {
+        try {
+            Item item = itemService.getItemById(id);
+            return ResponseEntity.ok(item.toDTO());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
     @GetMapping("/clothes")
     public ResponseEntity<List<ClothesDTO>> getClothes() {
