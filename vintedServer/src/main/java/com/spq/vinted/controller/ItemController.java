@@ -1,16 +1,22 @@
 package com.spq.vinted.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.vinted.dto.ClothesDTO;
 import com.spq.vinted.dto.ElectronicsDTO;
@@ -46,91 +52,63 @@ public class ItemController {
     }
     
     @PostMapping("/itemData")
-    public ResponseEntity<Void> uploadItemData(
+    public ResponseEntity<Long> uploadItemData(
             @RequestParam("token") long token,
             @RequestBody ItemDTO itemDTO) {
         User user = userService.getUserByToken(token);
         if (user == null) {
-            return ResponseEntity.status(403).build(); // Forbidden
+            return ResponseEntity.status(403).build();
+        }
+        Item savedItem = null;
+        if (itemDTO instanceof ClothesDTO clothes) {
+            System.out.println("ClothesDTO: " + clothes.getTitle() + ", " + clothes.getDescription() + ", " + clothes.getPrice() + ", " + clothes.getSize() + ", " + clothes.getType() + ", " + clothes.getCategory());
+            Clothes clothesItem = new Clothes(clothes.getTitle(), clothes.getDescription(), clothes.getPrice(),
+                    clothes.getSize(), clothes.getType(), clothes.getCategory(), user);
+            savedItem = itemService.saveItem(clothesItem);
+        } else if (itemDTO instanceof ElectronicsDTO electronics) {
+            Electronics electronicsItem = new Electronics(electronics.getTitle(), electronics.getDescription(),
+                    electronics.getPrice(), user, electronics.getType());
+            savedItem = itemService.saveItem(electronicsItem);
+        } else if (itemDTO instanceof PetDTO pet) {
+            Pet petItem = new Pet(pet.getTitle(), pet.getDescription(), pet.getPrice(), pet.getSpecies(), user);
+            savedItem = itemService.saveItem(petItem);
+        } else if (itemDTO instanceof HomeDTO home) {
+            Home homeItem = new Home(home.getTitle(), home.getDescription(), home.getPrice(), user, home.getType());
+            savedItem = itemService.saveItem(homeItem);
+        } else if (itemDTO instanceof EntertainmentDTO entertainment) {
+            Entertainment entertainmentItem = new Entertainment(entertainment.getTitle(), entertainment.getDescription(), entertainment.getPrice(), user, entertainment.getType());
+            savedItem = itemService.saveItem(entertainmentItem);
+        }
+        if (savedItem == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        if (itemDTO instanceof ClothesDTO) {
-            ClothesDTO clothes = (ClothesDTO) itemDTO;
-            Clothes clothesItem = new Clothes(
-                    clothes.getTitle(),
-                    clothes.getDescription(),
-                    clothes.getPrice(),
-                    null,
-                    clothes.getSize(),
-                    clothes.getBrand(),
-                    clothes.getCategory(),
-                    user
-            );
-            itemService.saveItem(clothesItem);
-            System.out.println("titulo: " + clothes.getTitle()+
-                    " descripcion: " + clothes.getDescription() +
-                    " precio: " + clothes.getPrice() +
-                    " categoria: " + clothes.getCategory() +
-                    " talla: " + clothes.getSize() );
-        } else if (itemDTO instanceof ElectronicsDTO) {
-            ElectronicsDTO electronics = (ElectronicsDTO) itemDTO;
-            Electronics electronicsItem = new Electronics(
-                    electronics.getTitle(),
-                    electronics.getDescription(),
-                    electronics.getPrice(),
-                    null,
-                    user
-            );
-            itemService.saveItem(electronicsItem);
-            System.out.println("title"+ ": " + electronics.getTitle() +
-                    " description: " + electronics.getDescription() +
-                    " price: " + electronics.getPrice() );
-        } else if (itemDTO instanceof PetDTO) {
-            PetDTO pet = (PetDTO) itemDTO;
-            Pet petItem = new Pet(
-                    pet.getTitle(),
-                    pet.getDescription(),
-                    pet.getPrice(),
-                    null,
-                    pet.getSpecies(),
-                    user
-            );
-            itemService.saveItem(petItem);
-            System.out.println("titulo: " + pet.getTitle() +
-                    " descripcion: " + pet.getDescription() +
-                    " precio: " + pet.getPrice() +
-                    " tipo: " + pet.getSpecies() );
-        } else if (itemDTO instanceof HomeDTO){
-            HomeDTO home = (HomeDTO) itemDTO;
-            Home homeItem = new Home(
-                    home.getTitle(),
-                    home.getDescription(),
-                    home.getPrice(),
-                    null,
-                    user
-            );
-            itemService.saveItem(homeItem);
-            System.out.println("titulo: " + home.getTitle() +
-                    " descripcion: " + home.getDescription() +
-                    " precio: " + home.getPrice() );
-        }else if(itemDTO instanceof EntertainmentDTO){
-            EntertainmentDTO entertainment = (EntertainmentDTO) itemDTO;
-            Entertainment entertainmentItem = new Entertainment(
-                    entertainment.getTitle(),
-                    entertainment.getDescription(),
-                    entertainment.getPrice(),
-                    null,
-                    user
-            );
-            itemService.saveItem(entertainmentItem);
-            System.out.println("titulo: " + entertainment.getTitle() +
-                    " descripcion: " + entertainment.getDescription() +
-                    " precio: " + entertainment.getPrice());
-        }
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(savedItem.getId());
     }
 
+    @PutMapping(value = "/itemImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateItemImage(
+            @RequestParam("itemId") long itemId,
+            @RequestPart("images") List<MultipartFile> images) { // CAMBIADO
+    
+        try {
+            System.out.println("Item ID: " + itemId + ", Images: " + images.size() + " files received.");
+            
+            // Llamar al servicio para guardar las imágenes
+            itemService.uploadItemImages(itemId, images);
+            
+            System.out.println("Images uploaded successfully for item ID: " + itemId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            if ("Item not found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 /* 
     @GetMapping("/items")
     public ResponseEntity<List<ItemDTO>> getItems() {
