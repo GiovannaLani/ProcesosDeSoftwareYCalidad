@@ -1,6 +1,10 @@
 package com.spq.client.data;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -15,6 +19,7 @@ public abstract class Item {
     private String title;
     private String description;
     private float price;
+    private List<String> images = new ArrayList<>();
     Item(String title, String description, float price) {
         this.title = title;
         this.description = description;
@@ -29,5 +34,8 @@ public abstract class Item {
 
     public float getPrice() { return price; }
     public void setPrice(float price) { this.price = price; }
+    
+    public List<String> getImages() { return images; }
+    public void setImages (List<String> images){this.images = images;}
 }
 

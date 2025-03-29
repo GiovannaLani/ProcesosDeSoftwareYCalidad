@@ -41,6 +41,7 @@ public class ClientController {
 			model.addAttribute("loggedUserId", userId);
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
+		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
 
 	}
 	
@@ -115,12 +116,16 @@ public class ClientController {
 		return "redirect:/login?redirectUrl=" + redirectUrl;
 	}
 
-	@GetMapping("/items")
-	public String getItems(Model model) {
+	@GetMapping("/allItems")
+	public String getItems(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
 		try {
 			List<Item> items = vintedService.getItems();
 			model.addAttribute("items", items);
-			return "items"; 
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -129,24 +134,31 @@ public class ClientController {
 	}
 
 	@GetMapping("/clothes")
-	public String getClothes(Model model) {
+	public String getClothes(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
 		try {
 			List<Clothes> clothes = vintedService.getClothes();
-			model.addAttribute("clothes", clothes);
-			return "index"; 
+			model.addAttribute("items", clothes);
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
 		}
-		return null;
+		return "redirect:/";
 	}
 
 	@GetMapping("/clothes/{category}")
-	public String getClothesByCategory(@PathVariable Category category, Model model) {
+	public String getClothesByCategory(
+		@RequestParam(value = "token", required = false) Long token,
+		@PathVariable Category category,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
     try {
         List<Clothes>clothesCategory = vintedService.getClothesByCategory(category);
-		model.addAttribute("clothesCategory", clothesCategory);
-		return "index";
+		model.addAttribute("items", clothesCategory);
+		return "product";
     } catch (RuntimeException e) {
         System.err.println("Ha ocurrido un error: " + e.getMessage());
         e.printStackTrace();
@@ -155,11 +167,14 @@ public class ClientController {
 }
 
 	@GetMapping("/electronics")
-	public String getElectronics(Model model) {
+	public String getElectronics(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
 		try {
 			List<Electronics> electronics = vintedService.getElectronics();
-			model.addAttribute("electronics", electronics);
-			return "index"; 
+			model.addAttribute("items", electronics);
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -168,11 +183,14 @@ public class ClientController {
 	}
 
 	@GetMapping("/pet")
-	public String getItemsForPet(Model model) {
+	public String getItemsForPet(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
 		try {
 			List<Pet> pets = vintedService.getItemsForPet();
-			model.addAttribute("pets", pets);
-			return "index"; 
+			model.addAttribute("items", pets);
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -181,11 +199,15 @@ public class ClientController {
 	}
 
 	@GetMapping("/entertainment")
-	public String getItemsForEntertainment(Model model) {
+	public String getItemsForEntertainment(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
 		try {
 			List<Entertainment> entertainment = vintedService.getItemsForEntertainment();
-			model.addAttribute("entertainment", entertainment);
-			return "index"; 
+			model.addAttribute("items", entertainment);
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -194,11 +216,15 @@ public class ClientController {
 	}
 
 	@GetMapping("/home")
-	public String getHomeItems(Model model) {
+	public String getHomeItems(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
 		try {
 			List<Home> homeItems = vintedService.getHomeItems();
-			model.addAttribute("homeItems", homeItems);
-			return "index"; 
+			model.addAttribute("items", homeItems);
+			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
