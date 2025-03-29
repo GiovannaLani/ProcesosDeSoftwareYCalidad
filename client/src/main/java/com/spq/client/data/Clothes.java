@@ -1,10 +1,14 @@
 package com.spq.client.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("clothes")
 public class Clothes extends Item {
     private ClothesSize size;
     private Category category;
     private ClothesType clothesType;
 
+    
     public Clothes(String title, String description, float price, ClothesSize size, Category category, ClothesType type) {
         super(title, description, price); 
         this.size = size;

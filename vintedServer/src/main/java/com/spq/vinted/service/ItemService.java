@@ -52,7 +52,6 @@ public class ItemService {
         return itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found"));
     }
 
-    
     public List<Clothes> getClothes(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Clothes).map(item -> (Clothes) item).collect(Collectors.toList());
     }

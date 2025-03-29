@@ -16,6 +16,8 @@ import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Clothes;
+import com.spq.client.data.ClothesSize;
+import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
