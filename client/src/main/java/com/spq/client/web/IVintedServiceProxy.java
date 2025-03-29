@@ -39,4 +39,6 @@ public interface IVintedServiceProxy {
 	public List<Item> getCartItems(Long token);
 	public void addItemToCart(Long token, Long itemId);
 	public void removeItemFromCart(Long token, Long itemId);
+	public User getUserByItemId(Long itemId);
+	public Purchase getPurchaseById(Long purchaseId);
 }

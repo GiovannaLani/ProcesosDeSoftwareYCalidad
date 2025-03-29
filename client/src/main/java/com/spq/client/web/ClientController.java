@@ -21,6 +21,7 @@ import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
+import com.spq.client.data.User;
 
 import java.util.List;
 import com.spq.client.data.Signup;
@@ -404,7 +405,7 @@ public class ClientController {
 		try {
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
-				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
 				return "redirect:/login";
 			}
 	
@@ -418,12 +419,13 @@ public class ClientController {
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
 	
-			return "purchase";
-		} catch (RuntimeException e) {
-			redirectAttributes.addFlashAttribute("errorMessage", "Error al mostrar la compra: " + e.getMessage());
+			return "purchase";  
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
 			return "redirect:/items";
 		}
-	}	
+	}
+	
 
 	@PostMapping("/createPurchase/{itemId}")
 	public String createPurchase(
@@ -444,25 +446,32 @@ public class ClientController {
 				return "redirect:/items";
 			}
 	
+			User seller = vintedService.getUserByItemId(itemId);
+			if (seller == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor.");
+				return "redirect:/items";
+			}
+	
 			Purchase purchase = new Purchase(
-				0,
-				itemId,
+				0, 
+				itemId, 
 				vintedService.getUser(buyerId, token).username(),
-				vintedService.getUser(buyerId, token).username(),
+				seller.username(),
 				item.getPrice(),
 				paymentMethod,
 				"PENDING"
 			);
 	
 			vintedService.createPurchase(purchase);
-			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Ahora selecciona un método de pago.");
-			return "redirect:/payment?purchaseId=" + purchase.id(); 
+			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
+			return "redirect:/payment?purchaseId=" + purchase.id();
 	
-		} catch (RuntimeException e) {
-			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra: " + e.getMessage());
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
 			return "redirect:/items";
 		}
 	}
+	
 	
 
 	@PostMapping("/processPayment/{purchaseId}")
@@ -471,36 +480,28 @@ public class ClientController {
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
+			Purchase purchase = vintedService.getPurchaseById(purchaseId);
+			if (purchase == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
+				return "redirect:/items";
+			}
+	
+			if (!"PENDING".equals(purchase.status())) {
+				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
+				return "redirect:/items";
+			}
+	
 			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod);
 			if (paymentSuccess) {
 				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error en el pago.");
 			}
-		} catch (RuntimeException e) {
-			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago: " + e.getMessage());
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
 		}
 		return "redirect:/items";
-	} 
-
-	@GetMapping("/cart")
-	public String showCart(
-			@RequestParam("token") Long token,
-			Model model) {
-		if (token == null) {
-			return "redirect:/login";
-		}
-		try {
-			List<Item> cartItems = vintedService.getCartItems(token);
-			model.addAttribute("cartItems", cartItems);
-			return "cart"; 
-		} catch (RuntimeException e) {
-			model.addAttribute("errorMessage", "Error al cargar el carrito.");
-			e.printStackTrace();
-			return "error"; 
-		}
-	}
-
+	}	
 
 	@PostMapping("/cart/add")
 	public String addItemToCart(

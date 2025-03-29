@@ -275,4 +275,15 @@ public class ItemController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+
+    @GetMapping("/{itemId}/owner")
+    public ResponseEntity<User> getItemOwner(@PathVariable long itemId) {
+        try {
+            User owner = itemService.getItemOwner(itemId);
+            return ResponseEntity.ok(owner);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }    
+
 }

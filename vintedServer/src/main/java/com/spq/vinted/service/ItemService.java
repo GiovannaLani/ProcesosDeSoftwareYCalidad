@@ -70,6 +70,12 @@ public class ItemService {
         return itemRepository.findAll().stream().filter(item -> item instanceof Pet).map(item -> (Pet) item).collect(Collectors.toList());
     }
 
+    public User getItemOwner(long itemId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
+        return item.getSeller();
+    }
+    
+
     public List<Entertainment> getItemsforEntertainment(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Entertainment).map(item -> (Entertainment) item).collect(Collectors.toList());
     }

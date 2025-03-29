@@ -405,4 +405,30 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
+	@Override
+	public Purchase getPurchaseById(Long purchaseId) {
+		try {
+			String url = apiBaseUrl + "/purchases/" + purchaseId;
+			return restTemplate.getForObject(url, Purchase.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Purchase not found");
+				default -> throw new RuntimeException("Failed to fetch purchase: " + e.getStatusText());
+			}
+		}
+	}	
+
+	@Override
+	public User getUserByItemId(Long itemId) {
+		try {
+			String url = apiBaseUrl + "/items/" + itemId + "/owner";
+			return restTemplate.getForObject(url, User.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item not found");
+				default -> throw new RuntimeException("Failed to get item owner: " + e.getStatusText());
+			}
+		}
+	}	
+
 }
