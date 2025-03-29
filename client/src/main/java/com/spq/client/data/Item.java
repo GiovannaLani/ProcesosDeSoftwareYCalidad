@@ -15,6 +15,11 @@ public abstract class Item {
     private String title;
     private String description;
     private float price;
+    Item(String title, String description, float price) {
+        this.title = title;
+        this.description = description;
+        this.price = price;
+    }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

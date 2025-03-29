@@ -15,8 +15,8 @@ public class Pet extends Item{
     public Pet() {
     }
 
-    public Pet(String title, String description, float price, String image, Species species, User seller) {
-        super(title, description, price, image, seller);
+    public Pet(String title, String description, float price, Species species, User seller) {
+        super(title, description, price, seller);
         this.species = species;
     }
 

@@ -135,7 +135,7 @@
 								</ul>
 							</div>
 						</div>
-						<form th:unless="${token}" th:action="@{/login}" method="get">
+						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
@@ -311,10 +311,10 @@
 						</div>
 						<div class="m-b-20">
 						<label for="username" class="stext-111 cl2 p-b-10 login-label">Nombre de usuario</label>
+						<p style="color: lightgray; font-size: 10px;">*No se puede cambiar.</p>
 							<input id="username" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
 								   type="text" name="username" placeholder="Introduce tu nombre de usuario" required>
 						</div>
-						<p>*No se puede cambiar.</p>
 						<div class="m-b-20">
 							<label for="name" class="stext-111 cl2 p-b-10 login-label">Nombre</label>
 							<input id="name" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 

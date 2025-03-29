@@ -288,13 +288,15 @@ public class ClientController {
 
 	@GetMapping("/uploadItem")
 	public String showUploadItem(
-			@RequestParam("token") Long token,
+			@RequestParam(value = "token", required = false) Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-
+		if (token == null) {
+			return "redirect:/login";
+		}
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
 	}
@@ -309,9 +311,13 @@ public class ClientController {
 			@RequestParam(value = "brand", required = false) String brand,
 			@RequestParam(value = "size", required = false) String size,
 			@RequestParam(value = "clothCategory", required = false) String clothCategory,
+			@RequestParam(value = "clothingType", required = false) String clothingType,
 			@RequestParam(value = "species", required = false) String species,
+			@RequestParam(value = "homeType", required = false) String homeType,
+			@RequestParam(value = "electronicsType", required = false) String electronicsType,
+			@RequestParam(value = "entertainmentType", required = false) String entertainmentType,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			//@RequestParam(value = "profileImage", required = false) MultipartFile itemImage,
+			@RequestParam(value = "itemImages") List<MultipartFile> itemImages,
 			RedirectAttributes redirectAttributes) {
 
 		if (redirectUrl == null) {
@@ -320,7 +326,7 @@ public class ClientController {
 
 		try {
 			System.out.println("Uploading item with title: " + title);
-			vintedService.uploadItemData(token, title, description, category, price, brand, size, clothCategory, species);
+			vintedService.uploadItem(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType, itemImages);
 			System.out.println("Item uploaded successfully.");
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {

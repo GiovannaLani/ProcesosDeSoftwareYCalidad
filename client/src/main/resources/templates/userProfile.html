@@ -136,12 +136,12 @@
 							</div>
 						</div>
 						
-						<form th:unless="${token}" th:action="@{/login}" method="get">
+						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						<form th:action="@{/uploadItem(token=${token})}" method="get" th:if="${token != null}">
+						<form th:action="@{/uploadItem(token=${token})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<button class="button-green">
 								Vender ahora
@@ -477,7 +477,7 @@
 									</p>
 								</div>
 								<div data-testid="closet-empty-state--action" style="width: 30%; display: flex; justify-content: center; margin: 0 auto;">
-									<a href="" class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary web_ui__Button__truncated">
+									<a th:href="@{/uploadItem(token=${token})}" class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary web_ui__Button__truncated">
 										<span class="web_ui__Button__content">
 											<span class="web_ui__Button__label">
 												Subir ahora
