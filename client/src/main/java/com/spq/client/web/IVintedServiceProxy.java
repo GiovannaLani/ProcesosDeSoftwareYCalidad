@@ -18,6 +18,7 @@ public interface IVintedServiceProxy {
     public void createUser(Signup user);
 	public Long login(String email, String password);
 	public List<Item> getItems();
+	public Item getItemById(Long id);
 	public List<Clothes> getClothes();
 	public List<Clothes> getClothesByCategory(Category category);
 	public List<Electronics> getElectronics();

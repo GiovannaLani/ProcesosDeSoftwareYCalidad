@@ -133,6 +133,23 @@ public class ClientController {
 		return null;
 	}
 
+	@GetMapping("/item/{id}")
+	public String getItemById(
+		@RequestParam(value = "token", required = false) Long token,
+		@PathVariable Long id,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			Item item = vintedService.getItemById(id);
+			model.addAttribute("item", item);
+			return "product-details"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	@GetMapping("/clothes")
 	public String getClothes(
 		@RequestParam(value = "token", required = false) Long token,
