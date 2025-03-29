@@ -30,7 +30,6 @@ import com.spq.vinted.repository.UserRepository;
 
 @Service
 public class ItemService {
-    private AuthService authService;
     private UserService userService;
     private final UserRepository userRepository;
 
@@ -38,8 +37,9 @@ public class ItemService {
     
     ItemRepository itemRepository;
     
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Item> getItems() {
@@ -109,7 +109,7 @@ public class ItemService {
     }
     
     public void addItemToCart(long token, Item item) {
-        User user = authService.getUser(token);
+        User user = userService.getUserByToken(token);
         if(user != null) {
             user.getCartItems().add(item);
         }else{
@@ -136,7 +136,7 @@ public class ItemService {
     
     
     public List<Item> getCartItems(long token) {
-        User user = authService.getUser(token);
+        User user = userService.getUserByToken(token);
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
@@ -144,4 +144,4 @@ public class ItemService {
     }
 }
 
-}
+

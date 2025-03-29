@@ -53,7 +53,7 @@ public class User {
 
     public User() {
     }
-    public User(String email, String password, String username, String name, String surname, List<Item> cartItems) {
+    public User(String email, String password, String username, String name, String surname) {
         this.email = email;
         this.password = password;
         this.username = username;

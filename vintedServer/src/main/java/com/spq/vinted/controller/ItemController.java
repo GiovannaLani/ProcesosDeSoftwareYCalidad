@@ -64,7 +64,7 @@ public class ItemController {
         List<Item> cartItems = itemService.getCartItems(token);
         return ResponseEntity.ok(cartItems);
 }
-}
+
     @PostMapping("/itemData")
     public ResponseEntity<Long> uploadItemData(
             @RequestParam("token") long token,
