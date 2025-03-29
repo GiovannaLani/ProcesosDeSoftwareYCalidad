@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import com.spq.client.data.User;
 import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
@@ -119,9 +116,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/items")
-	public List<Item> getItems() {
+	public String getItems(Model model) {
 		try {
-			return vintedService.getItems();
+			List<Item> items = vintedService.getItems();
+			model.addAttribute("items", items);
+			return "items"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -130,9 +129,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/clothes")
-	public List<Clothes> getClothes() {
+	public String getClothes(Model model) {
 		try {
-			return vintedService.getClothes();
+			List<Clothes> clothes = vintedService.getClothes();
+			model.addAttribute("clothes", clothes);
+			return "index"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -141,9 +142,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/clothes/{category}")
-	public List<Clothes> getClothesByCategory(@PathVariable Category category) {
+	public String getClothesByCategory(@PathVariable Category category, Model model) {
     try {
-        return vintedService.getClothesByCategory(category);
+        List<Clothes>clothesCategory = vintedService.getClothesByCategory(category);
+		model.addAttribute("clothesCategory", clothesCategory);
+		return "index";
     } catch (RuntimeException e) {
         System.err.println("Ha ocurrido un error: " + e.getMessage());
         e.printStackTrace();
@@ -152,9 +155,11 @@ public class ClientController {
 }
 
 	@GetMapping("/electronics")
-	public List<Electronics> getElectronics() {
+	public String getElectronics(Model model) {
 		try {
-			return vintedService.getElectronics();
+			List<Electronics> electronics = vintedService.getElectronics();
+			model.addAttribute("electronics", electronics);
+			return "index"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -163,9 +168,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/pet")
-	public List<Pet> getItemsForPet() {
+	public String getItemsForPet(Model model) {
 		try {
-			return vintedService.getItemsForPet();
+			List<Pet> pets = vintedService.getItemsForPet();
+			model.addAttribute("pets", pets);
+			return "index"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -174,9 +181,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/entertainment")
-	public List<Entertainment> getItemsForEntertainment() {
+	public String getItemsForEntertainment(Model model) {
 		try {
-			return vintedService.getItemsForEntertainment();
+			List<Entertainment> entertainment = vintedService.getItemsForEntertainment();
+			model.addAttribute("entertainment", entertainment);
+			return "index"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -185,9 +194,11 @@ public class ClientController {
 	}
 
 	@GetMapping("/home")
-	public List<Home> getHomeItems() {
+	public String getHomeItems(Model model) {
 		try {
-			return vintedService.getHomeItems();
+			List<Home> homeItems = vintedService.getHomeItems();
+			model.addAttribute("homeItems", homeItems);
+			return "index"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
