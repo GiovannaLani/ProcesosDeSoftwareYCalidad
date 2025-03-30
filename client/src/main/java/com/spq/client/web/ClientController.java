@@ -584,6 +584,7 @@ public class ClientController {
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
+			System.out.println(token);
 			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 			if (purchase == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
@@ -594,8 +595,8 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
 				return "redirect:/login";
 			}
-	
-			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod);
+			System.out.println("a");
+			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
 			if (paymentSuccess) {
 				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
 				return "redirect:/allItems";
@@ -605,7 +606,7 @@ public class ClientController {
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
 		}
-		return "redirect:/login";
+		return "redirect:/allItems";
 	}
 
 	@DeleteMapping("/deletePurchase/{purchaseId}")

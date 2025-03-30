@@ -38,6 +38,7 @@ public class PurchaseController {
     @GetMapping("/{purchaseId}")
     public ResponseEntity<PurchaseDTO> getPurchaseById(@RequestParam long token, @PathVariable long purchaseId) {
         try {
+            System.out.println("Token: " + token);
             PurchaseDTO purchase = purchaseService.getPurchaseById(token, purchaseId);
             System.out.println("Purchase: " + purchase);
             return ResponseEntity.ok(purchase);

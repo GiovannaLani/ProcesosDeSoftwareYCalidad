@@ -208,8 +208,8 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public boolean processPayment(long purchaseId, String paymentMethod) {
-        String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod;
+    public boolean processPayment(long purchaseId, String paymentMethod, long token) {
+        String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
         try {
             restTemplate.postForObject(url, null, Void.class);
             return true;

@@ -31,6 +31,7 @@ public class PurchaseService {
     }
 
     public PurchaseDTO getPurchaseById(long token, long purchaseId) {
+        System.out.println("Token: " + token);
         PurchaseDTO purchase = purchases.get(purchaseId);
         if (purchase != null && userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {
             return purchase;
