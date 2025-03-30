@@ -16,8 +16,6 @@ import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Clothes;
-import com.spq.client.data.ClothesSize;
-import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
@@ -126,7 +124,7 @@ public class ClientController {
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
-			List<Item> items = vintedService.getItems();
+			List<Item> items = vintedService.getItems(token); 
 			model.addAttribute("items", items);
 	
 			//if (token != null) {
@@ -138,8 +136,8 @@ public class ClientController {
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
+			return "redirect:/";
 		}
-		return null;
 	}
 
 	@GetMapping("/item/{id}")
@@ -150,14 +148,11 @@ public class ClientController {
 			Model model) {
 		try {
 			Item item = vintedService.getItemById(id);
+			Long sellerId = vintedService.getSeller(item).id();
+
 			model.addAttribute("item", item);
-	
-			//if (token != null) {
-			//	List<Item> cartItems = vintedService.getCartItems(token);
-			//	model.addAttribute("cartItems", cartItems);
-			//}
-	
-			return "product-details";
+			model.addAttribute("sellerId", sellerId);
+			return "product-details"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -171,7 +166,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Clothes> clothes = vintedService.getClothes();
+			List<Clothes> clothes = null;
+			if(token == null) {
+				clothes = vintedService.getClothes(-1);
+			}else {
+				clothes = vintedService.getClothes(token);
+			}
 			model.addAttribute("items", clothes);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -188,7 +188,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
     try {
-        List<Clothes>clothesCategory = vintedService.getClothesByCategory(category);
+		List<Clothes> clothesCategory = null;
+		if(token == null) {
+			clothesCategory = vintedService.getClothesByCategory(category, -1);
+		}else {
+			clothesCategory = vintedService.getClothesByCategory(category, token);
+		}
 		model.addAttribute("items", clothesCategory);
 		return "product";
     } catch (RuntimeException e) {
@@ -204,7 +209,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Electronics> electronics = vintedService.getElectronics();
+			List<Electronics> electronics = null;
+			if(token == null) {
+				electronics = vintedService.getElectronics(-1);
+			}else {
+				electronics = vintedService.getElectronics(token);
+			}
 			model.addAttribute("items", electronics);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -220,7 +230,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Pet> pets = vintedService.getItemsForPet();
+			List<Pet> pets = null;
+			if(token == null) {
+				pets = vintedService.getItemsForPet(-1);
+			}else {
+				pets = vintedService.getItemsForPet(token);
+			}
 			model.addAttribute("items", pets);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -237,7 +252,12 @@ public class ClientController {
 		Model model
 	) {
 		try {
-			List<Entertainment> entertainment = vintedService.getItemsForEntertainment();
+			List<Entertainment> entertainment = null;
+			if (token == null) {
+				entertainment = vintedService.getItemsForEntertainment(-1);
+			} else {
+				entertainment = vintedService.getItemsForEntertainment(token);	
+			}
 			model.addAttribute("items", entertainment);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -254,7 +274,12 @@ public class ClientController {
 		Model model
 	) {
 		try {
-			List<Home> homeItems = vintedService.getHomeItems();
+			List<Home> homeItems = null;
+			if(token == null) {
+				homeItems = vintedService.getHomeItems(-1);
+			}else {
+				homeItems = vintedService.getHomeItems(token);
+			}
 			model.addAttribute("items", homeItems);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -305,7 +330,8 @@ public class ClientController {
 	
 		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-	
+		List<Item> items = vintedService.getUserItems(id);
+    	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
 		model.addAttribute("isMyProfile", isMyProfile);
 	
@@ -412,9 +438,7 @@ public class ClientController {
 		}
 
 		try {
-			System.out.println("Uploading item with title: " + title);
 			vintedService.uploadItem(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType, itemImages);
-			System.out.println("Item uploaded successfully.");
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if ("User not found".equals(e.getMessage())) {
@@ -607,4 +631,7 @@ public class ClientController {
 
 		return "redirect:" + redirectUrl;
 	}
+
 }
+
+

@@ -24,8 +24,6 @@ import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Pet;
 import com.spq.vinted.repository.ItemRepository;
 
-import com.spq.vinted.dto.ItemDTO;
-import com.spq.vinted.model.Item;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.UserRepository;
 
@@ -45,8 +43,17 @@ public class ItemService {
         this.userRepository = userRepository;
     }
 
-    public List<Item> getItems() {
-        return itemRepository.findAll();
+    public List<Item> getItems(Long token) {
+        try {
+            if (token == null) {
+                return itemRepository.findAll();
+            } else {
+                Long userId = userService.getUserByToken(token).getId();
+                return itemRepository.findBySellerIdNot(userId);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch items: " + e.getMessage(), e);
+        }
     }
 
     public Item getItemById(long id) {
@@ -161,6 +168,11 @@ public class ItemService {
 
         userRepository.save(user);
         itemRepository.save(itemToRemove); 
+    }
+
+    public List<Item> getUserItems(long userId) {
+        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getItemsForSale();
     }
 
 }

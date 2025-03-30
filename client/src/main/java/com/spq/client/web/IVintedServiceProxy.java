@@ -18,14 +18,14 @@ import java.util.List;
 public interface IVintedServiceProxy {
     public void createUser(Signup user);
 	public Long login(String email, String password);
-	public List<Item> getItems();
+	public List<Item> getItems(Long token);
 	public Item getItemById(Long id);
-	public List<Clothes> getClothes();
-	public List<Clothes> getClothesByCategory(Category category);
-	public List<Electronics> getElectronics();
-	public List<Home> getHomeItems();
-	public List<Pet> getItemsForPet();
-	public List<Entertainment> getItemsForEntertainment();
+	public List<Clothes> getClothes(long token);
+	public List<Clothes> getClothesByCategory(Category category, long token);
+	public List<Electronics> getElectronics(long token);
+	public List<Home> getHomeItems(long token);
+	public List<Pet> getItemsForPet(long token);
+	public List<Entertainment> getItemsForEntertainment(long token);
 	public void logout(long token);
 	public Purchase createPurchase(Purchase purchase);
 	public boolean processPayment(long purchaseId, String paymentMethod);
@@ -41,4 +41,6 @@ public interface IVintedServiceProxy {
 	public void removeItemFromCart(Long token, Long itemId);
 	public User getUserByItemId(Long itemId);
 	public Purchase getPurchaseById(Long purchaseId);
+	public List<Item> getUserItems(Long userId);
+	public User getSeller(Item item);
 }

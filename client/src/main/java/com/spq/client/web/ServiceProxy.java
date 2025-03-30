@@ -76,12 +76,18 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 	@Override
-	public List<Item> getItems() {
-		try{
-			return restTemplate.exchange(apiBaseUrl + "/items/items", HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
-    	} catch (HttpStatusCodeException e) {
-        	throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
-    	}
+	public List<Item> getItems(Long token) {
+		try {
+			if (token == null) {
+				return restTemplate.exchange(apiBaseUrl + "/items/items", HttpMethod.GET, null, 
+						new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			} else {
+				return restTemplate.exchange(apiBaseUrl + "/items/items?token=" + token, HttpMethod.GET, null, 
+						new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			}
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
 	}
 
 	@Override
@@ -98,8 +104,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Clothes> getClothes() {
+	public List<Clothes> getClothes(long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/clothes?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+			}
 			List<Clothes> clothes = restTemplate.exchange(apiBaseUrl + "/items/clothes", HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
 			return clothes;
 		}catch (HttpStatusCodeException e) {
@@ -108,8 +117,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Clothes> getClothesByCategory(Category category) {
+	public List<Clothes> getClothesByCategory(Category category,long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/clothes/" + category + "?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
+			}
 			return restTemplate.exchange(apiBaseUrl + "/items/clothes/" + category, HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch clothes: " + e.getStatusText(), e);
@@ -117,8 +129,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Electronics> getElectronics() {
+	public List<Electronics> getElectronics(long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/electronics?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Electronics>>() {}).getBody();
+			}
 			return restTemplate.exchange(apiBaseUrl + "/items/electronics", HttpMethod.GET, null, new ParameterizedTypeReference<List<Electronics>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch electronics: " + e.getStatusText(), e);
@@ -126,8 +141,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Home> getHomeItems() {
+	public List<Home> getHomeItems(long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/home?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Home>>() {}).getBody();
+			}
 			return restTemplate.exchange(apiBaseUrl + "/items/home", HttpMethod.GET, null, new ParameterizedTypeReference<List<Home>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch home items: " + e.getStatusText(), e);
@@ -135,8 +153,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Pet> getItemsForPet() {
+	public List<Pet> getItemsForPet(long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/pet?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Pet>>() {}).getBody();
+			}
 			return restTemplate.exchange(apiBaseUrl + "/items/pet", HttpMethod.GET, null, new ParameterizedTypeReference<List<Pet>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch pet items: " + e.getStatusText(), e);
@@ -144,8 +165,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Entertainment> getItemsForEntertainment() {
+	public List<Entertainment> getItemsForEntertainment(long token) {
 		try{
+			if(token != -1){
+				return restTemplate.exchange(apiBaseUrl + "/items/entertainment?token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Entertainment>>() {}).getBody();
+			}
 			return restTemplate.exchange(apiBaseUrl + "/items/entertainment", HttpMethod.GET, null, new ParameterizedTypeReference<List<Entertainment>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch entertainment items: " + e.getStatusText(), e);
@@ -285,9 +309,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 		uploadItemImage(itemId, images);
 	}
 	@Override
-	public long uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType) {
-		System.out.println("Uploading item data...");
-		
+	public long uploadItemData(long token, String title, String description, String category, float price, String brand, String size, String clothCategory, String clothingType, String species, String homeType, String electronicsType, String entertainmentType) {		
 		String url = apiBaseUrl + "/items/itemData?token=" + token;
 		
 		Item item = switch (category.toLowerCase()) {
@@ -316,7 +338,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public void uploadItemImage(long itemId, List<MultipartFile> images) {
 		try {
-			System.out.println("Uploading item images...");
 			String url = apiBaseUrl + "/items/itemImage?itemId=" + itemId;
 
 			HttpHeaders headers = new HttpHeaders();
@@ -329,14 +350,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 					continue;
 				}
 				body.add("images", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
-				System.out.println("Image name: " + image.getOriginalFilename());
 			}
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-			System.out.println("Request entity: " + requestEntity);
 
 			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
-			System.out.println("Images uploaded successfully for item ID: " + itemId);
 		} catch (HttpStatusCodeException e) {
 			if (e.getStatusCode().value() == 404) {
 				throw new RuntimeException("Item not found");
@@ -423,4 +441,28 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}	
 
+	public List<Item> getUserItems(Long userId) {
+		try {
+			String url = apiBaseUrl + "/items/userItems/"+userId;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch user items: " + e.getStatusText());
+			}
+		}
+	}
+	
+	@Override
+	public User getSeller(Item item){
+		try {
+			String url = apiBaseUrl + "/items/seller/" + item.getId();
+			return restTemplate.getForObject(url, User.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch seller: " + e.getStatusText());
+			}
+		}
+	}
 }
