@@ -617,16 +617,23 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
 				return "redirect:/login";
 			}
-			System.out.println("a");
+	
 			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
 			if (paymentSuccess) {
-				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
+				try {
+					vintedService.deleteItem(token, purchase.itemId());
+					redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito. El artículo ha sido eliminado.");
+				} catch (RuntimeException e) {
+					redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado con éxito, pero no se pudo eliminar el artículo.");
+					e.printStackTrace();
+				}
 				return "redirect:/allItems";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error en el pago.");
 			}
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
+			e.printStackTrace();
 		}
 		return "redirect:/allItems";
 	}
