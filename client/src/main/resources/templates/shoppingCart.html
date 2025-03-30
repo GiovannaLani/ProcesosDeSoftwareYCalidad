@@ -226,6 +226,13 @@
                                     </td>
                                     <td class="column-2" th:text="${item.title}">Nombre del producto</td>
                                     <td class="column-3" th:text="${item.price}">Precio</td>
+									<td class="column-4">
+										<form th:action="@{/shoppingCart/remove}" method="post" class = "m-r-20">
+											<input type="hidden" name="token" th:value="${token}" />
+											<input type="hidden" name="itemId" th:value="${item.id}" />
+											<button type="submit" class="btn btn-danger">Eliminar</button>
+										</form>
+									</td>
                                 </tr>
 							</table>
 						</div>

@@ -59,9 +59,11 @@ public class ItemController {
         this.userService = userService;
     }
 
-    @PostMapping("/add-to-cart")
+    @PostMapping("/shoppingCart/add")
     public ResponseEntity<Void> addItemToCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
         try {
+            System.out.println("TOKEN"+token);
+            System.out.println("ITEMID"+itemId);
             itemService.addItemToCart(token, itemId);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
@@ -89,7 +91,7 @@ public class ItemController {
         }
     }
 
-    @DeleteMapping("/shoppingCart/remove")
+    @PostMapping("/shoppingCart/remove")
     public ResponseEntity<Void> deleteItemFromCart(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
         try {
             itemService.removeItemFromCart(token, itemId);
