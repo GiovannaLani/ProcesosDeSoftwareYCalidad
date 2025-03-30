@@ -1,6 +1,7 @@
 package com.spq.client.data;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
     @JsonSubTypes.Type(value = Home.class, name = "home")
 })
 public abstract class Item {
+    private long id;
     private String title;
     private String description;
     private float price;
@@ -25,6 +27,9 @@ public abstract class Item {
         this.description = description;
         this.price = price;
     }
+
+    public long getId() { return id; }  
+    public void setId(long id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -37,5 +42,10 @@ public abstract class Item {
     
     public List<String> getImages() { return images; }
     public void setImages (List<String> images){this.images = images;}
+
+    public String getType() {
+        JsonTypeName annotation = this.getClass().getAnnotation(JsonTypeName.class);
+        return annotation != null ? annotation.value() : "unknown";
+    }
 }
 

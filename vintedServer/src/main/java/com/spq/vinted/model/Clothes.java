@@ -14,7 +14,7 @@ public class Clothes extends Item {
     @Column(nullable = false)
     private ClothesSize size;
     @Column(nullable = false)
-    private ClothesType type;
+    private ClothesType clothesType;
     @Column(nullable = false)
     private Category category;
 
@@ -24,7 +24,7 @@ public class Clothes extends Item {
     public Clothes(String title, String description, float price, ClothesSize size, ClothesType type, Category category, User seller) {
         super(title, description, price, seller);
         this.size = size;
-        this.type = type;
+        this.clothesType = type;
         this.category = category;
     }
 
@@ -36,12 +36,12 @@ public class Clothes extends Item {
         this.size = size;
     }
 
-    public ClothesType getType() {
-        return type;
+    public ClothesType getClothesType() {
+        return clothesType;
     }
 
-    public void setType(ClothesType type) {
-        this.type = type;
+    public void setClothesType(ClothesType type) {
+        this.clothesType = type;
     }
 
     public Category getCategory() {
@@ -54,6 +54,6 @@ public class Clothes extends Item {
 
     @Override
     public ItemDTO toDTO() {
-        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getType(), getCategory(), getImages());
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getClothesType(), getCategory(), getImages());
     }
 }

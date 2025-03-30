@@ -1,14 +1,18 @@
 package com.spq.client.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("clothes")
 public class Clothes extends Item {
     private ClothesSize size;
     private Category category;
-    private ClothesType type;
+    private ClothesType clothesType;
 
+    
     public Clothes(String title, String description, float price, ClothesSize size, Category category, ClothesType type) {
         super(title, description, price); 
         this.size = size;
-        this.type = type;
+        this.clothesType = type;
         this.category = category;
     }
 
@@ -27,10 +31,10 @@ public class Clothes extends Item {
     public void setCategory(Category category) {
         this.category = category;
     }
-    public ClothesType getType() {
-        return type;
+    public ClothesType getClothesType() {
+        return clothesType;
     }
-    public void setType(ClothesType type) {
-        this.type = type;
+    public void setClothesType(ClothesType type) {
+        this.clothesType = type;
     }
 }

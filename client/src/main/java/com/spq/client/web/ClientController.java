@@ -15,6 +15,8 @@ import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Clothes;
+import com.spq.client.data.ClothesSize;
+import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
@@ -126,6 +128,23 @@ public class ClientController {
 			List<Item> items = vintedService.getItems();
 			model.addAttribute("items", items);
 			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@GetMapping("/item/{id}")
+	public String getItemById(
+		@RequestParam(value = "token", required = false) Long token,
+		@PathVariable Long id,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			Item item = vintedService.getItemById(id);
+			model.addAttribute("item", item);
+			return "product-details"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();

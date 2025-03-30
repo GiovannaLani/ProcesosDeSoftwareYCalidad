@@ -84,6 +84,19 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public Item getItemById(Long id) {
+		try{
+			Item item = restTemplate.getForObject(apiBaseUrl + "/items/item/" + id, Item.class);
+			return item;
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+			case 404 -> throw new RuntimeException("Item not found");
+			default -> throw new RuntimeException("Failed to fetch item: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
 	public List<Clothes> getClothes() {
 		try{
 			List<Clothes> clothes = restTemplate.exchange(apiBaseUrl + "/items/clothes", HttpMethod.GET, null, new ParameterizedTypeReference<List<Clothes>>() {}).getBody();
