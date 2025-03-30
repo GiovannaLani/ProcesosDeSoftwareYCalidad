@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.client.data.Signup;
 import com.spq.client.data.User;
+import com.spq.client.data.Purchase;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
@@ -26,6 +27,8 @@ public interface IVintedServiceProxy {
 	public List<Pet> getItemsForPet(long token);
 	public List<Entertainment> getItemsForEntertainment(long token);
 	public void logout(long token);
+	public Purchase createPurchase(long token, Purchase purchase);
+	public boolean processPayment(long purchaseId, String paymentMethod, long token);
 	public void deleteUser(long token);
 	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);
 	public User getUser(long id, long token);
@@ -36,6 +39,9 @@ public interface IVintedServiceProxy {
 	public List<Item> getCartItems(Long token);
 	public void addItemToCart(Long token, Long itemId);
 	public void removeItemFromCart(Long token, Long itemId);
+	public User getUserByItemId(Long itemId);
+	public Purchase getPurchaseById(Long token, Long purchaseId);
 	public List<Item> getUserItems(Long userId);
 	public User getSeller(Item item);
+	public void deletePurchase(Long token, Long purchaseId);
 }

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Log in</title>
+    <title>Compra</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" th:href="@{/images/icons/favicon.png}" />
@@ -28,7 +27,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/css-hamburgers/hamburgers.min.css}" />
 
     <!-- Animsition -->
-    <link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />-->
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/select2/select2.min.css}" />
@@ -47,12 +46,11 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/util.css}" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
 </head>
-
 <body class="animsition">
 
-	<!-- Header -->
+    <!-- Header -->
 	<header class="header-v4">
 		<!-- Header desktop -->
 		<div class="container-menu-desktop">
@@ -114,7 +112,7 @@
 							<i class="lnr lnr-envelope"></i>
 						</div>
 
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
 							<a th:href="@{/shoppingCart(token=${token})}" class="cart-link">
 								<i class="zmdi zmdi-shopping-cart"></i>
 							</a>
@@ -137,13 +135,12 @@
 							</div>
 						</div>
 						
-						<form th:unless="${token}" th:action="@{/login}" method="get">
-							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
+						<form th:action="@{/uploadItem(token=${token})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<button class="button-green">
 								Vender ahora
@@ -161,41 +158,39 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
+								<a href="index.html">Mujer</a>
 							</li>
 
 							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
+								<a href="product.html">Hombre</a>
 							</li>
 
 							<li>
-								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
+								<a href="shoping-cart.html">Moda de diseño</a>
 							</li>
 
 							<li>
-								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
+								<a href="blog.html">Niños</a>
 							</li>
 
 							<li>
-								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
+								<a href="about.html">Hogar</a>
 							</li>
 
 							<li>
-								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
-							</li>
-
-							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
-							</li>
-
-							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
+								<a href="contact.html">Electrónica</a>
 							</li>
 							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
+								<a href="contact.html">Entretenimiento</a>
 							</li>
 							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
+								<a href="contact.html">Mascotas</a>
+							</li>
+							<li>
+								<a href="contact.html">Sobre Vinted</a>
+							</li>
+							<li>
+								<a href="contact.html">Nuestra Plataforma</a>
 							</li>
 						</ul>
 					</div>
@@ -206,77 +201,88 @@
 
 	</header>
 
-
-	<!-- Content page -->
+    <!-- Main Content -->
 	<section class="bg0 p-t-104 p-b-116">
-		<form class="bg0 p-t-75 p-b-85">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
-						<div class="m-l-25 m-r--38 m-lr-0-xl">
-							<div class="wrap-table-shopping-cart">
-								<div th:if="${cartItems.isEmpty()}">
-									<p>El carrito está vacío.</p>
-								</div>
-								<div th:if="${!cartItems.isEmpty()}">
-									<table class="table-shopping-cart">
-										<tr class="table_head">
-											<th class="column-1">Product</th>
-											<th class="column-2"></th>
-											<th class="column-3">Price</th>
-										</tr>
-										<tr th:each="item : ${cartItems}" class="table_row">
-											<td class="column-1">
-												<div class="how-itemcart1">
-													<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" alt="IMG">
-												</div>
-											</td>
-											<td class="column-2" th:text="${item.title ?: 'Sin título'}">Nombre del producto</td>
-											<td class="column-3" th:text="${item.price ?: 0.0}">Precio</td>
-											<td class="column-4">
-												<form th:action="@{/shoppingCart/remove(redirectUrl=${currentUrl})}" method="post" class="m-r-20">
-													<input type="hidden" name="token" th:value="${token}" />
-													<input type="hidden" name="itemId" th:value="${item.id ?: 0}" />
-													<button type="submit" class="btn btn-danger">Eliminar</button>
-												</form>
-											</td>
-										</tr>
-									</table>
-								</div>
+		<div class="container">
+			<div class="flex-w flex-tr flex-login">
+				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+					<h4 class="mtext-105 cl2 txt-center p-b-30">
+						¡Pago Completado!
+					</h4>
+					<p class="txt-center">Gracias por tu compra. Aquí están los detalles de tu transacción:</p>
+					<ul class="p-l-20 p-t-20">
+						<li><strong>ID de la compra:</strong> <span th:text="${purchase.id}"></span></li>
+						<li><strong>Artículo:</strong> <span th:text="${purchase.itemId}"></span></li>
+						<li><strong>Comprador:</strong> <span th:text="${purchase.buyerUsername}"></span></li>
+						<li><strong>Vendedor:</strong> <span th:text="${purchase.sellerUsername}"></span></li>
+						<li><strong>Precio:</strong> <span th:text="${purchase.price}"></span> €</li>
+						<li><strong>Método de pago:</strong> <span th:text="${purchase.paymentMethod}"></span></li>
+						<li><strong>Estado:</strong> <span th:text="${purchase.status}"></span></li>
+					</ul>
+					
+					<form th:action="@{/processPayment/{purchaseId}(purchaseId=${purchase.id})}" method="post">
+						<input type="hidden" name="token" th:value="${token}" />
+	
+						<div class="p-t-20">
+							<label for="paymentMethod">Selecciona el método de pago:</label>
+							<select name="paymentMethod" id="paymentMethod" class="form-control" onchange="togglePaymentFields(this.value)">
+								<option value="credit_card">Tarjeta de Crédito</option>
+								<option value="paypal">PayPal</option>
+								<option value="bank_transfer">Transferencia Bancaria</option>
+							</select>
+						</div>
+
+						<div id="creditCardFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
+								<input type="text" id="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
+							</div>
+							<div class="m-b-20">
+								<label for="cardExpiry" class="stext-111 cl2 p-b-10">Fecha de expiración</label>
+								<input type="text" id="cardExpiry" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
+							</div>
+							<div class="m-b-20">
+								<label for="cardCVC" class="stext-111 cl2 p-b-10">CVC</label>
+								<input type="text" id="cardCVC" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
 							</div>
 						</div>
-					</div>
 
-				<div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
-					<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
-						<h4 class="mtext-109 cl2 p-b-30">
-							Cart Totals
-						</h4>
+						<div id="paypalFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
+								<input type="email" id="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
+							</div>
+						</div>
 
-						<div class="flex-w flex-t bor12 p-b-13">
-
-                            <div class="flex-w flex-t p-t-27 p-b-33 align-total">
-                                <div class="size-208" style="width: 100%;">
-                                    <span class="mtext-101 cl2">
-                                        Total:
-                                    </span>
-                                </div>
-                                <div class="size-209">
-                                    <span class="mtext-110 cl2" th:text="${totalPrice}">
-                                    </span>
-                                </div>
-                            </div>
-
-							<a th:href="@{/createPurchase/{itemId}(itemId=${cartItems[0].id}, token=${token})}" 
-							class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							 Proceed to Checkout
-							</a>
+						<div id="bankTransferFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
+								<input type="text" id="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES00 1234 5678 9012 3456">
+							</div>
+							<div class="m-b-20">
+								<label for="bankName" class="stext-111 cl2 p-b-10">Nombre del banco</label>
+								<input type="text" id="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Banco Ejemplo">
+							</div>
+						</div>
+	
+						<div class="txt-center p-t-20">
+							<button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
+								Procesar Pago
+							</button>
+						</div>
+					</form>
+	
+					<div class="txt-center p-t-20">
+						<a href="/allItems" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
+							Volver a la tienda
+						</a>
 					</div>
 				</div>
 			</div>
-		</form>
+		</div>
 	</section>
-	<!-- Footer -->
+
+    <!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
 			<div class="row">
@@ -427,7 +433,6 @@
 		</div>
 	</footer>
 
-
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
@@ -493,7 +498,41 @@
         });
     });
 	</script>
+	<script>
+		function togglePaymentFields(paymentMethod) {
+			const creditCardFields = document.getElementById("creditCardFields");
+			const paypalFields = document.getElementById("paypalFields");
+			const bankTransferFields = document.getElementById("bankTransferFields");
+
+			creditCardFields.style.display = "none";
+			paypalFields.style.display = "none";
+			bankTransferFields.style.display = "none";
+
+			if (paymentMethod === "credit_card") {
+				creditCardFields.style.display = "block";
+			} else if (paymentMethod === "paypal") {
+				paypalFields.style.display = "block";
+			} else if (paymentMethod === "bank_transfer") {
+				bankTransferFields.style.display = "block";
+			}
+		}
+	</script>
+
+	<script>
+		function togglePaymentFields(paymentMethod) {
+			document.getElementById("creditCardFields").style.display = "none";
+			document.getElementById("paypalFields").style.display = "none";
+			document.getElementById("bankTransferFields").style.display = "none";
+
+			if (paymentMethod === "credit_card") {
+				document.getElementById("creditCardFields").style.display = "block";
+			} else if (paymentMethod === "paypal") {
+				document.getElementById("paypalFields").style.display = "block";
+			} else if (paymentMethod === "bank_transfer") {
+				document.getElementById("bankTransferFields").style.display = "block";
+			}
+		}
+	</script>
 
 </body>
-
 </html>

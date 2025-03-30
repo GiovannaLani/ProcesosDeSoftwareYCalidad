@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
@@ -22,6 +23,7 @@ import com.spq.client.data.MultipartInputStreamFileResource;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
+import com.spq.client.data.Purchase;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.Clothes;
@@ -188,6 +190,39 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public Purchase createPurchase(long token, Purchase purchase) {
+		try {
+			String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/create")
+					.queryParam("token", token)
+					.toUriString();
+
+			return restTemplate.postForObject(url, purchase, Purchase.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid purchase request");
+				case 404 -> throw new RuntimeException("Item not found");
+				case 409 -> throw new RuntimeException("Purchase conflict, item already sold");
+				default -> throw new RuntimeException("Failed to create purchase: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+    public boolean processPayment(long purchaseId, String paymentMethod, long token) {
+        String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
+        try {
+            restTemplate.postForObject(url, null, Void.class);
+            return true;
+        } catch (HttpStatusCodeException e) {
+            switch (e.getStatusCode().value()) {
+                case 400 -> throw new RuntimeException("Invalid payment request");
+                case 404 -> throw new RuntimeException("Purchase not found");
+                case 409 -> throw new RuntimeException("Payment conflict, already paid");
+                default -> throw new RuntimeException("Failed to process payment: " + e.getStatusText());
+            }
+        }
+    }
+
 	public void deleteUser(long token) {
 		try {
 			restTemplate.delete(apiBaseUrl + "/users/delete?token=" + token);
@@ -386,6 +421,46 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public Purchase getPurchaseById(Long token, Long purchaseId) {
+		try {
+			String url = apiBaseUrl + "/purchases/" + purchaseId + "?token=" + token;
+	
+			return restTemplate.getForObject(url, Purchase.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Purchase not found");
+				default -> throw new RuntimeException("Failed to fetch purchase: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void deletePurchase(Long token, Long purchaseId) {
+		try {
+			String url = apiBaseUrl + "/purchases/cancel?token=" + token + "&purchaseId=" + purchaseId;
+			restTemplate.delete(url);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Purchase not found");
+				case 403 -> throw new RuntimeException("Not authorized to delete this purchase");
+				default -> throw new RuntimeException("Failed to delete purchase: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public User getUserByItemId(Long itemId) {
+		try {
+			String url = apiBaseUrl + "/items/" + itemId + "/owner";
+			return restTemplate.getForObject(url, User.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item not found");
+				default -> throw new RuntimeException("Failed to get item owner: " + e.getStatusText());
+			}
+		}
+	}	
+
 	public List<Item> getUserItems(Long userId) {
 		try {
 			String url = apiBaseUrl + "/items/userItems/"+userId;

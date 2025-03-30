@@ -302,6 +302,17 @@ public class ItemController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+
+    @GetMapping("/{itemId}/owner")
+    public ResponseEntity<User> getItemOwner(@PathVariable long itemId) {
+        try {
+            User owner = itemService.getItemOwner(itemId);
+            return ResponseEntity.ok(owner);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }    
+
     @GetMapping("/userItems/{userId}")
     public ResponseEntity<List<ItemDTO>> getUserItems(@PathVariable long userId) {
         try {
@@ -320,6 +331,7 @@ public class ItemController {
     @GetMapping("/seller/{itemId}")
     public ResponseEntity<UserDTO> getSeller(@PathVariable long itemId) {
         try {
+            System.out.println("algo");
             Item item = itemService.getItemById(itemId);
             UserDTO seller = item.getSeller().toDTO();
             return ResponseEntity.ok(seller);

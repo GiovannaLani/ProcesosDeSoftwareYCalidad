@@ -3,6 +3,7 @@ package com.spq.client.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,10 +15,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Purchase;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
+import com.spq.client.data.User;
 
 import java.util.List;
 import com.spq.client.data.Signup;
@@ -118,14 +121,19 @@ public class ClientController {
 
 	@GetMapping("/allItems")
 	public String getItems(
-		@RequestParam(value = "token", required = false) Long token,
-		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-		Model model
-	) {
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
 		try {
 			List<Item> items = vintedService.getItems(token); 
 			model.addAttribute("items", items);
-			return "product"; 
+	
+			//if (token != null) {
+			//	List<Item> cartItems = vintedService.getCartItems(token);
+			//	model.addAttribute("cartItems", cartItems);
+			//}
+	
+			return "product";
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -135,10 +143,10 @@ public class ClientController {
 
 	@GetMapping("/item/{id}")
 	public String getItemById(
-		@RequestParam(value = "token", required = false) Long token,
-		@PathVariable Long id,
-		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-		Model model) {
+			@RequestParam(value = "token", required = false) Long token,
+			@PathVariable Long id,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
 		try {
 			Item item = vintedService.getItemById(id);
 			Long sellerId = vintedService.getSeller(item).id();
@@ -316,21 +324,31 @@ public class ClientController {
 	@GetMapping("/userProfile/{id}")
 	public String showUserProfile(
 			@PathVariable("id") Long id,
-			@RequestParam(value="token") Long token,
+			@RequestParam(value = "token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
+	
 		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
 		List<Item> items = vintedService.getUserItems(id);
     	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
-    	model.addAttribute("isMyProfile", isMyProfile);
-
+		model.addAttribute("isMyProfile", isMyProfile);
+	
+		//try {
+		//	List<Item> cartItems = vintedService.getCartItems(token); 
+		//	model.addAttribute("cartItems", cartItems);
+		//} catch (RuntimeException e) {
+		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+		//	e.printStackTrace();
+		//}
+	
 		return "userProfile";
 	}
+
 	@PostMapping("/editUser")
 	public String editUser(
 			@RequestParam("token") Long token,
@@ -386,6 +404,15 @@ public class ClientController {
 		if (token == null) {
 			return "redirect:/login";
 		}
+	
+		//try {
+		//	List<Item> cartItems = vintedService.getCartItems(token);
+		//	model.addAttribute("cartItems", cartItems);
+		//} catch (RuntimeException e) {
+		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+		//	e.printStackTrace();
+		//}
+	
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
 	}
@@ -450,6 +477,155 @@ public class ClientController {
 		}
 	}
 
+	@GetMapping("/createPurchase/{itemId}")
+	public String showPurchasePage(
+			@PathVariable Long itemId,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
+				return "redirect:/login";
+			}
+	
+			Item item = vintedService.getItemById(itemId);
+			if (item == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
+				return "redirect:/login";
+			}
+	
+			model.addAttribute("item", item);
+			model.addAttribute("buyerId", buyerId);
+			model.addAttribute("token", token);
+	
+			return "purchase";  
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
+			return "redirect:/login";
+		}
+	}
+	
+
+	@PostMapping("/createPurchase/{itemId}")
+	public String createPurchase(
+			@PathVariable Long itemId,
+			@RequestParam("token") Long token,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				return "redirect:/login";
+			}
+	
+			Item item = vintedService.getItemById(itemId);
+			if (item == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
+				return "redirect:/login";
+			}
+	
+			User seller = vintedService.getSeller(item);
+			if (seller == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor.");
+				return "redirect:/login";
+			}
+	
+			Purchase purchase = new Purchase(
+					null,
+					itemId,
+					vintedService.getUser(buyerId, token).username(),
+					seller.username(),
+					item.getPrice(),
+					paymentMethod,
+					"PENDING"
+			);
+	
+			Purchase createdPurchase = vintedService.createPurchase(token, purchase);
+	
+			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
+			return "redirect:/processPayment/" + createdPurchase.id() + "?token=" + token;
+	
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
+			e.printStackTrace();
+			return "redirect:/login";
+		}
+	}
+
+	@GetMapping("/processPayment/{purchaseId}")
+	public String showPaymentConfirmation(
+			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			System.out.println("Purchase ID: " + purchaseId);
+			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+			System.out.println("Purchase: " + purchase);
+			if (purchase == null) {
+				System.out.println("a");
+				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
+				return "redirect:/login";
+			}
+	
+			model.addAttribute("purchase", purchase);
+			return "paymentConfirmation";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
+			return "redirect:/login";
+		}
+	}
+
+	@PostMapping("/processPayment/{purchaseId}")
+	public String processPayment(
+			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println(token);
+			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+			if (purchase == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
+				return "redirect:/login";
+			}
+	
+			if (!"PENDING".equals(purchase.status())) {
+				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
+				return "redirect:/login";
+			}
+			System.out.println("a");
+			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
+			if (paymentSuccess) {
+				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
+				return "redirect:/allItems";
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Error en el pago.");
+			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
+		}
+		return "redirect:/allItems";
+	}
+
+	@DeleteMapping("/deletePurchase/{purchaseId}")
+	public String deletePurchase(
+			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
+			RedirectAttributes redirectAttributes) {
+		try {
+			vintedService.deletePurchase(token, purchaseId);
+			redirectAttributes.addFlashAttribute("successMessage", "Compra eliminada con éxito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar la compra: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return "redirect:/allItems";
+	}
 
 	@PostMapping("/shoppingCart/add")
 	public String addItemToCart(
