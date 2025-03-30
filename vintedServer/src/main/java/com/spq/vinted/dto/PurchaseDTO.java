@@ -3,8 +3,8 @@ package com.spq.vinted.dto;
 public class PurchaseDTO {
     private Long id;
     private long itemId;
-    private String buyerEmail;
-    private String sellerEmail;
+    private String buyerUsername;
+    private String sellerUsername;
     private float price;
     private String paymentMethod;
     private String status;
@@ -14,8 +14,8 @@ public class PurchaseDTO {
     public PurchaseDTO(Long id, long itemId, String buyerEmail, String sellerEmail, float price, String paymentMethod, String status) {
         this.id = id;
         this.itemId = itemId;
-        this.buyerEmail = buyerEmail;
-        this.sellerEmail = sellerEmail;
+        this.buyerUsername = buyerEmail;
+        this.sellerUsername = sellerEmail;
         this.price = price;
         this.paymentMethod = paymentMethod;
         this.status = status;
@@ -37,20 +37,20 @@ public class PurchaseDTO {
         this.itemId = itemId;
     }
 
-    public String getBuyerEmail() {
-        return buyerEmail;
+    public String getBuyerUsername() {
+        return buyerUsername;
     }
 
-    public void setBuyerEmail(String buyerEmail) {
-        this.buyerEmail = buyerEmail;
+    public void setBuyerUsername(String buyerEmail) {
+        this.buyerUsername = buyerEmail;
     }
 
-    public String getSellerEmail() {
-        return sellerEmail;
+    public String getSellerUsername() {
+        return sellerUsername;
     }
 
-    public void setSellerEmail(String sellerEmail) {
-        this.sellerEmail = sellerEmail;
+    public void setSellerUsername(String sellerEmail) {
+        this.sellerUsername = sellerEmail;
     }
 
     public float getPrice() {

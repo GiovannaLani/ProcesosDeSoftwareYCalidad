@@ -511,9 +511,6 @@ public class ClientController {
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
-			System.out.println("Item ID: " + itemId);
-			System.out.println("Token: " + token);
-			System.out.println("Payment Method: " + paymentMethod);
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
@@ -521,16 +518,12 @@ public class ClientController {
 			}
 	
 			Item item = vintedService.getItemById(itemId);
-			System.out.println("Item: " + item);
-			System.out.println("Item ID: " + item.getId());
 			if (item == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
 				return "redirect:/login";
 			}
 	
 			User seller = vintedService.getSeller(item);
-			System.out.println("Seller: " + seller);
-			System.out.println("Seller ID: " + seller.id());
 			if (seller == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor.");
 				return "redirect:/login";
@@ -549,7 +542,7 @@ public class ClientController {
 			Purchase createdPurchase = vintedService.createPurchase(token, purchase);
 	
 			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
-			return "redirect:/payment?purchaseId=" + createdPurchase.id();
+			return "redirect:/processPayment/" + createdPurchase.id() + "?token=" + token;
 	
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
@@ -558,13 +551,39 @@ public class ClientController {
 		}
 	}
 
+	@GetMapping("/processPayment/{purchaseId}")
+	public String showPaymentConfirmation(
+			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			System.out.println("Purchase ID: " + purchaseId);
+			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+			System.out.println("Purchase: " + purchase);
+			if (purchase == null) {
+				System.out.println("a");
+				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
+				return "redirect:/login";
+			}
+	
+			model.addAttribute("purchase", purchase);
+			return "paymentConfirmation";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
+			return "redirect:/login";
+		}
+	}
+
 	@PostMapping("/processPayment/{purchaseId}")
 	public String processPayment(
 			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
-			Purchase purchase = vintedService.getPurchaseById(purchaseId);
+			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 			if (purchase == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
 				return "redirect:/login";
@@ -578,6 +597,7 @@ public class ClientController {
 			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod);
 			if (paymentSuccess) {
 				redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito.");
+				return "redirect:/allItems";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error en el pago.");
 			}
@@ -585,7 +605,7 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
 		}
 		return "redirect:/login";
-	}	
+	}
 
 	@PostMapping("/shoppingCart/add")
 	public String addItemToCart(

@@ -421,9 +421,10 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public Purchase getPurchaseById(Long purchaseId) {
+	public Purchase getPurchaseById(Long token, Long purchaseId) {
 		try {
-			String url = apiBaseUrl + "/purchases/" + purchaseId;
+			String url = apiBaseUrl + "/purchases/" + purchaseId + "?token=" + token;
+	
 			return restTemplate.getForObject(url, Purchase.class);
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
@@ -431,12 +432,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 				default -> throw new RuntimeException("Failed to fetch purchase: " + e.getStatusText());
 			}
 		}
-	}	
+	}
 
 	@Override
 	public User getUserByItemId(Long itemId) {
 		try {
-			System.out.println(("Buscando usuario por itemId: " + itemId));
 			String url = apiBaseUrl + "/items/" + itemId + "/owner";
 			return restTemplate.getForObject(url, User.class);
 		} catch (HttpStatusCodeException e) {

@@ -39,6 +39,7 @@ public class PurchaseController {
     public ResponseEntity<PurchaseDTO> getPurchaseById(@RequestParam long token, @PathVariable long purchaseId) {
         try {
             PurchaseDTO purchase = purchaseService.getPurchaseById(token, purchaseId);
+            System.out.println("Purchase: " + purchase);
             return ResponseEntity.ok(purchase);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);

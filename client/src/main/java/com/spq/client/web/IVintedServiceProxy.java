@@ -40,7 +40,7 @@ public interface IVintedServiceProxy {
 	public void addItemToCart(Long token, Long itemId);
 	public void removeItemFromCart(Long token, Long itemId);
 	public User getUserByItemId(Long itemId);
-	public Purchase getPurchaseById(Long purchaseId);
+	public Purchase getPurchaseById(Long token, Long purchaseId);
 	public List<Item> getUserItems(Long userId);
 	public User getSeller(Item item);
 }
