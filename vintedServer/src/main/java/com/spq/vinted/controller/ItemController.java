@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -328,6 +329,7 @@ public class ItemController {
             return ResponseEntity.badRequest().build();
         }
     }
+
     @GetMapping("/seller/{itemId}")
     public ResponseEntity<UserDTO> getSeller(@PathVariable long itemId) {
         try {
@@ -339,4 +341,21 @@ public class ItemController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @DeleteMapping("/delete/{itemId}")
+    public ResponseEntity<Void> deleteItem(@RequestParam("token") long token, @PathVariable long itemId) {
+        try {
+            System.out.println("Deleting item with ID: " + itemId);
+            itemService.deleteItem(token, itemId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            if ("Item not found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if ("Not authorized".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

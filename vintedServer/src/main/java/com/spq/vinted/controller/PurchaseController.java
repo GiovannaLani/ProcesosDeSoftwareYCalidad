@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/purchases")
@@ -26,12 +28,17 @@ public class PurchaseController {
     }
 
     @PostMapping("/pay")
-    public ResponseEntity<String> processPayment(@RequestParam long token, @RequestParam long purchaseId, @RequestParam String paymentMethod) {
+    public ResponseEntity<Map<String, String>> processPayment(@RequestParam long token, @RequestParam long purchaseId, @RequestParam String paymentMethod) {
         boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);
+        Map<String, String> response = new HashMap<>();
         if (success) {
-            return ResponseEntity.ok("Payment successful.");
+            response.put("status", "success");
+            response.put("message", "Payment successful.");
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.badRequest().body("Payment failed.");
+            response.put("status", "error");
+            response.put("message", "Payment failed.");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 

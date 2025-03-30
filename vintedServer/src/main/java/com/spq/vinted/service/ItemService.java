@@ -175,6 +175,26 @@ public class ItemService {
         return user.getItemsForSale();
     }
 
+    public void deleteItem(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        System.out.println("borrando item");
+        if (user == null) {
+            throw new RuntimeException("Not authorized");
+        }
+    
+        Item item = getItemById(itemId);
+        if (item == null) {
+            throw new RuntimeException("Item not found");
+        }
+    
+        if (!item.getSeller().getId().equals(user.getId())) {
+            throw new RuntimeException("Not authorized");
+        }
+        
+        itemRepository.delete(item);
+        System.out.println("item borrado");
+    }
+
 }
 
 

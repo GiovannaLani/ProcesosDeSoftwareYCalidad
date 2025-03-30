@@ -35,6 +35,7 @@ import com.spq.client.data.Entertainment;
 import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
 import com.spq.client.data.HomeType;
+import java.util.Map;
 
 import java.util.List;
 
@@ -208,20 +209,37 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public boolean processPayment(long purchaseId, String paymentMethod, long token) {
-        String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
-        try {
-            restTemplate.postForObject(url, null, Void.class);
-            return true;
-        } catch (HttpStatusCodeException e) {
-            switch (e.getStatusCode().value()) {
-                case 400 -> throw new RuntimeException("Invalid payment request");
-                case 404 -> throw new RuntimeException("Purchase not found");
-                case 409 -> throw new RuntimeException("Payment conflict, already paid");
-                default -> throw new RuntimeException("Failed to process payment: " + e.getStatusText());
-            }
-        }
-    }
+	public boolean processPayment(long purchaseId, String paymentMethod, long token) {
+		String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
+		try {
+			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
+			System.out.println("Server response: " + response);
+			return "success".equalsIgnoreCase(response.get("status"));
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid payment request");
+				case 404 -> throw new RuntimeException("Purchase not found");
+				case 409 -> throw new RuntimeException("Payment conflict, already paid");
+				default -> throw new RuntimeException("Failed to process payment: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void deleteItem(Long token, Long itemId) {
+		try {
+			System.out.println("borrar" + itemId);
+			String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
+			restTemplate.delete(url);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item not found");
+				case 403 -> throw new RuntimeException("Not authorized to delete this item");
+				default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
+			}
+		}
+	}
 
 	public void deleteUser(long token) {
 		try {
