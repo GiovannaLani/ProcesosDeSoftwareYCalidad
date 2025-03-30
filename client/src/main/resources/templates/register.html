@@ -136,13 +136,14 @@
 								</ul>
 							</div>
 						</div>
-						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
+						<form th:unless="${token}" th:action="@{/login}" method="get">
+							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">s
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
 						
-						<form th:action="@{/uploadItem(token=${token})}" method="get">
+						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<button class="button-green">
 								Vender ahora

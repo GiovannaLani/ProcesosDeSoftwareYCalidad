@@ -67,7 +67,7 @@ public class ClientController {
 			vintedService.createUser(new Signup(email, password, username, name, surname));
 			token = vintedService.login(email, password);
 			userId = vintedService.getUserIdFromToken(token);
-			return "redirect:/login?redirectUrl=" + redirectUrl;
+			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if (e.getMessage().equals("User already exists")) {
 				redirectAttributes.addFlashAttribute("errorMessage", "El usuario ya existe");
@@ -78,7 +78,7 @@ public class ClientController {
 				e.printStackTrace();
 			}
 		}
-		return "redirect:/register?redirectUrl=" + redirectUrl;
+		return "redirect:" + redirectUrl;
 	}
 	
     @GetMapping("/login")
@@ -103,7 +103,7 @@ public class ClientController {
 			model.addAttribute("redirectUrl", redirectUrl);
 			token = vintedService.login(email, password);
 			userId = vintedService.getUserIdFromToken(token);
-			return "redirect:"+ redirectUrl;
+			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if (e.getMessage().equals("Invalid credentials")) {
 				redirectAttributes.addFlashAttribute("errorMessage", "La contraseña no es correcta");
@@ -113,7 +113,7 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado");
 			}
 		}
-		return "redirect:/login?redirectUrl=" + redirectUrl;
+		return "redirect:" + redirectUrl;
 	}
 
 	@GetMapping("/allItems")
@@ -129,7 +129,7 @@ public class ClientController {
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
-			return "redirect:/";
+			return "allItems";
 		}
 	}
 
@@ -171,7 +171,7 @@ public class ClientController {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
 		}
-		return "redirect:/";
+		return "product";
 	}
 
 	@GetMapping("/clothes/{category}")
@@ -285,6 +285,7 @@ public class ClientController {
 	@GetMapping("/logout")
 	public String logout(
 			@RequestParam(value="token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
 			this.token = null;
@@ -295,12 +296,13 @@ public class ClientController {
             e.printStackTrace();
         }
 		
-		return "redirect:/";
+		return "redirect:/login?redirectUrl=" + redirectUrl;
 	}
 
 	@GetMapping("/deleteUser")
 	public String deleteUser(
 			@RequestParam(value="token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
 			this.token = null;
@@ -308,7 +310,7 @@ public class ClientController {
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 		}
-		return "redirect:/";
+		return "redirect:" + redirectUrl;
 	}
 
 	@GetMapping("/userProfile/{id}")
@@ -352,7 +354,7 @@ public class ClientController {
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado.");
 			}
-			return "redirect:/editUser?redirectUrl=" + redirectUrl;
+			return "redirect:" + redirectUrl;
 		}
 	}
 
@@ -420,13 +422,14 @@ public class ClientController {
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado.");
 			}
-			return "redirect:/editUser?redirectUrl=" + redirectUrl;
+			return "redirect:" + redirectUrl;
 		}
 	} 
 
 	@GetMapping("/shoppingCart")
 	public String showCart(
 			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (token == null) {
 			return "redirect:/login";
@@ -439,7 +442,7 @@ public class ClientController {
 			model.addAttribute("cartItems", cartItems);
 			model.addAttribute("cartSize", cartItems.size());
 			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));
-			return "shoppingCart"; 
+			return "shoppingCart";
 		} catch (RuntimeException e) {
 			model.addAttribute("errorMessage", "Error al cargar el carrito.");
 			e.printStackTrace();
@@ -459,7 +462,7 @@ public class ClientController {
 		}
 
 		if (token == null) {
-			return "redirect:/login";
+			return "redirect:" + redirectUrl;
 		}
 		try {
 			vintedService.addItemToCart(token, itemId);
@@ -483,9 +486,10 @@ public class ClientController {
 		}
 
 		if (token == null) {
-			return "redirect:/login";
+			return "redirect:" + redirectUrl;
 		}
 		try {
+			System.out.println("REDIRECT" + redirectUrl);
 			vintedService.removeItemFromCart(token, itemId);
 			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado del carrito.");
 		} catch (RuntimeException e) {
@@ -497,5 +501,4 @@ public class ClientController {
 	}
 
 }
-
 
