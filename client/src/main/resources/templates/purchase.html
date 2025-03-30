@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Compra de articulo</title>
+    <title>Compra</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" th:href="@{/images/icons/favicon.png}" />
@@ -28,7 +27,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/css-hamburgers/hamburgers.min.css}" />
 
     <!-- Animsition -->
-    <link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />
+    <!--<link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />-->
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/select2/select2.min.css}" />
@@ -47,12 +46,11 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/util.css}" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
 </head>
-
 <body class="animsition">
 
-	<!-- Header -->
+    <!-- Header -->
 	<header class="header-v4">
 		<!-- Header desktop -->
 		<div class="container-menu-desktop">
@@ -114,9 +112,10 @@
 							<i class="lnr lnr-envelope"></i>
 						</div>
 
-						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart"
-							data-notify="2">
-							<i class="zmdi zmdi-shopping-cart"></i>
+                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+							<a th:href="@{/shoppingCart(token=${token})}" class="cart-link">
+								<i class="zmdi zmdi-shopping-cart"></i>
+							</a>
 						</div>
 
 						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
@@ -202,136 +201,89 @@
 
 	</header>
 
-	<!-- Cart -->
-	<div class="wrap-header-cart js-panel-cart">
-		<div class="s-full js-hide-cart"></div>
+    <!-- Main Content -->
+	<section class="bg0 p-t-104 p-b-116">
+		<div class="container">
+			<div class="flex-w flex-tr flex-login">
+				<div th:if="${item != null}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+					<h4 class="mtext-105 cl2 txt-center p-b-30">
+						Comprar: <span th:text="${item.title}"></span>
+					</h4>
+					<div class="txt-center p-b-30">
+						<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" 
+							 alt="Imagen del artículo" 
+							 style="max-width: 300px; max-height: 300px;">
+					</div>
+					<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
+					<p class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
+						
+					<div class="m-b-20">
+						<label for="paymentMethod" class="stext-111 cl2">Método de pago:</label>
+						<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" onchange="togglePaymentFields(this.value)">
+							<option value="">Elegir opción</option>
+							<option value="credit_card">Tarjeta de crédito</option>
+							<option value="paypal">PayPal</option>
+							<option value="bank_transfer">Transferencia bancaria</option>
+						</select>
+					</div>
 
-		<div class="header-cart flex-col-l p-l-65 p-r-25">
-			<div class="header-cart-title flex-w flex-sb-m p-b-8">
-				<span class="mtext-103 cl2">
-					Your Cart
-				</span>
+					<div id="creditCardFields" style="display: none;">
+						<div class="m-b-20">
+							<label for="cardNumber" class="stext-111 cl2">Número de tarjeta:</label>
+							<input type="text" id="cardNumber" name="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
+						</div>
+						<div class="m-b-20">
+							<label for="cardHolder" class="stext-111 cl2">Nombre del titular:</label>
+							<input type="text" id="cardHolder" name="cardHolder" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del titular">
+						</div>
+						<div class="m-b-20">
+							<label for="expiryDate" class="stext-111 cl2">Fecha de expiración:</label>
+							<input type="text" id="expiryDate" name="expiryDate" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
+						</div>
+						<div class="m-b-20">
+							<label for="cvv" class="stext-111 cl2">CVV:</label>
+							<input type="text" id="cvv" name="cvv" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
+						</div>
+					</div>
 
-				<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
-					<i class="zmdi zmdi-close"></i>
+					<div id="paypalFields" style="display: none;">
+						<div class="m-b-20">
+							<label for="paypalEmail" class="stext-111 cl2">Correo electrónico de PayPal:</label>
+							<input type="email" id="paypalEmail" name="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
+						</div>
+					</div>
+
+					<div id="bankTransferFields" style="display: none;">
+						<div class="m-b-20">
+							<label for="bankAccount" class="stext-111 cl2">Número de cuenta bancaria:</label>
+							<input type="text" id="bankAccount" name="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES00 0000 0000 0000 0000">
+						</div>
+						<div class="m-b-20">
+							<label for="bankName" class="stext-111 cl2">Nombre del banco:</label>
+							<input type="text" id="bankName" name="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del banco">
+						</div>
+					</div>
+					
+					<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer"
+							onclick="confirmPurchase('${item.id}', '${token}')">
+						Confirmar compra
+					</button>
 				</div>
-			</div>
-
-			<div class="header-cart-content flex-w js-pscroll">
-				<ul class="header-cart-wrapitem w-full">
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-01.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								White Shirt Pleat
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $19.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-02.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Converse All Star
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $39.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-03.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Nixon Porter Leather
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $17.00
-							</span>
-						</div>
-					</li>
-				</ul>
-
-				<div class="w-full">
-					<div class="header-cart-total w-full p-tb-40">
-						Total: $75.00
-					</div>
-
-					<div class="header-cart-buttons flex-w w-full">
-						<a href="shoping-cart.html"
-							class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
-							View Cart
-						</a>
-
-						<a href="shoping-cart.html"
-							class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
-							Check Out
-						</a>
-					</div>
+	
+				<div th:if="${item == null}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+					<h4 class="mtext-105 cl2 txt-center p-b-30">
+						Error al cargar el artículo
+					</h4>
+					<p class="txt-center">No se pudo cargar la información del artículo. Por favor, regresa a la página de inicio.</p>
+					<a href="/items" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
+						Volver a la página de artículos
+					</a>
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	<!-- Content page -->
-    <section class="bg0 p-t-104 p-b-116">
-        <div class="container">
-            <div class="flex-w flex-tr flex-login">
-                <div th:unless="${token}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-                    <h4 class="mtext-105 cl2 txt-center p-b-30">
-                        Comprar: <span th:text="${item.title}"></span>
-                    </h4>
-                    <p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-                    <p class="txt-center">Precio: <span th:text="${item.price}"></span></p>
-                    <form th:action="@{/createPurchase/{id}(id=${item.id})}" method="POST">
-                        <input type="hidden" name="token" th:value="${token}">
-                        <input type="hidden" name="itemId" th:value="${item.id}">
-                        
-                        <div class="m-b-20">
-                            <label for="paymentMethod" class="stext-111 cl2">Método de pago:</label>
-                            <select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
-                                <option value="credit_card">Tarjeta de crédito</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="bank_transfer">Transferencia bancaria</option>
-                            </select>
-                        </div>
-                        
-                        <button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-                            Confirmar compra
-                        </button>
-                    </form>
-                </div>
-                
-                <div th:if="${token}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-                    <h4 class="mtext-105 cl2 txt-center p-b-30">
-                        Comprar: <span th:text="${item.title}"></span>
-                    </h4>
-                    <div>
-                        <p class="errorMessage txt-center">Ya has iniciado sesión.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-	<!-- Footer -->
+    <!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
 			<div class="row">
@@ -482,7 +434,6 @@
 		</div>
 	</footer>
 
-
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
@@ -548,7 +499,38 @@
         });
     });
 	</script>
+	<script>
+		function togglePaymentFields(paymentMethod) {
+			const creditCardFields = document.getElementById("creditCardFields");
+			const paypalFields = document.getElementById("paypalFields");
+			const bankTransferFields = document.getElementById("bankTransferFields");
+
+			creditCardFields.style.display = "none";
+			paypalFields.style.display = "none";
+			bankTransferFields.style.display = "none";
+
+			if (paymentMethod === "credit_card") {
+				creditCardFields.style.display = "block";
+			} else if (paymentMethod === "paypal") {
+				paypalFields.style.display = "block";
+			} else if (paymentMethod === "bank_transfer") {
+				bankTransferFields.style.display = "block";
+			}
+		}
+	</script>
+
+	<script>
+		function confirmPurchase(itemId, token) {
+			const paymentMethod = document.getElementById("paymentMethod").value;
+
+			if (!paymentMethod) {
+				alert("Por favor, selecciona un método de pago.");
+				return;
+			}
+
+			window.location.href = `/createPurchase/${itemId}?token=${token}&paymentMethod=${paymentMethod}`;
+		}
+	</script>
 
 </body>
-
 </html>

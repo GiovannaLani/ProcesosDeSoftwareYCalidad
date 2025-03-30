@@ -471,6 +471,10 @@ public class ClientController {
 			model.addAttribute("item", item);
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
+			System.out.println("Buyer ID: " + buyerId);
+			System.out.println("Item ID: " + itemId);
+			System.out.println("Token: " + token);
+			System.out.println("Item Price: " + item.getPrice());
 	
 			return "purchase";  
 		} catch (Exception e) {
