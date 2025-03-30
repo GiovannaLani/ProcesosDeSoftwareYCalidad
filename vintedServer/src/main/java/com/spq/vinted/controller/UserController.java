@@ -28,12 +28,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Authorization Controller", description = "Login and logout operations")
 public class UserController {
     @Autowired
-    private UserService authService;
+    private UserService userService;
 	
 	@PostMapping("/signup")
     public ResponseEntity<Void> createUser(@RequestBody SignupDTO user) {
         try {
-            authService.createUser(user.email(),  user.password(), user.username(), user.name(), user.surname());
+            userService.createUser(user.email(),  user.password(), user.username(), user.name(), user.surname());
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (RuntimeException e) {
             if (e.getMessage().equals("User already exists")) {
@@ -50,7 +50,7 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<Long> logIn(@RequestBody LoginDTO loginData) {
 		try {
-			long token = authService.logIn(loginData.email(), loginData.password());
+			long token = userService.logIn(loginData.email(), loginData.password());
 			return new ResponseEntity<>(token, HttpStatus.OK);
 		} catch (RuntimeException e) {
 			if (e.getMessage().equals("Invalid credentials")) {
@@ -66,7 +66,7 @@ public class UserController {
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logOut(@RequestParam("token") long token) {
 		try {
-			authService.LogOut(token);
+			userService.LogOut(token);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -76,7 +76,7 @@ public class UserController {
 	@DeleteMapping("/delete")
 	public ResponseEntity<Void> deleteUser(@RequestParam("token") long token) {
 		try {
-			authService.deleteUser(token);
+			userService.deleteUser(token);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -91,7 +91,7 @@ public class UserController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		try {
-			authService.editUser(token, name, surname, description, profileImage);
+			userService.editUser(token, name, surname, description, profileImage);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
 			if ("User not found".equals(e.getMessage())) {
@@ -102,42 +102,42 @@ public class UserController {
 		}
 	}
 	@PutMapping("/editUserData")
-public ResponseEntity<Void> updateUserData(
-        @RequestParam("token") long token,
-        @RequestBody EditUserDTO userEditDTO) {  // Recibes el DTO con los datos del usuario en JSON
+	public ResponseEntity<Void> updateUserData(
+			@RequestParam("token") long token,
+			@RequestBody EditUserDTO userEditDTO) {
 
-    try {
-        authService.editUserData(token, userEditDTO.name(), userEditDTO.surname(), userEditDTO.description());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } catch (RuntimeException e) {
-        if ("User not found".equals(e.getMessage())) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-@PutMapping(value = "/editProfileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<Void> updateProfileImage(
-        @RequestParam("token") long token,
-        @RequestPart(value = "profileImage") MultipartFile profileImage) {
+		try {
+			userService.editUserData(token, userEditDTO.name(), userEditDTO.surname(), userEditDTO.description());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	@PutMapping(value = "/editProfileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Void> updateProfileImage(
+			@RequestParam("token") long token,
+			@RequestPart(value = "profileImage") MultipartFile profileImage) {
 
-    try {
-        authService.editProfileImage(token, profileImage);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } catch (RuntimeException e) {
-        if ("User not found".equals(e.getMessage())) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
+		try {
+			userService.editProfileImage(token, profileImage);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 
 	@GetMapping("/profile/{userId}")
     public ResponseEntity<UserDTO> getUserProfile(@RequestParam("token") Long token, @PathVariable("userId") long userId) {
-        User user = authService.getUserById(userId);
+        User user = userService.getUserById(userId);
         if (user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -163,7 +163,7 @@ public ResponseEntity<Void> updateProfileImage(
 	@GetMapping("/userId")
     public ResponseEntity<Long> getUserIdFromToken(@RequestParam("token") Long token) {
         try {
-            Long userId = authService.getUserIdByToken(token);
+            Long userId = userService.getUserIdByToken(token);
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }

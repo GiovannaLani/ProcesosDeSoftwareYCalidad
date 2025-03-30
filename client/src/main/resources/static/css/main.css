@@ -3001,10 +3001,9 @@ input.num-product::-webkit-inner-spin-button {
 }
 
 
-
 /*---------------------------------------------*/
 .how-itemcart1 {
-  width: 60px;
+  width: 120px;
   position: relative;
   margin-right: 20px;
   cursor: pointer;
@@ -3012,35 +3011,6 @@ input.num-product::-webkit-inner-spin-button {
 
 .how-itemcart1 img {
   width: 100%;
-}
-
-.how-itemcart1::after {
-  content: '\e870';
-  font-family: Linearicons-Free;
-  font-size: 16px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: rgba(0,0,0,0.5);
-  color: #fff;
-  transition: all 0.3s;
-  -webkit-transition: all 0.3s;
-  -o-transition: all 0.3s;
-  -moz-transition: all 0.3s;
-  opacity: 0;
-}
-
-.how-itemcart1:hover:after {
-  opacity: 1;
 }
 
 /*---------------------------------------------*/
@@ -4208,4 +4178,83 @@ a{
 
 #profileImage {
   display: none;
+}
+.image-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+  justify-content:flex-start;
+}
+
+.image-box {
+  position: relative;
+  width: 18%;
+  height: 175px;
+  border: 2px dashed #ccc; /* Borde punteado */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  opacity: 1; /* Hacer visible inicialmente */
+  pointer-events: auto; /* Asegura que se pueda hacer clic */
+  transition: opacity 0.3s, pointer-events 0.3s;
+}
+
+.upload-btn {
+  position: absolute;
+  font-size: 14px;
+  background-color: rgba(0,119,130,1);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.file-input {
+  display: none;
+}
+
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.hidden {
+  display: none; 
+}
+
+.align-total {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+}
+
+.size-208, .size-209 {
+  flex: 1; 
+  text-align: left;
+}
+
+.mtext-101 {
+  font-size: 16px; 
+  font-weight: normal; 
+}
+
+.mtext-110 {
+  font-size: 16px; 
+  font-weight: bold; 
+  text-align: right; 
+}
+
+.cart-link {
+  color: inherit; 
+  text-decoration: none; 
+}
+
+.cart-link:hover {
+  color: inherit; 
 }

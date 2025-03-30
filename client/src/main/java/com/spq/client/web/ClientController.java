@@ -11,7 +11,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.spq.client.data.Category;
+import com.spq.client.data.Item;
+import com.spq.client.data.Pet;
+import com.spq.client.data.Clothes;
+import com.spq.client.data.Electronics;
+import com.spq.client.data.Entertainment;
+import com.spq.client.data.Home;
 
+import java.util.List;
 import com.spq.client.data.Signup;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +41,7 @@ public class ClientController {
 			model.addAttribute("loggedUserId", userId);
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
+		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
 
 	}
 	
@@ -106,6 +115,172 @@ public class ClientController {
 		}
 		return "redirect:/login?redirectUrl=" + redirectUrl;
 	}
+
+	@GetMapping("/allItems")
+	public String getItems(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
+		try {
+			List<Item> items = vintedService.getItems(token); 
+			model.addAttribute("items", items);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+			return "redirect:/";
+		}
+	}
+
+	@GetMapping("/item/{id}")
+	public String getItemById(
+		@RequestParam(value = "token", required = false) Long token,
+		@PathVariable Long id,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			Item item = vintedService.getItemById(id);
+			Long sellerId = vintedService.getSeller(item).id();
+
+			model.addAttribute("item", item);
+			model.addAttribute("sellerId", sellerId);
+			return "product-details"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@GetMapping("/clothes")
+	public String getClothes(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			List<Clothes> clothes = null;
+			if(token == null) {
+				clothes = vintedService.getClothes(-1);
+			}else {
+				clothes = vintedService.getClothes(token);
+			}
+			model.addAttribute("items", clothes);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return "redirect:/";
+	}
+
+	@GetMapping("/clothes/{category}")
+	public String getClothesByCategory(
+		@RequestParam(value = "token", required = false) Long token,
+		@PathVariable Category category,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+    try {
+		List<Clothes> clothesCategory = null;
+		if(token == null) {
+			clothesCategory = vintedService.getClothesByCategory(category, -1);
+		}else {
+			clothesCategory = vintedService.getClothesByCategory(category, token);
+		}
+		model.addAttribute("items", clothesCategory);
+		return "product";
+    } catch (RuntimeException e) {
+        System.err.println("Ha ocurrido un error: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return null;
+}
+
+	@GetMapping("/electronics")
+	public String getElectronics(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			List<Electronics> electronics = null;
+			if(token == null) {
+				electronics = vintedService.getElectronics(-1);
+			}else {
+				electronics = vintedService.getElectronics(token);
+			}
+			model.addAttribute("items", electronics);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@GetMapping("/pet")
+	public String getItemsForPet(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model) {
+		try {
+			List<Pet> pets = null;
+			if(token == null) {
+				pets = vintedService.getItemsForPet(-1);
+			}else {
+				pets = vintedService.getItemsForPet(token);
+			}
+			model.addAttribute("items", pets);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@GetMapping("/entertainment")
+	public String getItemsForEntertainment(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
+		try {
+			List<Entertainment> entertainment = null;
+			if (token == null) {
+				entertainment = vintedService.getItemsForEntertainment(-1);
+			} else {
+				entertainment = vintedService.getItemsForEntertainment(token);	
+			}
+			model.addAttribute("items", entertainment);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@GetMapping("/home")
+	public String getHomeItems(
+		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+		Model model
+	) {
+		try {
+			List<Home> homeItems = null;
+			if(token == null) {
+				homeItems = vintedService.getHomeItems(-1);
+			}else {
+				homeItems = vintedService.getHomeItems(token);
+			}
+			model.addAttribute("items", homeItems);
+			return "product"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	@GetMapping("/logout")
 	public String logout(
@@ -116,6 +291,7 @@ public class ClientController {
 			this.userId = null;
 			vintedService.logout(token);
 		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
             e.printStackTrace();
         }
 		
@@ -146,7 +322,8 @@ public class ClientController {
 		}
 		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-
+		List<Item> items = vintedService.getUserItems(id);
+    	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
     	model.addAttribute("isMyProfile", isMyProfile);
 
@@ -195,4 +372,130 @@ public class ClientController {
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "editUser";
 	}
+
+	@GetMapping("/uploadItem")
+	public String showUploadItem(
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+		if (token == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("redirectUrl", redirectUrl);
+		return "uploadItem";
+	}
+	
+	@PostMapping("/uploadItem")
+	public String uploadItem(
+			@RequestParam("token") Long token,
+			@RequestParam("title") String title,
+			@RequestParam("description") String description,
+			@RequestParam("category") String category,
+			@RequestParam("price") Float price,
+			@RequestParam(value = "brand", required = false) String brand,
+			@RequestParam(value = "size", required = false) String size,
+			@RequestParam(value = "clothCategory", required = false) String clothCategory,
+			@RequestParam(value = "clothingType", required = false) String clothingType,
+			@RequestParam(value = "species", required = false) String species,
+			@RequestParam(value = "homeType", required = false) String homeType,
+			@RequestParam(value = "electronicsType", required = false) String electronicsType,
+			@RequestParam(value = "entertainmentType", required = false) String entertainmentType,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			@RequestParam(value = "itemImages") List<MultipartFile> itemImages,
+			RedirectAttributes redirectAttributes) {
+
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			vintedService.uploadItem(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType, itemImages);
+			return "redirect:" + redirectUrl;
+		} catch (RuntimeException e) {
+			if ("User not found".equals(e.getMessage())) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado.");
+			}
+			return "redirect:/editUser?redirectUrl=" + redirectUrl;
+		}
+	} 
+
+	@GetMapping("/shoppingCart")
+	public String showCart(
+			@RequestParam("token") Long token,
+			Model model) {
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			List<Item> cartItems = vintedService.getCartItems(token);
+			if(cartItems == null || cartItems.isEmpty()) {
+				cartItems = List.of(); 
+			}
+			model.addAttribute("cartItems", cartItems);
+			model.addAttribute("cartSize", cartItems.size());
+			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));
+			return "shoppingCart"; 
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar el carrito.");
+			e.printStackTrace();
+			return "error"; 
+		}
+	}
+
+
+	@PostMapping("/shoppingCart/add")
+	public String addItemToCart(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			vintedService.addItemToCart(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo añadido al carrito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al añadir el artículo al carrito.");
+			e.printStackTrace();
+		}
+		return "redirect:" + redirectUrl;
+	}
+
+
+	@PostMapping("/shoppingCart/remove")
+	public String removeItemFromCart(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			vintedService.removeItemFromCart(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado del carrito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el artículo del carrito.");
+			e.printStackTrace();
+		}
+
+		return "redirect:" + redirectUrl;
+	}
+
 }
+
+

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register</title>
+    <title>Log in</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -114,7 +114,7 @@
 							<i class="lnr lnr-envelope"></i>
 						</div>
 
-						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="2">
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
 							<a th:href="@{/shoppingCart(token=${token})}" class="cart-link">
 								<i class="zmdi zmdi-shopping-cart"></i>
 							</a>
@@ -136,12 +136,12 @@
 								</ul>
 							</div>
 						</div>
+						
 						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						
 						<form th:action="@{/uploadItem(token=${token})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<button class="button-green">
@@ -206,59 +206,112 @@
 	</header>
 
 
-	<!-- Content page -->
-	<section class="bg0 p-t-104 p-b-116">
+	<!-- Product Detail -->
+	<section class="sec-product-detail bg0 p-t-104 p-b-116">
 		<div class="container">
-			<div class="flex-w flex-tr flex-login">
-				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<form th:action="@{/editUser(token=${token})}" method="post" enctype="multipart/form-data" name="editUserForm">
-						<h4 class="mtext-105 cl2 txt-center p-b-30">
-							Editar Perfil
-						</h4>
-						<input type="hidden" name="redirectUrl" th:value="${redirectUrl}">
+			<div class="row">
 
-						<div class="m-b-20 file-upload-container">
-							<div id="imagePreviewContainer" style="margin-top: 10px; display: flex; justify-content: center; align-items: center;" class="web_ui__Image__image web_ui__Image__x4-large web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover" >
-								<img th:src="${user.profileImage != null} ? @{${profileImageBaseUrl + user.profileImage}} : @{'/images/icons/profile-default.png'}" id="imagePreview"  alt="Imagen de perfil" class="web_ui__Image__content">
+				<div class="col-md-6 col-lg-7 p-b-30">
+					<div class="p-l-25 p-r-30 p-lr-0-lg">
+						<div class="wrap-slick3 flex-sb flex-w">
+							<div class="wrap-slick3-dots"></div>
+							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
+				
+							<div class="slick3 gallery-lb">
+								<div th:if="${item.images != null and not #lists.isEmpty(item.images)}"
+									 th:each="image : ${item.images}" 
+									 class="item-slick3" 
+									 th:data-thumb="@{${itemImageBaseUrl + image}}">
+									 
+									<div class="wrap-pic-w pos-relative">
+										<img th:src="@{${itemImageBaseUrl + image}}" alt="IMG-PRODUCT">
+				
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
+										   th:href="@{${itemImageBaseUrl + image}}">
+											<i class="fa fa-expand"></i>
+										</a>
+									</div>
+								</div>
 							</div>
-							<label for="profileImage" class="m-t-20 custom-file-upload">Foto de Perfil</label>
-							<input id="profileImage" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="file" name="profileImage" accept="image/*" onchange="previewImage(event)">
+						</div>
+					</div>
+				</div>
+
+				
+	
+				<div class="col-md-6 col-lg-5 p-b-30">
+					<div class="p-r-50 p-t-5 p-lr-0-lg">
+						<h4 th:text="${item?.title ?: 'Título no disponible'}" class="mtext-105 cl2 js-name-detail p-b-14"></h4>
+	
+						<span class="mtext-106 cl2" th:text="${item?.price != null ? item.price + '€' : 'Precio no disponible'}"></span>
+	
+						<p class="stext-102 cl3 p-t-23" th:text="${item?.description ?: 'Descripción no disponible'}"></p>
+						
+						<!-- Additional Details -->
+						<div class="p-t-33">
+							<div class="flex-w p-b-10">
+								<div class="size-203 flex-c-m respon6">
+									<div th:if="${item?.type == 'clothes'}">
+										<p>Talla: <span th:text="${item?.size ?: 'No especificado'}"></span></p>
+										<p>Tipo: <span th:text="${item?.clothesType.displayName ?: 'No especificado'}"></span></p>
+										<p>Para: <span th:text="${item?.category.displayName ?: 'No especificado'}"></span></p>
+									</div>
+	
+									<div th:if="${item?.type == 'electronics'}">
+										<p>Tipo: <span th:text="${item?.electronicsType.displayName ?: 'No especificado'}"></span></p>
+									</div>
+									<div th:if="${item?.type == 'entertainment'}">
+										<p>Tipo: <span th:text="${item?.entertainmentType.displayName ?: 'No especificado'}"></span></p>
+									</div>
+									<div th:if="${item?.type == 'home'}">
+										<p>Tipo: <span th:text="${item?.homeType.displayName ?: 'No especificado'}"></span></p>
+									</div>
+									<div th:if="${item?.type == 'pet'}">
+										<p>Especie: <span th:text="${item?.species.displayName ?: 'No especificado'}"></span></p>
+									</div>
+
+								</div>
+							</div>
+	
+							<div class="flex-w flex-r-m p-b-10">
+								<div class="size-204 flex-w flex-m respon6-next">
+	
+									<form th:if="${loggedUserId != sellerId}" th:action="@{/shoppingCart/add}" method="post">
+										<input type="hidden" name="token" th:value="${token}" />
+										<input type="hidden" name="itemId" th:value="${item.id}" />
+										<button type="submit" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+											Añadir al carrito
+										</button>
+									</form>
+								</div>
+							</div>
 						</div>
 
-						<div class="m-b-20">
-							<label for="name" class="stext-111 cl2 p-b-10 login-label">Nombre</label>
-							<input th:value="${user.name}" id="name" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="name" placeholder="Introduce tu nombre" required>
+						<!-- Social Links -->
+						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
+							<div class="flex-m bor9 p-r-10 m-r-11">
+								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
+									<i class="zmdi zmdi-favorite"></i>
+								</a>
+							</div>
+	
+							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
+								<i class="fa fa-facebook"></i>
+							</a>
+	
+							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
+								<i class="fa fa-twitter"></i>
+							</a>
+	
+							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
+								<i class="fa fa-google-plus"></i>
+							</a>
 						</div>
-					
-						<div class="m-b-20">
-							<label for="surname" class="stext-111 cl2 p-b-10 login-label">Apellido</label>
-							<input th:value="${user.surname}" id="surname" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-								   type="text" name="surname" placeholder="Introduce tu apellido" required>
-						</div>
-					
-						<div class="m-b-20">
-							<label for="description" class="stext-111 cl2 p-b-10 login-label">Descripción</label>
-							<textarea th:text="${user.description}" id="description" class="textarea-description stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" 
-									  name="description" placeholder="Añade una descripción sobre ti"></textarea>
-						</div>
-					
-						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
-							Actualizar Perfil
-						</button>
-					
-						<div th:if="${errorMessage}">
-							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
-						</div>
-					
-						<p class="txt-center">¿No deseas cambiar nada? <a th:href="@{/userProfile/{id}(id=${loggedUserId}, token=${token})}">Volver a mi perfil</a></p>
-					</form>
+					</div>
 				</div>
 			</div>
 		</div>
 	</section>
-
 
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
@@ -424,8 +477,8 @@
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script th:src="@{/vendor/bootstrap/js/popper.js}" ></script>
-	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}" ></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}"></script>
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
@@ -439,7 +492,7 @@
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}"></script>
 	<!--===============================================================================================-->
-	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -477,26 +530,9 @@
         });
     });
 	</script>
-<script>
-    function previewImage(event) {
-        var output = document.getElementById('imagePreview');
-        var imageContainer = document.getElementById('imagePreviewContainer');
+	<script th:src="@{/vendor/slick/slick.min.js}"></script>
+	<script th:src="@{/js/slick-custom.js}"></script>
 
-        var file = event.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-
-            reader.onload = function(e) {
-                output.src = e.target.result;
-                output.style.display = 'block';
-            };
-
-            reader.readAsDataURL(file);
-        } else {
-            output.style.display = 'none'; 
-        }
-    }
-</script>
 </body>
 
 </html>
