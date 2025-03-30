@@ -3,6 +3,7 @@ package com.spq.client.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -605,6 +606,21 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
 		}
 		return "redirect:/login";
+	}
+
+	@DeleteMapping("/deletePurchase/{purchaseId}")
+	public String deletePurchase(
+			@PathVariable Long purchaseId,
+			@RequestParam("token") Long token,
+			RedirectAttributes redirectAttributes) {
+		try {
+			vintedService.deletePurchase(token, purchaseId);
+			redirectAttributes.addFlashAttribute("successMessage", "Compra eliminada con éxito.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar la compra: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return "redirect:/allItems";
 	}
 
 	@PostMapping("/shoppingCart/add")

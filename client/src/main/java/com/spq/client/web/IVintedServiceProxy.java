@@ -43,4 +43,5 @@ public interface IVintedServiceProxy {
 	public Purchase getPurchaseById(Long token, Long purchaseId);
 	public List<Item> getUserItems(Long userId);
 	public User getSeller(Item item);
+	public void deletePurchase(Long token, Long purchaseId);
 }

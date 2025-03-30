@@ -435,6 +435,20 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public void deletePurchase(Long token, Long purchaseId) {
+		try {
+			String url = apiBaseUrl + "/purchases/cancel?token=" + token + "&purchaseId=" + purchaseId;
+			restTemplate.delete(url);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Purchase not found");
+				case 403 -> throw new RuntimeException("Not authorized to delete this purchase");
+				default -> throw new RuntimeException("Failed to delete purchase: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
 	public User getUserByItemId(Long itemId) {
 		try {
 			String url = apiBaseUrl + "/items/" + itemId + "/owner";
