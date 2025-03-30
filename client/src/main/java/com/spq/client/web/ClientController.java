@@ -45,6 +45,15 @@ public class ClientController {
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
 		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
+		if(token!= null) {
+			if(vintedService.getCartItems(token) != null) {
+				model.addAttribute("cartSize", vintedService.getCartItems(token).size());
+			}else {
+				model.addAttribute("cartSize", 0);
+			}
+		}else{
+			model.addAttribute("cartSize", 0);
+		}
 
 	}
 	
@@ -52,6 +61,12 @@ public class ClientController {
 	public String showRegisterPage(
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
+		if (redirectUrl == null || redirectUrl.isEmpty()) {
+			redirectUrl = "/allItems";
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
+		}
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "register";
 	}
@@ -66,30 +81,45 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
+			if (redirectUrl == null || redirectUrl.isEmpty()) {
+				redirectUrl = "/allItems";
+			}
 			model.addAttribute("redirectUrl", redirectUrl);
 			vintedService.createUser(new Signup(email, password, username, name, surname));
 			token = vintedService.login(email, password);
 			userId = vintedService.getUserIdFromToken(token);
+			if (!redirectUrl.contains("token=")) {
+				if (redirectUrl.contains("?")) {
+					redirectUrl += "&token=" + token;
+				} else {
+					redirectUrl += "?token=" + token;
+				}
+			}
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if (e.getMessage().equals("User already exists")) {
-				redirectAttributes.addFlashAttribute("errorMessage", "El usuario ya existe");
+				redirectAttributes.addFlashAttribute("errorMessage", "El email ya existe");
+			} else if (e.getMessage().equals("Username already exists")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "El nombre de usuario ya existe");
 			} else if (e.getMessage().equals("Invalid credentials")) {
                 redirectAttributes.addFlashAttribute("errorMessage", "La contraseña es incorrecta");
-			} else {
+			}else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado");
 				e.printStackTrace();
 			}
 		}
-		return "redirect:" + redirectUrl;
+		return "redirect:/register?redirectUrl=" + redirectUrl;
 	}
 	
     @GetMapping("/login")
 	public String showLoginPage(
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
-		if (redirectUrl == null) {
-			redirectUrl = "/";
+		if (redirectUrl == null || redirectUrl.isEmpty()) {
+			redirectUrl = "/allItems";
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
 		}
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "login";
@@ -103,9 +133,19 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
+			if (redirectUrl == null || redirectUrl.isEmpty()) {
+				redirectUrl = "/allItems";
+			}
 			model.addAttribute("redirectUrl", redirectUrl);
 			token = vintedService.login(email, password);
 			userId = vintedService.getUserIdFromToken(token);
+			if (!redirectUrl.contains("token=")) {
+				if (redirectUrl.contains("?")) {
+					redirectUrl += "&token=" + token;
+				} else {
+					redirectUrl += "?token=" + token;
+				}
+			}
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if (e.getMessage().equals("Invalid credentials")) {
@@ -116,7 +156,7 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado");
 			}
 		}
-		return "redirect:" + redirectUrl;
+		return "redirect:/login?redirectUrl=" + redirectUrl;
 	}
 
 	@GetMapping("/allItems")
@@ -127,11 +167,6 @@ public class ClientController {
 		try {
 			List<Item> items = vintedService.getItems(token); 
 			model.addAttribute("items", items);
-	
-			//if (token != null) {
-			//	List<Item> cartItems = vintedService.getCartItems(token);
-			//	model.addAttribute("cartItems", cartItems);
-			//}
 	
 			return "product";
 		} catch (RuntimeException e) {
@@ -318,7 +353,7 @@ public class ClientController {
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 		}
-		return "redirect:" + redirectUrl;
+		return "redirect:login";
 	}
 
 	@GetMapping("/userProfile/{id}")
@@ -337,14 +372,6 @@ public class ClientController {
     	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
 		model.addAttribute("isMyProfile", isMyProfile);
-	
-		//try {
-		//	List<Item> cartItems = vintedService.getCartItems(token); 
-		//	model.addAttribute("cartItems", cartItems);
-		//} catch (RuntimeException e) {
-		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
-		//	e.printStackTrace();
-		//}
 	
 		return "userProfile";
 	}
@@ -365,7 +392,7 @@ public class ClientController {
 
 		try {
 			vintedService.updateUser(token, name, surname, description, profileImage);
-			return "redirect:" + redirectUrl;
+			return "redirect:" + redirectUrl+"?token="+token;
 		} catch (RuntimeException e) {
 			if ("User not found".equals(e.getMessage())) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
@@ -404,14 +431,6 @@ public class ClientController {
 		if (token == null) {
 			return "redirect:/login";
 		}
-	
-		//try {
-		//	List<Item> cartItems = vintedService.getCartItems(token);
-		//	model.addAttribute("cartItems", cartItems);
-		//} catch (RuntimeException e) {
-		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
-		//	e.printStackTrace();
-		//}
 	
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
@@ -467,7 +486,6 @@ public class ClientController {
 				cartItems = List.of(); 
 			}
 			model.addAttribute("cartItems", cartItems);
-			model.addAttribute("cartSize", cartItems.size());
 			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));
 			return "shoppingCart";
 		} catch (RuntimeException e) {
@@ -585,7 +603,8 @@ public class ClientController {
 			@PathVariable Long purchaseId,
 			@RequestParam("token") Long token,
 			@RequestParam("paymentMethod") String paymentMethod,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes,
+			Model model) {
 		try {
 			System.out.println(token);
 			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
@@ -632,7 +651,8 @@ public class ClientController {
 			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes,
+			Model model) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
@@ -657,6 +677,7 @@ public class ClientController {
 			@RequestParam("itemId") Long itemId,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			RedirectAttributes redirectAttributes) {
+				System.out.println("REMOVE : " + redirectUrl);
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
@@ -673,7 +694,7 @@ public class ClientController {
 			e.printStackTrace();
 		}
 
-		return "redirect:" + redirectUrl;
+		return "redirect:" + redirectUrl + "?token=" + token;
 	}
 
 }

@@ -33,8 +33,10 @@ public class UserService {
 	}
 	
 	public long logIn(String email, String password) {
-		
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));		
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+		if (!user.getPassword().equals(password)) {
+			throw new RuntimeException("Invalid credentials");
+		}		
 		long token = System.currentTimeMillis();
 		activeUsers.put(token, user);
 		return token;

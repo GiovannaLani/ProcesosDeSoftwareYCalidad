@@ -38,7 +38,9 @@ public class UserController {
         } catch (RuntimeException e) {
             if (e.getMessage().equals("User already exists")) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
-            } else if (e.getMessage().equals("Invalid credentials")) {
+            } else if (e.getMessage().equals("Username already exists")) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }else if (e.getMessage().equals("Invalid credentials")) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             } else {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

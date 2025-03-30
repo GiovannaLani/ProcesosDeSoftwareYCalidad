@@ -56,6 +56,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
 			case 409 -> throw new RuntimeException("User already exists");
+			case 400 -> throw new RuntimeException("Username already exists");
 			case 403 -> throw new RuntimeException("Invalid credentials");
 			default -> throw new RuntimeException("Failed to create user: " + e.getStatusText());
 			}

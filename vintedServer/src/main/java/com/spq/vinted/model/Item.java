@@ -106,4 +106,14 @@ public abstract class Item {
     }
     public abstract ItemDTO toDTO();
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Item item = (Item) obj;
+        
+        return id == item.id;
+    }
+
 }
