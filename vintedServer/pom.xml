@@ -10,10 +10,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.spq</groupId>
-	<artifactId>vinted</artifactId>
+	<artifactId>viinted</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>vinted</name>
-	<description>Demo project for Spring Boot REST API</description>
+	<name>viinted</name>
+	<description>Viinted es una aplicación web inspirada en Vinted, diseñada para la compra y venta de items de segunda mano.</description>
 	<url />
 	<licenses>
 		<license />

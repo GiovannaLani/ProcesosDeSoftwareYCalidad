@@ -10,10 +10,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>rest-api</artifactId>
+	<artifactId>viinted-client</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>rest-api</name>
-	<description>Demo project for Spring Boot REST API</description>
+	<name>viinted-client</name>
+	<description>Viinted es una aplicación web inspirada en Vinted, diseñada para la compra y venta de items de segunda mano.</description>
 	<url />
 	<licenses>
 		<license />
@@ -30,7 +30,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<server.hostname>127.0.0.1</server.hostname>
-		<server.port>8080</server.port>
+		<server.port>8081</server.port>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starter Data JPA (includes Hibernate) -->
