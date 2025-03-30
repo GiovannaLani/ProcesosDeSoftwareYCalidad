@@ -1,7 +1,7 @@
 package com.spq.client.data;
 
 public record Purchase(
-    long id,
+    Long id,
     long itemId,
     String buyerEmail,
     String sellerEmail,

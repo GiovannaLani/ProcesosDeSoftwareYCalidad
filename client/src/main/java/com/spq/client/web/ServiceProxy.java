@@ -165,18 +165,18 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public void createPurchase(Purchase purchase) {
-        try {
-            restTemplate.postForObject(apiBaseUrl + "/purchases/create", purchase, Void.class);
-        } catch (HttpStatusCodeException e) {
-            switch (e.getStatusCode().value()) {
-                case 400 -> throw new RuntimeException("Invalid purchase request");
-                case 404 -> throw new RuntimeException("Item not found");
-                case 409 -> throw new RuntimeException("Purchase conflict, item already sold");
-                default -> throw new RuntimeException("Failed to create purchase: " + e.getStatusText());
-            }
-        }
-    }
+	public Purchase createPurchase(Purchase purchase) {
+		try {
+			return restTemplate.postForObject(apiBaseUrl + "/purchases/create", purchase, Purchase.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid purchase request");
+				case 404 -> throw new RuntimeException("Item not found");
+				case 409 -> throw new RuntimeException("Purchase conflict, item already sold");
+				default -> throw new RuntimeException("Failed to create purchase: " + e.getStatusText());
+			}
+		}
+	}
 
 	@Override
     public boolean processPayment(long purchaseId, String paymentMethod) {

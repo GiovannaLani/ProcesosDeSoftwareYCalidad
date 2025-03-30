@@ -16,9 +16,13 @@ public class PurchaseController {
     private PurchaseService purchaseService;
 
     @PostMapping("/create")
-    public ResponseEntity<String> createPurchase(@RequestParam long token, @RequestBody PurchaseDTO purchase) {
-        purchaseService.createPurchase(token, purchase);
-        return ResponseEntity.ok("Purchase created successfully.");
+    public ResponseEntity<PurchaseDTO> createPurchase(@RequestParam long token, @RequestBody PurchaseDTO purchase) {
+        try {
+            PurchaseDTO createdPurchase = purchaseService.createPurchase(token, purchase);
+            return ResponseEntity.ok(createdPurchase);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @PostMapping("/pay")

@@ -129,10 +129,10 @@ public class ClientController {
 			List<Item> items = vintedService.getItems();
 			model.addAttribute("items", items);
 	
-			if (token != null) {
-				List<Item> cartItems = vintedService.getCartItems(token);
-				model.addAttribute("cartItems", cartItems);
-			}
+			//if (token != null) {
+			//	List<Item> cartItems = vintedService.getCartItems(token);
+			//	model.addAttribute("cartItems", cartItems);
+			//}
 	
 			return "product";
 		} catch (RuntimeException e) {
@@ -152,10 +152,10 @@ public class ClientController {
 			Item item = vintedService.getItemById(id);
 			model.addAttribute("item", item);
 	
-			if (token != null) {
-				List<Item> cartItems = vintedService.getCartItems(token);
-				model.addAttribute("cartItems", cartItems);
-			}
+			//if (token != null) {
+			//	List<Item> cartItems = vintedService.getCartItems(token);
+			//	model.addAttribute("cartItems", cartItems);
+			//}
 	
 			return "product-details";
 		} catch (RuntimeException e) {
@@ -309,13 +309,13 @@ public class ClientController {
 		boolean isMyProfile = (id.equals(userId));
 		model.addAttribute("isMyProfile", isMyProfile);
 	
-		try {
-			List<Item> cartItems = vintedService.getCartItems(token); 
-			model.addAttribute("cartItems", cartItems);
-		} catch (RuntimeException e) {
-			System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
-			e.printStackTrace();
-		}
+		//try {
+		//	List<Item> cartItems = vintedService.getCartItems(token); 
+		//	model.addAttribute("cartItems", cartItems);
+		//} catch (RuntimeException e) {
+		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+		//	e.printStackTrace();
+		//}
 	
 		return "userProfile";
 	}
@@ -376,13 +376,13 @@ public class ClientController {
 			return "redirect:/login";
 		}
 	
-		try {
-			List<Item> cartItems = vintedService.getCartItems(token);
-			model.addAttribute("cartItems", cartItems);
-		} catch (RuntimeException e) {
-			System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
-			e.printStackTrace();
-		}
+		//try {
+		//	List<Item> cartItems = vintedService.getCartItems(token);
+		//	model.addAttribute("cartItems", cartItems);
+		//} catch (RuntimeException e) {
+		//	System.err.println("Error al obtener los artículos del carrito: " + e.getMessage());
+		//	e.printStackTrace();
+		//}
 	
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
@@ -503,26 +503,26 @@ public class ClientController {
 			}
 	
 			Purchase purchase = new Purchase(
-				0, 
-				itemId, 
-				vintedService.getUser(buyerId, token).username(),
-				seller.username(),
-				item.getPrice(),
-				paymentMethod,
-				"PENDING"
+					null,
+					itemId,
+					vintedService.getUser(buyerId, token).username(),
+					seller.username(),
+					item.getPrice(),
+					paymentMethod,
+					"PENDING"
 			);
 	
-			vintedService.createPurchase(purchase);
+			Purchase createdPurchase = vintedService.createPurchase(purchase);
+	
 			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
-			return "redirect:/payment?purchaseId=" + purchase.id();
+			return "redirect:/payment?purchaseId=" + createdPurchase.id();
 	
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
+			e.printStackTrace();
 			return "redirect:/items";
 		}
 	}
-	
-	
 
 	@PostMapping("/processPayment/{purchaseId}")
 	public String processPayment(

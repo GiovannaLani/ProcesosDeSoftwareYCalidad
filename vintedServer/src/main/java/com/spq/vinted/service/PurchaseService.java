@@ -11,12 +11,13 @@ public class PurchaseService {
     private final Map<Long, List<Long>> userPurchases = new HashMap<>();
     private long purchaseCounter = 1;
 
-    public void createPurchase(long token, PurchaseDTO purchase) {
+    public PurchaseDTO createPurchase(long token, PurchaseDTO purchase) {
         purchase.setStatus("PENDING");
+        purchase.setId(purchaseCounter);
         purchases.put(purchaseCounter, purchase);
         userPurchases.computeIfAbsent(token, k -> new ArrayList<>()).add(purchaseCounter);
-        
         purchaseCounter++;
+        return purchase;
     }
 
     public boolean processPayment(long token, long purchaseId, String paymentMethod) {
