@@ -157,6 +157,13 @@ public class ItemService {
         itemRepository.save(itemToRemove); 
     }
 
+    public List<Item> getUserItems(long userId) {
+        System.out.println("UserId get:" + userId);
+        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println("User:" + user.getId() + " Items: " + user.getItemsForSale().size());
+        return user.getItemsForSale();
+    }
+
 }
 
 

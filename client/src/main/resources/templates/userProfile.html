@@ -322,7 +322,7 @@
 													</svg>
 													<div class="web_ui__Cell__content">
 														<div class="web_ui__Cell__body">
-															<p>Items en venta: 0</p>
+															<p>Items en venta: <span th:text="${#lists.size(items)}">0</span></p>
 														</div>
 													</div>
 												</div>
@@ -384,7 +384,7 @@
 						</span>
 						<div class="web_ui__Divider__divider"></div>
 						<div id="closet-content" class="profile__items-wrapper m-t-30">
-							<div class="web_ui__EmptyState__empty-state" data-testid="closet-empty-state">
+							<div class="web_ui__EmptyState__empty-state" data-testid="closet-empty-state" th:if="${#lists.isEmpty(items)}">
 								<div class="web_ui__Container__container web_ui__Container__styling-wide m-b-10">
 									<h1 class="web_ui__Text__heading web_ui__Text__center txt-center">
 										Sube artículos para empezar a vender
@@ -401,6 +401,36 @@
 											</span>
 										</span>
 									</a>
+								</div>
+							</div>
+							<div class="row isotope-grid" data-testid="closet-empty-state" th:if="${not #lists.isEmpty(items)}">
+								<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women" th:each="item : ${items}">
+									<!-- Block2 -->
+									<div class="block2">
+										<a th:href="@{/item/{id}(id=${item.id}, token=${token})}">
+											<div class="block2-pic hov-img0">
+												<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" alt="IMG-PRODUCT">
+											</div>
+											<div class="block2-txt flex-w flex-t p-t-14">
+												<div class="block2-txt-child1 flex-col-l ">
+													<a href="product-detail.html" th:text="${item.title}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+														Esprit Ruffle Shirt
+													</a>
+				
+													<span class="stext-105 cl3 " th:text="${item.price + ' €'}">
+														16.64€
+													</span>
+												</div>
+				
+												<div class="block2-txt-child2 flex-r p-t-3">
+													<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+														<img class="icon-heart1 dis-block trans-04" th:src="@{/images/icons/icon-heart-01.png}" alt="ICON">
+														<img class="icon-heart2 dis-block trans-04 ab-t-l" th:src="@{/images/icons/icon-heart-02.png}" alt="ICON">
+													</a>
+												</div>
+											</div>
+										</a>
+									</div>
 								</div>
 							</div>
 						</div>

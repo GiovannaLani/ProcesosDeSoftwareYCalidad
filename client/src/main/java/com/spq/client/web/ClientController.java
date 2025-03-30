@@ -143,7 +143,10 @@ public class ClientController {
 		Model model) {
 		try {
 			Item item = vintedService.getItemById(id);
+			Long sellerId = vintedService.getSeller(item).id();
+
 			model.addAttribute("item", item);
+			model.addAttribute("sellerId", sellerId);
 			return "product-details"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
@@ -291,7 +294,8 @@ public class ClientController {
 		}
 		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-
+		List<Item> items = vintedService.getUserItems(id);
+    	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
     	model.addAttribute("isMyProfile", isMyProfile);
 

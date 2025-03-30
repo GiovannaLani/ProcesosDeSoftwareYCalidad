@@ -32,6 +32,7 @@ import com.spq.vinted.dto.EntertainmentDTO;
 import com.spq.vinted.dto.HomeDTO;
 import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.PetDTO;
+import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Category;
 import com.spq.vinted.model.Clothes;
 import com.spq.vinted.model.Electronics;
@@ -279,4 +280,29 @@ public class ItemController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+    @GetMapping("/userItems/{userId}")
+    public ResponseEntity<List<ItemDTO>> getUserItems(@PathVariable long userId) {
+        try {
+            System.out.println("User ID: " + userId);
+            List<Item> items = itemService.getUserItems(userId);
+            List<ItemDTO> itemDTOs = new ArrayList<ItemDTO>();
+            for(Item item: items){
+                System.out.println("Item: " + item.getTitle() + ", " + item.getDescription() + ", " + item.getPrice());
+                itemDTOs.add(item.toDTO());
+            }
+            return ResponseEntity.ok(itemDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/seller/{itemId}")
+    public ResponseEntity<UserDTO> getSeller(@PathVariable long itemId) {
+        try {
+            Item item = itemService.getItemById(itemId);
+            UserDTO seller = item.getSeller().toDTO();
+            return ResponseEntity.ok(seller);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
