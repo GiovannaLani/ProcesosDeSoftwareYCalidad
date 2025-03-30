@@ -3,6 +3,7 @@ package com.spq.vinted.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.MalformedURLException;
@@ -10,8 +11,6 @@ import java.net.MalformedURLException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -159,13 +158,12 @@ public class ItemController {
     }
  
     @GetMapping("/items")
-    public ResponseEntity<List<ItemDTO>> getItems() {
+    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(value = "token", required = false) Long token) {
         try {
-            List<Item> items = itemService.getItems();
-            List<ItemDTO> itemDTOs = new ArrayList<ItemDTO>();
-            for(Item item: items){
-                itemDTOs.add(item.toDTO());
-            }
+            List<Item> items = itemService.getItems(token);
+            List<ItemDTO> itemDTOs = items.stream()
+                                        .map(Item::toDTO)
+                                        .collect(Collectors.toList());
             return ResponseEntity.ok(itemDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -184,9 +182,13 @@ public class ItemController {
 
 
     @GetMapping("/clothes")
-    public ResponseEntity<List<ClothesDTO>> getClothes() {
+    public ResponseEntity<List<ClothesDTO>> getClothes(@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Clothes> clothes = itemService.getClothes();
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                clothes = clothes.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
             for(Clothes c: clothes){
                 clothesDTOs.add((ClothesDTO) c.toDTO());
@@ -198,9 +200,13 @@ public class ItemController {
     }
 
     @GetMapping("/clothes/{category}")
-    public ResponseEntity<List<ClothesDTO>> getClothesByCategory(@PathVariable Category category) {
+    public ResponseEntity<List<ClothesDTO>> getClothesByCategory(@PathVariable Category category,@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Clothes> clothes = itemService.getClothesByCategory(category);
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                clothes = clothes.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
             for(Clothes c: clothes){
                 clothesDTOs.add((ClothesDTO) c.toDTO());
@@ -212,9 +218,13 @@ public class ItemController {
     }
 
     @GetMapping("/electronics")
-    public ResponseEntity<List<ElectronicsDTO>> getElectronics() {
+    public ResponseEntity<List<ElectronicsDTO>> getElectronics(@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Electronics> electronics = itemService.getElectronics();
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                electronics = electronics.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<ElectronicsDTO> electronicsDTOs = new ArrayList<ElectronicsDTO>();
             for(Electronics e: electronics){
                 electronicsDTOs.add((ElectronicsDTO) e.toDTO());
@@ -226,9 +236,13 @@ public class ItemController {
     }
 
     @GetMapping("/home")   
-    public ResponseEntity<List<HomeDTO>> getHomeItems() {
+    public ResponseEntity<List<HomeDTO>> getHomeItems(@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Home> homeItems = itemService.getHomeItems();
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                homeItems = homeItems.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<HomeDTO> homeDTOs = new ArrayList<HomeDTO>();
             for(Home homeItem: homeItems){
                 homeDTOs.add((HomeDTO) homeItem.toDTO());
@@ -240,9 +254,13 @@ public class ItemController {
     }
 
     @GetMapping("/pet")
-    public ResponseEntity<List<PetDTO>> getItemsForPet() {
+    public ResponseEntity<List<PetDTO>> getItemsForPet(@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Pet> petItems = itemService.getItemsForPet();
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                petItems = petItems.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<PetDTO> petDTOs = new ArrayList<PetDTO>();
             for(Pet petItem: petItems){
                 petDTOs.add((PetDTO) petItem.toDTO());
@@ -254,9 +272,13 @@ public class ItemController {
     }
 
     @GetMapping("/entertainment")   
-    public ResponseEntity<List<EntertainmentDTO>> getItemsforEntertainment() {
+    public ResponseEntity<List<EntertainmentDTO>> getItemsforEntertainment(@RequestParam(value = "token", required = false) Long token) {
         try {
             List<Entertainment> entertainmentItems = itemService.getItemsforEntertainment();
+            if(token != null) {
+                Long userId = userService.getUserByToken(token).getId();
+                entertainmentItems = entertainmentItems.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
+            }
             List<EntertainmentDTO> entertainmentDTOs = new ArrayList<EntertainmentDTO>();
             for(Entertainment entertainmentItem: entertainmentItems){
                 entertainmentDTOs.add((EntertainmentDTO) entertainmentItem.toDTO());

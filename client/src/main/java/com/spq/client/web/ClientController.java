@@ -15,8 +15,6 @@ import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Clothes;
-import com.spq.client.data.ClothesSize;
-import com.spq.client.data.ClothesType;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
@@ -125,14 +123,14 @@ public class ClientController {
 		Model model
 	) {
 		try {
-			List<Item> items = vintedService.getItems();
+			List<Item> items = vintedService.getItems(token); 
 			model.addAttribute("items", items);
 			return "product"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
+			return "redirect:/";
 		}
-		return null;
 	}
 
 	@GetMapping("/item/{id}")
@@ -161,7 +159,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Clothes> clothes = vintedService.getClothes();
+			List<Clothes> clothes = null;
+			if(token == null) {
+				clothes = vintedService.getClothes(-1);
+			}else {
+				clothes = vintedService.getClothes(token);
+			}
 			model.addAttribute("items", clothes);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -178,7 +181,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
     try {
-        List<Clothes>clothesCategory = vintedService.getClothesByCategory(category);
+		List<Clothes> clothesCategory = null;
+		if(token == null) {
+			clothesCategory = vintedService.getClothesByCategory(category, -1);
+		}else {
+			clothesCategory = vintedService.getClothesByCategory(category, token);
+		}
 		model.addAttribute("items", clothesCategory);
 		return "product";
     } catch (RuntimeException e) {
@@ -194,7 +202,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Electronics> electronics = vintedService.getElectronics();
+			List<Electronics> electronics = null;
+			if(token == null) {
+				electronics = vintedService.getElectronics(-1);
+			}else {
+				electronics = vintedService.getElectronics(token);
+			}
 			model.addAttribute("items", electronics);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -210,7 +223,12 @@ public class ClientController {
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
 		try {
-			List<Pet> pets = vintedService.getItemsForPet();
+			List<Pet> pets = null;
+			if(token == null) {
+				pets = vintedService.getItemsForPet(-1);
+			}else {
+				pets = vintedService.getItemsForPet(token);
+			}
 			model.addAttribute("items", pets);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -227,7 +245,12 @@ public class ClientController {
 		Model model
 	) {
 		try {
-			List<Entertainment> entertainment = vintedService.getItemsForEntertainment();
+			List<Entertainment> entertainment = null;
+			if (token == null) {
+				entertainment = vintedService.getItemsForEntertainment(-1);
+			} else {
+				entertainment = vintedService.getItemsForEntertainment(token);	
+			}
 			model.addAttribute("items", entertainment);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -244,7 +267,12 @@ public class ClientController {
 		Model model
 	) {
 		try {
-			List<Home> homeItems = vintedService.getHomeItems();
+			List<Home> homeItems = null;
+			if(token == null) {
+				homeItems = vintedService.getHomeItems(-1);
+			}else {
+				homeItems = vintedService.getHomeItems(token);
+			}
 			model.addAttribute("items", homeItems);
 			return "product"; 
 		} catch (RuntimeException e) {
@@ -384,9 +412,7 @@ public class ClientController {
 		}
 
 		try {
-			System.out.println("Uploading item with title: " + title);
 			vintedService.uploadItem(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType, itemImages);
-			System.out.println("Item uploaded successfully.");
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			if ("User not found".equals(e.getMessage())) {
