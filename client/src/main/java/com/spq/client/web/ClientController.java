@@ -435,6 +435,9 @@ public class ClientController {
 		}
 		try {
 			List<Item> cartItems = vintedService.getCartItems(token);
+			if(cartItems == null || cartItems.isEmpty()) {
+				cartItems = List.of(); 
+			}
 			model.addAttribute("cartItems", cartItems);
 			model.addAttribute("cartSize", cartItems.size());
 			model.addAttribute("totalPrice",String.format("%.2f", cartItems.stream().mapToDouble(Item::getPrice).sum()));

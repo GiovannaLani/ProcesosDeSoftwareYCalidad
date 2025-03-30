@@ -351,15 +351,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public void addItemToCart(Long token, Long itemId) {
 		try {
-			String url = apiBaseUrl + "/shoppingCart/add";
+			String url = apiBaseUrl + "/items/shoppingCart/add?token=" + token + "&itemId=" + itemId;
 			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.setContentType(MediaType.APPLICATION_JSON);			
 
-			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("token", token);
-			body.add("itemId", itemId);
-
-			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
 			restTemplate.postForObject(url, requestEntity, Void.class);
 		} catch (HttpStatusCodeException e) {
@@ -386,15 +382,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public void removeItemFromCart(Long token, Long itemId) {
 		try {
-			String url = apiBaseUrl + "/items/shoppingCart/remove";
+			String url = apiBaseUrl + "/items/shoppingCart/remove?token=" + token + "&itemId=" + itemId;
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
-			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("token", token);
-			body.add("itemId", itemId);
-
-			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
 			restTemplate.postForObject(url, requestEntity, Void.class);
 		} catch (HttpStatusCodeException e) {

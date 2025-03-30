@@ -4244,7 +4244,7 @@ a{
 }
 
 .file-input {
-  display: none; /* Ocultar el input de archivo */
+  display: none;
 }
 
 .image-box img {
@@ -4255,27 +4255,36 @@ a{
 }
 
 .hidden {
-  display: none; /* Esconde los divs inicialmente */
+  display: none; 
 }
 
 .align-total {
-  display: flex; /* Activa el diseño flexible */
-  align-items: center; /* Alinea verticalmente los elementos */
-  justify-content: space-between; /* Espacia los elementos horizontalmente */
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
 }
 
 .size-208, .size-209 {
-  flex: 1; /* Asegura que ambos elementos ocupen el mismo espacio */
-  text-align: left; /* Alinea el texto a la izquierda */
+  flex: 1; 
+  text-align: left;
 }
 
 .mtext-101 {
-  font-size: 16px; /* Ajusta el tamaño del texto si es necesario */
-  font-weight: normal; /* Opcional: ajusta el peso del texto */
+  font-size: 16px; 
+  font-weight: normal; 
 }
 
 .mtext-110 {
-  font-size: 16px; /* Ajusta el tamaño del texto si es necesario */
-  font-weight: bold; /* Resalta el precio */
-  text-align: right; /* Alinea el precio a la derecha */
+  font-size: 16px; 
+  font-weight: bold; 
+  text-align: right; 
+}
+
+.cart-link {
+  color: inherit; 
+  text-decoration: none; 
+}
+
+.cart-link:hover {
+  color: inherit; 
 }
