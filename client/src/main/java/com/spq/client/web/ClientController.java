@@ -489,21 +489,17 @@ public class ClientController {
 			Item item = vintedService.getItemById(itemId);
 			if (item == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
-				return "redirect:/items";
+				return "redirect:/login";
 			}
 	
 			model.addAttribute("item", item);
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
-			System.out.println("Buyer ID: " + buyerId);
-			System.out.println("Item ID: " + itemId);
-			System.out.println("Token: " + token);
-			System.out.println("Item Price: " + item.getPrice());
 	
 			return "purchase";  
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
-			return "redirect:/items";
+			return "redirect:/login";
 		}
 	}
 	
@@ -515,6 +511,9 @@ public class ClientController {
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
+			System.out.println("Item ID: " + itemId);
+			System.out.println("Token: " + token);
+			System.out.println("Payment Method: " + paymentMethod);
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
@@ -522,15 +521,19 @@ public class ClientController {
 			}
 	
 			Item item = vintedService.getItemById(itemId);
+			System.out.println("Item: " + item);
+			System.out.println("Item ID: " + item.getId());
 			if (item == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
-				return "redirect:/items";
+				return "redirect:/login";
 			}
 	
-			User seller = vintedService.getUserByItemId(itemId);
+			User seller = vintedService.getSeller(item);
+			System.out.println("Seller: " + seller);
+			System.out.println("Seller ID: " + seller.id());
 			if (seller == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor.");
-				return "redirect:/items";
+				return "redirect:/login";
 			}
 	
 			Purchase purchase = new Purchase(
@@ -543,7 +546,7 @@ public class ClientController {
 					"PENDING"
 			);
 	
-			Purchase createdPurchase = vintedService.createPurchase(purchase);
+			Purchase createdPurchase = vintedService.createPurchase(token, purchase);
 	
 			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
 			return "redirect:/payment?purchaseId=" + createdPurchase.id();
@@ -551,7 +554,7 @@ public class ClientController {
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
 			e.printStackTrace();
-			return "redirect:/items";
+			return "redirect:/login";
 		}
 	}
 
@@ -564,12 +567,12 @@ public class ClientController {
 			Purchase purchase = vintedService.getPurchaseById(purchaseId);
 			if (purchase == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
-				return "redirect:/items";
+				return "redirect:/login";
 			}
 	
 			if (!"PENDING".equals(purchase.status())) {
 				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
-				return "redirect:/items";
+				return "redirect:/login";
 			}
 	
 			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod);
@@ -581,7 +584,7 @@ public class ClientController {
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar el pago.");
 		}
-		return "redirect:/items";
+		return "redirect:/login";
 	}	
 
 	@PostMapping("/shoppingCart/add")

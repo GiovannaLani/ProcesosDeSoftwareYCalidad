@@ -331,6 +331,7 @@ public class ItemController {
     @GetMapping("/seller/{itemId}")
     public ResponseEntity<UserDTO> getSeller(@PathVariable long itemId) {
         try {
+            System.out.println("algo");
             Item item = itemService.getItemById(itemId);
             UserDTO seller = item.getSeller().toDTO();
             return ResponseEntity.ok(seller);

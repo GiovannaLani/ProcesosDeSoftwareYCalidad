@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
@@ -189,9 +190,13 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public Purchase createPurchase(Purchase purchase) {
+	public Purchase createPurchase(long token, Purchase purchase) {
 		try {
-			return restTemplate.postForObject(apiBaseUrl + "/purchases/create", purchase, Purchase.class);
+			String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/create")
+					.queryParam("token", token)
+					.toUriString();
+
+			return restTemplate.postForObject(url, purchase, Purchase.class);
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
 				case 400 -> throw new RuntimeException("Invalid purchase request");
@@ -431,6 +436,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public User getUserByItemId(Long itemId) {
 		try {
+			System.out.println(("Buscando usuario por itemId: " + itemId));
 			String url = apiBaseUrl + "/items/" + itemId + "/owner";
 			return restTemplate.getForObject(url, User.class);
 		} catch (HttpStatusCodeException e) {

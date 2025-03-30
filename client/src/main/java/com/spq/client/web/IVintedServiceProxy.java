@@ -27,7 +27,7 @@ public interface IVintedServiceProxy {
 	public List<Pet> getItemsForPet(long token);
 	public List<Entertainment> getItemsForEntertainment(long token);
 	public void logout(long token);
-	public Purchase createPurchase(Purchase purchase);
+	public Purchase createPurchase(long token, Purchase purchase);
 	public boolean processPayment(long purchaseId, String paymentMethod);
 	public void deleteUser(long token);
 	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);

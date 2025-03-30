@@ -217,67 +217,27 @@
 					<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
 					<p class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
 						
-					<div class="m-b-20">
-						<label for="paymentMethod" class="stext-111 cl2">Método de pago:</label>
-						<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" onchange="togglePaymentFields(this.value)">
-							<option value="">Elegir opción</option>
-							<option value="credit_card">Tarjeta de crédito</option>
-							<option value="paypal">PayPal</option>
-							<option value="bank_transfer">Transferencia bancaria</option>
-						</select>
-					</div>
-
-					<div id="creditCardFields" style="display: none;">
+					<form th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
+						<h4 class="mtext-105 cl2 txt-center p-b-30">
+							Confirmar Compra
+						</h4>
 						<div class="m-b-20">
-							<label for="cardNumber" class="stext-111 cl2">Número de tarjeta:</label>
-							<input type="text" id="cardNumber" name="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
+							<label for="paymentMethod" class="stext-111 cl2 p-b-10">Método de pago</label>
+							<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" required>
+								<option value="">Elegir opción</option>
+								<option value="credit_card">Tarjeta de crédito</option>
+								<option value="paypal">PayPal</option>
+								<option value="bank_transfer">Transferencia bancaria</option>
+							</select>
 						</div>
-						<div class="m-b-20">
-							<label for="cardHolder" class="stext-111 cl2">Nombre del titular:</label>
-							<input type="text" id="cardHolder" name="cardHolder" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del titular">
+						<input type="hidden" name="token" th:value="${token}">
+						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
+							Confirmar compra
+						</button>
+						<div th:if="${errorMessage}">
+							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
 						</div>
-						<div class="m-b-20">
-							<label for="expiryDate" class="stext-111 cl2">Fecha de expiración:</label>
-							<input type="text" id="expiryDate" name="expiryDate" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
-						</div>
-						<div class="m-b-20">
-							<label for="cvv" class="stext-111 cl2">CVV:</label>
-							<input type="text" id="cvv" name="cvv" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
-						</div>
-					</div>
-
-					<div id="paypalFields" style="display: none;">
-						<div class="m-b-20">
-							<label for="paypalEmail" class="stext-111 cl2">Correo electrónico de PayPal:</label>
-							<input type="email" id="paypalEmail" name="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
-						</div>
-					</div>
-
-					<div id="bankTransferFields" style="display: none;">
-						<div class="m-b-20">
-							<label for="bankAccount" class="stext-111 cl2">Número de cuenta bancaria:</label>
-							<input type="text" id="bankAccount" name="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES00 0000 0000 0000 0000">
-						</div>
-						<div class="m-b-20">
-							<label for="bankName" class="stext-111 cl2">Nombre del banco:</label>
-							<input type="text" id="bankName" name="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del banco">
-						</div>
-					</div>
-					
-					<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer"
-							onclick="confirmPurchase('${item.id}', '${token}')">
-						Confirmar compra
-					</button>
-				</div>
-	
-				<div th:if="${item == null}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<h4 class="mtext-105 cl2 txt-center p-b-30">
-						Error al cargar el artículo
-					</h4>
-					<p class="txt-center">No se pudo cargar la información del artículo. Por favor, regresa a la página de inicio.</p>
-					<a href="/items" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-						Volver a la página de artículos
-					</a>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -516,19 +476,6 @@
 			} else if (paymentMethod === "bank_transfer") {
 				bankTransferFields.style.display = "block";
 			}
-		}
-	</script>
-
-	<script>
-		function confirmPurchase(itemId, token) {
-			const paymentMethod = document.getElementById("paymentMethod").value;
-
-			if (!paymentMethod) {
-				alert("Por favor, selecciona un método de pago.");
-				return;
-			}
-
-			window.location.href = `/createPurchase/${itemId}?token=${token}&paymentMethod=${paymentMethod}`;
 		}
 	</script>
 
