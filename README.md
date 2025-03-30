@@ -23,11 +23,21 @@ El proyecto ha sido realizado con fines educativos como parte de una asignatura,
    ```
 2. Configurar la base de datos en `application.properties`.
 3. Ir a `dbsetup.sql` y ejecutar su contenido en MySQL.
-4. Compilar y ejecutar el servidor:
+   ```sh
+   DROP USER IF EXISTS 'spq'@'%';
+   CREATE USER IF NOT EXISTS 'spq'@'%' IDENTIFIED BY 'spq';
+
+   DROP SCHEMA IF EXISTS restapidb;
+   CREATE SCHEMA restapidb;
+
+   GRANT ALL ON restapidb.* TO 'spq'@'%';
+   FLUSH PRIVILEGES;
+   ```
+5. Compilar y ejecutar el servidor:
    ```sh
    mvn spring-boot:run
    ```
-5. Acceder a la aplicación desde el navegador en `http://localhost:8081`
+6. Acceder a la aplicación desde el navegador en `http://localhost:8081`
 
 ## Características
 - Registro e inicio de sesión de usuarios
