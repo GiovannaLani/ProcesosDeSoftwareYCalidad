@@ -122,12 +122,18 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-            
+    
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
-             
-        List<Item> cartItems = user.getCartItems();
-        if (cartItems == null || !user.getCartItems().contains(item)) {
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        if (user.getCartItems() == null) {
+            user.setCartItems(new ArrayList<>());
+        }
+    
+        if (!user.getCartItems().contains(item)) {
             user.getCartItems().add(item);
             item.getUsersWithItemInCart().add(user);
     
@@ -135,6 +141,7 @@ public class ItemService {
             itemRepository.save(item);
         }
     }
+    
     
     public List<Item> getCartItems(long token) {
         User user = userService.getUserByToken(token);
