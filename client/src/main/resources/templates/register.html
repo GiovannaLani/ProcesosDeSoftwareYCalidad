@@ -145,6 +145,7 @@
 						
 						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
+							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							<button class="button-green">
 								Vender ahora
 							</button>
