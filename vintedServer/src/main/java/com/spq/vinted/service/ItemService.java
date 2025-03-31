@@ -27,6 +27,8 @@ import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 
 @Service
 public class ItemService {
@@ -139,10 +141,15 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
         List<Item> cartItems = user.getCartItems();
         if (cartItems == null || cartItems.isEmpty()) {
-            return Collections.emptyList();        
+            return Collections.emptyList();
         }
+    
         return cartItems;
     }
 
@@ -175,9 +182,9 @@ public class ItemService {
         return user.getItemsForSale();
     }
 
+    @Transactional
     public void deleteItem(long token, long itemId) {
         User user = userService.getUserByToken(token);
-        System.out.println("borrando item");
         if (user == null) {
             throw new RuntimeException("Not authorized");
         }
@@ -187,13 +194,20 @@ public class ItemService {
             throw new RuntimeException("Item not found");
         }
     
-        if (!item.getSeller().getId().equals(user.getId())) {
-            throw new RuntimeException("Not authorized");
+        for (User u : item.getUsersWithItemInCart()) {
+            u.getCartItems().remove(item);
+            userRepository.save(u);
         }
-        
+    
+        item.getUsersWithItemInCart().clear();
+        itemRepository.save(item);
+    
         itemRepository.delete(item);
-        System.out.println("item borrado");
+    
+        System.out.println("Item borrado correctamente.");
     }
+    
+    
 
 }
 

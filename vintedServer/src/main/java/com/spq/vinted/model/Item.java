@@ -24,21 +24,27 @@ public abstract class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @Column(nullable = false)
     private String title;
+
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false)
     private float price;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "item_images", joinColumns = @JoinColumn(name = "item_id"))
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
+
     @ManyToOne
-	@JoinColumn(name = "seller_id")
-    private User seller;   
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
     @ManyToMany(mappedBy = "cartItems", fetch = FetchType.EAGER)
-    private List<User> usersWithItemInCart = new ArrayList<>(); 
+    private List<User> usersWithItemInCart = new ArrayList<>();
     
     public Item() {
     }

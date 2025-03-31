@@ -61,7 +61,7 @@ public class ClientController {
 	public String showRegisterPage(
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
-		if (redirectUrl == null || redirectUrl.isEmpty()) {
+		if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 			redirectUrl = "/allItems";
 			if (token != null) {
 				redirectUrl += "?token=" + token;
@@ -81,7 +81,7 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
-			if (redirectUrl == null || redirectUrl.isEmpty()) {
+			if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 				redirectUrl = "/allItems";
 			}
 			model.addAttribute("redirectUrl", redirectUrl);
@@ -115,7 +115,7 @@ public class ClientController {
 	public String showLoginPage(
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
-		if (redirectUrl == null || redirectUrl.isEmpty()) {
+		if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 			redirectUrl = "/allItems";
 			if (token != null) {
 				redirectUrl += "?token=" + token;
@@ -133,7 +133,7 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
-			if (redirectUrl == null || redirectUrl.isEmpty()) {
+			if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 				redirectUrl = "/allItems";
 			}
 			model.addAttribute("redirectUrl", redirectUrl);
@@ -399,7 +399,7 @@ public class ClientController {
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado.");
 			}
-			return "redirect:" + redirectUrl;
+			return "redirect:" + redirectUrl+"?token="+token;
 		}
 	}
 
