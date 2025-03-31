@@ -50,7 +50,7 @@
 </head>
 <body class="animsition">
 
-    <!-- Header -->
+	<!-- Header -->
 	<header class="header-v4">
 		<!-- Header desktop -->
 		<div class="container-menu-desktop">
@@ -112,7 +112,7 @@
 							<i class="lnr lnr-envelope"></i>
 						</div>
 
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
 							<a th:href="@{/shoppingCart(token=${token})}" class="cart-link">
 								<i class="zmdi zmdi-shopping-cart"></i>
 							</a>
@@ -135,12 +135,13 @@
 							</div>
 						</div>
 						
-						<form th:unless="${token}" th:action="@{/login(redirectUrl=${currentUrl})}" method="get">
+						<form th:unless="${token}" th:action="@{/login}" method="get">
+							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
-						<form th:action="@{/uploadItem(token=${token})}" method="get">
+						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<button class="button-green">
 								Vender ahora
@@ -158,39 +159,41 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Mujer</a>
+								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
 							</li>
 
 							<li>
-								<a href="product.html">Hombre</a>
+								<a th:href="@{/clothes(token=${token})}">Ropa</a>
 							</li>
 
 							<li>
-								<a href="shoping-cart.html">Moda de diseño</a>
+								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
 							</li>
 
 							<li>
-								<a href="blog.html">Niños</a>
+								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
 							</li>
 
 							<li>
-								<a href="about.html">Hogar</a>
+								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
 							</li>
 
 							<li>
-								<a href="contact.html">Electrónica</a>
+								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
+							</li>
+
+							<li>
+								<a th:href="@{/home(token=${token})}">Hogar</a>
+							</li>
+
+							<li>
+								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
 							</li>
 							<li>
-								<a href="contact.html">Entretenimiento</a>
+								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
 							</li>
 							<li>
-								<a href="contact.html">Mascotas</a>
-							</li>
-							<li>
-								<a href="contact.html">Sobre Vinted</a>
-							</li>
-							<li>
-								<a href="contact.html">Nuestra Plataforma</a>
+								<a th:href="@{/pet(token=${token})}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -226,9 +229,9 @@
 						<div class="p-t-20">
 							<label for="paymentMethod">Selecciona el método de pago:</label>
 							<select name="paymentMethod" id="paymentMethod" class="form-control" onchange="togglePaymentFields(this.value)">
-								<option value="credit_card">Tarjeta de Crédito</option>
-								<option value="paypal">PayPal</option>
-								<option value="bank_transfer">Transferencia Bancaria</option>
+								<option value="credit_card" th:selected="${purchase.paymentMethod == 'credit_card'}">Tarjeta de Crédito</option>
+								<option value="paypal" th:selected="${purchase.paymentMethod == 'paypal'}">PayPal</option>
+								<option value="bank_transfer" th:selected="${purchase.paymentMethod == 'bank_transfer'}">Transferencia Bancaria</option>
 							</select>
 						</div>
 
