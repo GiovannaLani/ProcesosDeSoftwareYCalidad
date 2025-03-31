@@ -165,24 +165,26 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-
-        List<Item> cartItems = user.getCartItems();
-        if (cartItems == null || cartItems.isEmpty()) {
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        if (user.getCartItems() == null || user.getCartItems().isEmpty()) {
             throw new RuntimeException("El carrito está vacío.");
         }
-
-        Item itemToRemove = cartItems.stream()
+    
+        Item itemToRemove = user.getCartItems().stream()
                 .filter(item -> item.getId() == itemId)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado en el carrito"));
-
-        cartItems.remove(itemToRemove);
-
+    
+        user.getCartItems().remove(itemToRemove);
         itemToRemove.getUsersWithItemInCart().remove(user);
-
+    
+        itemRepository.save(itemToRemove);
         userRepository.save(user);
-        itemRepository.save(itemToRemove); 
     }
+    
 
     public List<Item> getUserItems(long userId) {
         User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));

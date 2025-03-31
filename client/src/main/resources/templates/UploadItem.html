@@ -145,6 +145,7 @@
 						
 						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
+							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							<button class="button-green">
 								Vender ahora
 							</button>
@@ -213,7 +214,8 @@
 				<h4 class="mtext-105 cl2 txt-center p-b-30">
 					Subir item
 				</h4>
-				<form th:action="@{/uploadItem(redirectUrl=${currentUrl})}" method="post" enctype="multipart/form-data">
+				<form th:action="@{/uploadItem}" method="post" enctype="multipart/form-data">
+					<input type="hidden" name="redirectUrl" th:value="${redirectUrl}">
 					<div class="flex-w flex-tr flex-login">
 					  <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
 						<p>Sube hasta 5 fotos.</p>

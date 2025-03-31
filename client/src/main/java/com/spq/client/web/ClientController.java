@@ -431,7 +431,9 @@ public class ClientController {
 		if (token == null) {
 			return "redirect:/login";
 		}
-	
+		model.addAttribute("redirectUrl", redirectUrl);
+
+		System.out.println("redirectUrl del get: " + redirectUrl);
 		model.addAttribute("redirectUrl", redirectUrl);
 		return "uploadItem";
 	}
@@ -453,13 +455,20 @@ public class ClientController {
 			@RequestParam(value = "entertainmentType", required = false) String entertainmentType,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			@RequestParam(value = "itemImages") List<MultipartFile> itemImages,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes,
+			Model model) {
 
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
 
 		try {
+			if(token!= null) {
+				redirectUrl += "?token=" + token;
+			}
+			model.addAttribute("redirectUrl", redirectUrl);
+			System.out.println("redirectUrl del post: " + redirectUrl);
+
 			vintedService.uploadItem(token, title, description, category, price, brand, size, clothCategory, clothingType, species, homeType, electronicsType, entertainmentType, itemImages);
 			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
