@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.ResponseEntity;
 
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
@@ -205,6 +206,31 @@ public class ServiceProxy implements IVintedServiceProxy {
 				case 404 -> throw new RuntimeException("Item not found");
 				case 409 -> throw new RuntimeException("Purchase conflict, item already sold");
 				default -> throw new RuntimeException("Failed to create purchase: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<Purchase> createPurchases(long token, List<Purchase> purchases) {
+		try {
+			String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/multipleCreate")
+					.queryParam("token", token)
+					.toUriString();
+	
+			ResponseEntity<List<Purchase>> response = restTemplate.exchange(
+					url,
+					HttpMethod.POST,
+					new HttpEntity<>(purchases),
+					new ParameterizedTypeReference<List<Purchase>>() {}
+			);
+	
+			return response.getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid purchase request");
+				case 404 -> throw new RuntimeException("One or more items not found");
+				case 409 -> throw new RuntimeException("Purchase conflict, one or more items already sold");
+				default -> throw new RuntimeException("Failed to create purchases: " + e.getStatusText());
 			}
 		}
 	}

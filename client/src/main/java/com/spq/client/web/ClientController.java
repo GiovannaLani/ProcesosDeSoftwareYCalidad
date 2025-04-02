@@ -22,8 +22,10 @@ import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
 import com.spq.client.data.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.spq.client.data.Signup;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -535,6 +537,40 @@ public class ClientController {
 	}
 	
 
+	@GetMapping("/createMultiplePurchase")
+	public String showPurchasePage(
+			@RequestParam("itemIds") List<Long> itemIds,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
+				return "redirect:/login";
+			}
+	
+			List<Item> items = new ArrayList<>();
+			for (Long itemId : itemIds) {
+				Item item = vintedService.getItemById(itemId);
+				if (item == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Uno o más artículos no existen.");
+					return "redirect:/allItems";
+				}
+				items.add(item);
+			}
+	
+			model.addAttribute("items", items);
+			model.addAttribute("buyerId", buyerId);
+			model.addAttribute("token", token);
+	
+			return "purchase";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
+			return "redirect:/allItems";  
+		}
+	}
+		
 	@PostMapping("/createPurchase/{itemId}")
 	public String createPurchase(
 			@PathVariable Long itemId,
@@ -581,6 +617,59 @@ public class ClientController {
 			return "redirect:/login";
 		}
 	}
+
+	@PostMapping("/createMultiplePurchase")
+	public String createPurchase(
+			@RequestParam("token") Long token,
+			@RequestParam("itemIds") List<Long> itemIds,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				return "redirect:/login";
+			}
+	
+			List<Purchase> purchases = new ArrayList<>();
+			for (Long itemId : itemIds) {
+				Item item = vintedService.getItemById(itemId);
+				if (item == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Uno o más artículos no existen.");
+					return "redirect:/login";
+				}
+	
+				User seller = vintedService.getSeller(item);
+				if (seller == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor de un artículo.");
+					return "redirect:/login";
+				}
+	
+				Purchase purchase = new Purchase(
+						null,
+						itemId,
+						vintedService.getUser(buyerId, token).username(),
+						seller.username(),
+						item.getPrice(),
+						paymentMethod,
+						"PENDING"
+				);
+				purchases.add(purchase);
+			}
+	
+			List<Purchase> createdPurchases = vintedService.createPurchases(token, purchases);
+	
+			redirectAttributes.addFlashAttribute("successMessage", "Compras iniciadas. Procede con el pago.");
+			return "redirect:/processPayment?purchaseIds=" + createdPurchases.stream()
+					.map(p -> p.id().toString())
+					.collect(Collectors.joining(",")) + "&token=" + token;
+	
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear las compras.");
+			e.printStackTrace();
+			return "redirect:/login";
+		}
+	}	
 
 	@GetMapping("/processPayment/{purchaseId}")
 	public String showPaymentConfirmation(

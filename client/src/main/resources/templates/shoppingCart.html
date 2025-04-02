@@ -267,10 +267,11 @@
                                 </div>
                             </div>
 
-							<a th:if="${!cartItems.isEmpty()}" th:href="@{/createPurchase/{itemId}(itemId=${cartItems[0].id}, token=${token})}" 
+							<a th:if="${not #lists.isEmpty(cartItems)}"
+							th:href="@{/createMultiplePurchase(token=${token}, itemIds=${#strings.listJoin(cartItems.![id], ',')})}"
 							class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							 Proceed to Checkout
-							</a>
+							Proceed to Checkout
+							</a>						 
 					</div>
 				</div>
 			</div>
