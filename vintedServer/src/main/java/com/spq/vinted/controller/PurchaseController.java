@@ -27,6 +27,18 @@ public class PurchaseController {
         }
     }
 
+    @PostMapping("/multipleCreate")
+    public ResponseEntity<List<PurchaseDTO>> createMultiplePurchases(
+            @RequestParam long token,
+            @RequestBody List<PurchaseDTO> purchases) {
+        try {
+            List<PurchaseDTO> createdPurchases = purchaseService.createMultiplePurchases(token, purchases);
+            return ResponseEntity.ok(createdPurchases);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
     @PostMapping("/pay")
     public ResponseEntity<Map<String, String>> processPayment(@RequestParam long token, @RequestParam long purchaseId, @RequestParam String paymentMethod) {
         boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);

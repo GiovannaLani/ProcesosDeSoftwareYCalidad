@@ -23,6 +23,7 @@ import com.spq.client.data.Home;
 import com.spq.client.data.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.spq.client.data.Signup;
 import java.util.stream.Collectors;
@@ -563,7 +564,7 @@ public class ClientController {
 			model.addAttribute("items", items);
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
-	
+			System.out.println("Token: " + token);
 			return "purchase";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
@@ -625,6 +626,7 @@ public class ClientController {
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
+			System.out.println("Token: " + token);
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
@@ -716,7 +718,14 @@ public class ClientController {
 				purchases.add(purchase);
 			}
 	
+			String purchaseIdsString = purchaseIds.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining(","));
+	
 			model.addAttribute("purchases", purchases);
+			model.addAttribute("purchaseIds", purchaseIdsString);
+			model.addAttribute("token", token);
+	
 			return "paymentConfirmation";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
@@ -733,7 +742,6 @@ public class ClientController {
 			RedirectAttributes redirectAttributes,
 			Model model) {
 		try {
-			System.out.println(token);
 			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 			if (purchase == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
@@ -767,18 +775,36 @@ public class ClientController {
 
 	@PostMapping("/processMultiplePayment")
 	public String processPayments(
-			@RequestParam("purchaseIds") List<Long> purchaseIds,
+			@RequestParam("purchaseIds") String purchaseIds,
 			@RequestParam("token") Long token,
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
-			System.out.println("Token: " + token);
-			System.out.println("Purchase IDs: " + purchaseIds);
+			List<Long> purchaseIdList = Arrays.stream(purchaseIds.split(","))
+					.map(Long::valueOf)
+					.collect(Collectors.toList());
+		
+			boolean allPaymentsSuccessful = true;
 	
-			boolean allPaymentsSuccessful = vintedService.processPayments(purchaseIds, paymentMethod, token);
+			for (Long purchaseId : purchaseIdList) {
+				boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
+				if (paymentSuccess) {
+					try {
+						Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+						if (purchase != null) {
+							vintedService.deleteItem(token, purchase.itemId());
+						}
+					} catch (RuntimeException e) {
+						redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado, pero no se pudo eliminar un artículo.");
+						e.printStackTrace();
+					}
+				} else {
+					allPaymentsSuccessful = false;
+				}
+			}
 	
 			if (allPaymentsSuccessful) {
-				redirectAttributes.addFlashAttribute("successMessage", "Todos los pagos se procesaron con éxito.");
+				redirectAttributes.addFlashAttribute("successMessage", "Todos los pagos se procesaron con éxito y los artículos fueron eliminados.");
 			} else {
 				redirectAttributes.addFlashAttribute("warningMessage", "Algunos pagos no se pudieron procesar.");
 			}

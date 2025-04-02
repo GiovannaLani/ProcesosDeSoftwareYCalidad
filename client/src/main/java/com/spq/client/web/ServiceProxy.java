@@ -37,7 +37,7 @@ import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
 import com.spq.client.data.HomeType;
 import java.util.Map;
-
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -213,9 +213,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public List<Purchase> createPurchases(long token, List<Purchase> purchases) {
 		try {
-			String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/multipleCreate")
-					.queryParam("token", token)
-					.toUriString();
+			String url = apiBaseUrl + "/purchases/multipleCreate?token=" + token;
 	
 			ResponseEntity<List<Purchase>> response = restTemplate.exchange(
 					url,
@@ -226,6 +224,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	
 			return response.getBody();
 		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
 			switch (e.getStatusCode().value()) {
 				case 400 -> throw new RuntimeException("Invalid purchase request");
 				case 404 -> throw new RuntimeException("One or more items not found");
@@ -255,30 +254,26 @@ public class ServiceProxy implements IVintedServiceProxy {
 
 	@Override
 	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token) {
-		boolean allPaymentsSuccessful = true;
+		String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/payMultiple")
+				.queryParam("token", token)
+				.queryParam("paymentMethod", paymentMethod)
+				.queryParam("purchaseIds", purchaseIds.toArray())
+				.toUriString();
 	
-		for (Long purchaseId : purchaseIds) {
-			String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
-			try {
-				Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
-				System.out.println("Server response for purchase ID " + purchaseId + ": " + response);
+		try {
+			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
+			System.out.println("Server response: " + response);
 	
-				if (!"success".equalsIgnoreCase(response.get("status"))) {
-					allPaymentsSuccessful = false;
-					System.out.println("Payment failed for purchase ID " + purchaseId);
-				}
-			} catch (HttpStatusCodeException e) {
-				System.out.println("Error response for purchase ID " + purchaseId + ": " + e.getResponseBodyAsString());
-				switch (e.getStatusCode().value()) {
-					case 400 -> throw new RuntimeException("Invalid payment request for purchase ID " + purchaseId);
-					case 404 -> throw new RuntimeException("Purchase not found for purchase ID " + purchaseId);
-					case 409 -> throw new RuntimeException("Payment conflict, already paid for purchase ID " + purchaseId);
-					default -> throw new RuntimeException("Failed to process payment for purchase ID " + purchaseId + ": " + e.getStatusText());
-				}
+			return "success".equalsIgnoreCase(response.get("status"));
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid payment request");
+				case 404 -> throw new RuntimeException("One or more purchases not found");
+				case 409 -> throw new RuntimeException("Payment conflict, already paid for one or more purchases");
+				default -> throw new RuntimeException("Failed to process payments: " + e.getStatusText());
 			}
 		}
-	
-		return allPaymentsSuccessful;
 	}
 
 	@Override

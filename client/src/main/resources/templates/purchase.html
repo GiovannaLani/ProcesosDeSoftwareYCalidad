@@ -225,6 +225,7 @@
 							</div>
 							<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
 							<p class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
+							<input type="hidden" name="itemIds" th:value="${item.id}">
 						</div>
 						
 						<h4 class="mtext-105 cl2 txt-center p-b-30">Confirmar Compra</h4>

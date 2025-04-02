@@ -229,7 +229,7 @@
 	
 					<form th:action="@{/processMultiplePayment}" method="post">
 						<input type="hidden" name="token" th:value="${token}" />
-						<input type="hidden" name="purchaseIds" th:value="${purchases.![id].join(',')}" />
+						<input type="hidden" name="purchaseIds" th:value="${purchaseIds}" />
 	
 						<div class="p-t-20">
 							<label for="paymentMethod">Selecciona el método de pago:</label>
