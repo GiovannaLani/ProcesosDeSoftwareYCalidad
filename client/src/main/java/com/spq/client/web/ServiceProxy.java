@@ -254,6 +254,34 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token) {
+		boolean allPaymentsSuccessful = true;
+	
+		for (Long purchaseId : purchaseIds) {
+			String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
+			try {
+				Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
+				System.out.println("Server response for purchase ID " + purchaseId + ": " + response);
+	
+				if (!"success".equalsIgnoreCase(response.get("status"))) {
+					allPaymentsSuccessful = false;
+					System.out.println("Payment failed for purchase ID " + purchaseId);
+				}
+			} catch (HttpStatusCodeException e) {
+				System.out.println("Error response for purchase ID " + purchaseId + ": " + e.getResponseBodyAsString());
+				switch (e.getStatusCode().value()) {
+					case 400 -> throw new RuntimeException("Invalid payment request for purchase ID " + purchaseId);
+					case 404 -> throw new RuntimeException("Purchase not found for purchase ID " + purchaseId);
+					case 409 -> throw new RuntimeException("Payment conflict, already paid for purchase ID " + purchaseId);
+					default -> throw new RuntimeException("Failed to process payment for purchase ID " + purchaseId + ": " + e.getStatusText());
+				}
+			}
+		}
+	
+		return allPaymentsSuccessful;
+	}
+
+	@Override
 	public void deleteItem(Long token, Long itemId) {
 		try {
 			System.out.println("borrar" + itemId);

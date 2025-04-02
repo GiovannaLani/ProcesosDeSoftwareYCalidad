@@ -211,31 +211,35 @@
 			<div class="flex-w flex-tr flex-login">
 				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
 					<h4 class="mtext-105 cl2 txt-center p-b-30">
-						Revisión de pago
+						Revisión de pagos
 					</h4>
-					<p class="txt-center">Gracias por tu compra. Aquí están los detalles de tu transacción:</p>
+					<p class="txt-center">Gracias por tus compras. Aquí están los detalles de tus transacciones:</p>
 					<ul class="p-l-20 p-t-20">
-						<li><strong>ID de la compra:</strong> <span th:text="${purchase.id}"></span></li>
-						<li><strong>Artículo:</strong> <span th:text="${purchase.itemId}"></span></li>
-						<li><strong>Comprador:</strong> <span th:text="${purchase.buyerUsername}"></span></li>
-						<li><strong>Vendedor:</strong> <span th:text="${purchase.sellerUsername}"></span></li>
-						<li><strong>Precio:</strong> <span th:text="${purchase.price}"></span> €</li>
-						<li><strong>Método de pago:</strong> <span th:text="${purchase.paymentMethod}"></span></li>
-						<li><strong>Estado:</strong> <span th:text="${purchase.status}"></span></li>
+						<div th:each="purchase : ${purchases}">
+							<li><strong>ID de la compra:</strong> <span th:text="${purchase.id}"></span></li>
+							<li><strong>Artículo:</strong> <span th:text="${purchase.itemId}"></span></li>
+							<li><strong>Comprador:</strong> <span th:text="${purchase.buyerUsername}"></span></li>
+							<li><strong>Vendedor:</strong> <span th:text="${purchase.sellerUsername}"></span></li>
+							<li><strong>Precio:</strong> <span th:text="${purchase.price}"></span> €</li>
+							<li><strong>Método de pago:</strong> <span th:text="${purchase.paymentMethod}"></span></li>
+							<li><strong>Estado:</strong> <span th:text="${purchase.status}"></span></li>
+							<hr>
+						</div>
 					</ul>
-					
-					<form th:action="@{/processPayment/{purchaseId}(purchaseId=${purchase.id})}" method="post">
+	
+					<form th:action="@{/processMultiplePayment}" method="post">
 						<input type="hidden" name="token" th:value="${token}" />
+						<input type="hidden" name="purchaseIds" th:value="${purchases.![id].join(',')}" />
 	
 						<div class="p-t-20">
 							<label for="paymentMethod">Selecciona el método de pago:</label>
 							<select name="paymentMethod" id="paymentMethod" class="form-control" onchange="togglePaymentFields(this.value)">
-								<option value="credit_card" th:selected="${purchase.paymentMethod == 'credit_card'}">Tarjeta de Crédito</option>
-								<option value="paypal" th:selected="${purchase.paymentMethod == 'paypal'}">PayPal</option>
-								<option value="bank_transfer" th:selected="${purchase.paymentMethod == 'bank_transfer'}">Transferencia Bancaria</option>
+								<option value="credit_card">Tarjeta de Crédito</option>
+								<option value="paypal">PayPal</option>
+								<option value="bank_transfer">Transferencia Bancaria</option>
 							</select>
 						</div>
-
+	
 						<div id="creditCardFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
@@ -250,14 +254,14 @@
 								<input type="text" id="cardCVC" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
 							</div>
 						</div>
-
+	
 						<div id="paypalFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
 								<input type="email" id="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
 							</div>
 						</div>
-
+	
 						<div id="bankTransferFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
@@ -271,7 +275,7 @@
 	
 						<div class="txt-center p-t-20">
 							<button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-								Procesar Pago
+								Procesar Pagos
 							</button>
 						</div>
 					</form>

@@ -42,6 +42,35 @@ public class PurchaseController {
         }
     }
 
+    @PostMapping("/payMultiple")
+    public ResponseEntity<Map<String, String>> processMultiplePayments(
+            @RequestParam long token,
+            @RequestParam List<Long> purchaseIds,
+            @RequestParam String paymentMethod) {
+        Map<String, String> response = new HashMap<>();
+        boolean allPaymentsSuccessful = true;
+    
+        for (Long purchaseId : purchaseIds) {
+            boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);
+            if (!success) {
+                allPaymentsSuccessful = false;
+                response.put("status", "error");
+                response.put("message", "Payment failed for purchase ID " + purchaseId);
+                return ResponseEntity.badRequest().body(response);
+            }
+        }
+    
+        if (allPaymentsSuccessful) {
+            response.put("status", "success");
+            response.put("message", "All payments processed successfully.");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("status", "error");
+            response.put("message", "Some payments failed.");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
     @GetMapping("/{purchaseId}")
     public ResponseEntity<PurchaseDTO> getPurchaseById(@RequestParam long token, @PathVariable long purchaseId) {
         try {

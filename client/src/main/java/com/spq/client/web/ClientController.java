@@ -660,7 +660,7 @@ public class ClientController {
 			List<Purchase> createdPurchases = vintedService.createPurchases(token, purchases);
 	
 			redirectAttributes.addFlashAttribute("successMessage", "Compras iniciadas. Procede con el pago.");
-			return "redirect:/processPayment?purchaseIds=" + createdPurchases.stream()
+			return "redirect:/processMultiplePayment?purchaseIds=" + createdPurchases.stream()
 					.map(p -> p.id().toString())
 					.collect(Collectors.joining(",")) + "&token=" + token;
 	
@@ -692,6 +692,35 @@ public class ClientController {
 			return "paymentConfirmation";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
+			return "redirect:/login";
+		}
+	}
+
+	@GetMapping("/processMultiplePayment")
+	public String showPaymentConfirmation(
+			@RequestParam("purchaseIds") List<Long> purchaseIds,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			System.out.println("Purchase IDs: " + purchaseIds);
+	
+			List<Purchase> purchases = new ArrayList<>();
+			for (Long purchaseId : purchaseIds) {
+				Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+				if (purchase == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Una o más compras no fueron encontradas.");
+					return "redirect:/login";
+				}
+				purchases.add(purchase);
+			}
+	
+			model.addAttribute("purchases", purchases);
+			return "paymentConfirmation";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
+			e.printStackTrace();
 			return "redirect:/login";
 		}
 	}
@@ -734,6 +763,32 @@ public class ClientController {
 			e.printStackTrace();
 		}
 		return "redirect:/allItems";
+	}
+
+	@PostMapping("/processMultiplePayment")
+	public String processPayments(
+			@RequestParam("purchaseIds") List<Long> purchaseIds,
+			@RequestParam("token") Long token,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			System.out.println("Purchase IDs: " + purchaseIds);
+	
+			boolean allPaymentsSuccessful = vintedService.processPayments(purchaseIds, paymentMethod, token);
+	
+			if (allPaymentsSuccessful) {
+				redirectAttributes.addFlashAttribute("successMessage", "Todos los pagos se procesaron con éxito.");
+			} else {
+				redirectAttributes.addFlashAttribute("warningMessage", "Algunos pagos no se pudieron procesar.");
+			}
+	
+			return "redirect:/allItems";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar los pagos: " + e.getMessage());
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
 	}
 
 	@DeleteMapping("/deletePurchase/{purchaseId}")
