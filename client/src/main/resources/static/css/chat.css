@@ -1,0 +1,282 @@
+.web_ui__Text__title {
+    color: RGBA(var(--greyscale-level-1, 1));
+    font-family: V-Inter, V_INTER, V_INTER Fallback, Helvetica Neue, Helvetica-Neue, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+  }
+  
+  .web_chat_a:hover {
+    background-color: rgb(240, 240, 240);
+  }
+  
+  .web_ui__Image__large, .web_ui__Image__size-large {
+    height: 48px;
+    width: 48px;
+  }
+  .web_ui__Text__left {
+    text-align: left;
+  }
+  
+  h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, h6:first-child, ol:first-child, p:first-child, table:first-child {
+    margin-top: 0 !important;
+  }
+  
+  .web_ui__Text__left {
+    text-align: left;
+  }
+  .web_ui__Text__caption, .web_ui__Text__subtitle {
+    color: RGBA(var(--greyscale-level-2, 1));
+    font-family: V-Inter, V_INTER, V_INTER Fallback, Helvetica Neue, Helvetica-Neue, Arial, sans-serif;
+    font-weight: 375;
+  }
+  .web_ui__Text__subtitle {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .web_ui__Text__text {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+  }
+  h3 {
+    font-size: 2.1rem;
+  }
+  .heading, h1, h2, h3, h4, h5, h6 {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    font-weight: 400;
+    line-height: 1.25;
+    color: inherit;
+    word-break: normal;
+  }
+  .heading, h1, h2, h3, h4, h5, h6, ol, p, table, ul {
+    margin: 10px 0 0;
+  }
+  h3 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+  }
+  .inbox-page__block--sidebar {
+    width: 300px;
+    flex-shrink: 0;
+  }
+  
+  .inbox-page__block {
+    height: calc(100vh - 185px);
+    min-height: 320px;
+  }
+  .conversation-list-toolbar {
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+  }
+  .conversation-header{
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    justify-content: center;
+  }
+  .bor10-r {
+    border-right: 1px solid #e6e6e6;
+  }
+  
+  .web_ui__Image__rounded {
+    border-radius: 6px;
+  }
+  
+  .thread__messages-wrapper {
+    display: flex;
+    flex: 1 1;
+    flex-direction: column;
+    overflow: auto;
+  }
+  .thread__messages-main {
+    position: relative;
+    width: 100%;
+    flex: 3 1;
+    display: flex
+  ;
+    height: 100%;
+  }
+  .thread__content {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 16px;
+    /*overflow: auto;*/
+  }
+  .u-ui-margin-top-large {
+    margin-top: 16px !important;
+  }
+  .conversation-message-container {
+    display: flex;
+    padding-bottom: 4px;
+  }
+  .conversation-message-container-user {
+    display: flex;
+    padding-bottom: 4px;
+    justify-content: flex-end;
+  }
+  .u-ui-margin-right-regular {
+    margin-right: 8px !important;
+  }
+  .conversation-message__intro {
+    min-width: 220px;
+  }
+  
+  .conversation-message {
+    word-break: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    position: relative;
+    display: flex
+  ;
+    flex-direction: column;
+    float: left;
+    min-height: 28px;
+    max-width: 384px;
+  }
+  .web_ui__Bubble__bubble {
+    background: rgba(var(--greyscale-level-6), 1);
+    border: 1px solid rgba(var(--greyscale-level-1), .12);
+    border-radius: 6px;
+    font-size: 0;
+    vertical-align: top;
+  }
+  .web_ui__Bubble__bubble-user {
+    background: rgba(123,181,186,1);
+    color: white;
+    border: 1px solid rgba(var(--greyscale-level-1), .12);
+    border-radius: 6px;
+    font-size: 0;
+    vertical-align: top;
+  }
+  .web_ui__Bubble__narrow {
+    padding: 8px;
+  }
+  .web_ui__Image__medium, .web_ui__Image__size-medium {
+    height: 32px;
+    width: 32px;
+  }
+  
+  .web_ui__Text__left {
+    text-align: left;
+  }
+  
+  .web_ui__Text__body, .web_ui__Text__user-input {
+    font-family: V-Inter, V_INTER, V_INTER Fallback, Helvetica Neue, Helvetica-Neue, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 375;
+    line-height: 22px;
+  }
+  .web_ui__Text__body {
+    color: RGBA(var(--greyscale-level-2, 1));
+  }
+  .web_ui__Text__body-user {
+    color: white;
+  }
+  .web_ui__Text__text {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+  }
+  .u-ui-padding-horizontal-large {
+    padding-right: 16px !important;
+    padding-left: 16px !important;
+  }
+  
+  .u-ui-padding-bottom-regular {
+    padding-bottom: 8px !important;
+  }
+  .u-flexbox {
+    display: flex
+  ;
+  }
+  .thread__messages-container {
+    flex: 3 1;
+    display: flex
+  ;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+  }
+  .thread__wrapper {
+    position: relative;
+    display: flex
+  ;
+    height: 100%;
+  }
+  .web_ui__InputBar__input-bar {
+    background-color: rgba(var(--greyscale-level-5), 1);
+    border-radius: 6px;
+    display: flex
+  ;
+    min-height: 36px;
+    padding: 0;
+  }
+  .web_ui__InputBar__prefix, .web_ui__InputBar__suffix {
+    align-items: flex-end;
+  }
+  
+  .web_ui__InputBar__icon, .web_ui__InputBar__input, .web_ui__InputBar__prefix, .web_ui__InputBar__suffix {
+    display: flex
+  ;
+  }
+  .web_ui__Button__default.web_ui__Button__without-text {
+    height: auto;
+    padding: 9px;
+  }
+  .web_ui__Button__flat {
+    /* background-color: initial; */
+    border-color: transparent;
+  }
+  
+  .web_ui__Button__disabled {
+    opacity: .48;
+    pointer-events: none;
+  }
+  .web_ui__InputBar__input textarea {
+    resize: none;
+  }
+  .u-ui-padding-top-regular {
+    padding-top: 8px !important;
+  }
+  .web_ui__Icon__greyscale-level-3 svg {
+    fill: rgba(var(--greyscale-level-3), 1);
+    color: rgba(var(--greyscale-level-3), 1);
+  }
+
+  .u-overflow-auto {
+    overflow: auto !important;
+  }
+  
+  .u-fill-height {
+    height: 100% !important;
+  }
+  .mper-l-r-15{
+    margin-left: 15%;
+    margin-right: 15%;
+  }
+  #chatMessagesContainer {
+    height: 400px;
+    width: 100%;
+    overflow-y: scroll;
+    padding: 10px;
+    margin-bottom: 10px;
+    flex-direction: column;
+}

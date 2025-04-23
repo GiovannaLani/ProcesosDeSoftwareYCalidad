@@ -296,7 +296,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 .button-green{
   background-color: rgba(0,119,130,1);
   text-decoration: none;
-  color: white;
+  color: white !important;
   font-family: V-Inter, Helvetica Neue, Helvetica-Neue, Arial, sans-serif;
     font-size: 12px;
     font-weight: 375;
@@ -315,7 +315,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 .button-white{
   background-color: white;
   text-decoration: none;
-  color: rgba(0,119,130,1);
+  color: rgba(0,119,130,1) !important;
   font-family: V-Inter, Helvetica Neue, Helvetica-Neue, Arial, sans-serif;
     font-size: 12px;
     font-weight: 375;
@@ -4257,4 +4257,14 @@ a{
 
 .cart-link:hover {
   color: inherit; 
+}
+
+.enviar-mensaje {
+  color: rgba(0,119,130,1);
+  background-color: white;
+  border: 1px solid rgba(0,119,130,1);
+}
+.enviar-mensaje:hover {
+  background-color: rgba(0,119,130,1);
+  color: white;
 }

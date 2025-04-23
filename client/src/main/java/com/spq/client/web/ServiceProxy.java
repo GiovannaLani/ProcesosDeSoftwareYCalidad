@@ -26,6 +26,9 @@ import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
+import com.spq.client.data.ChatMessage;
+import com.spq.client.data.ChatRoom;
+import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.ClothesSize;
 import com.spq.client.data.ClothesType;
@@ -501,6 +504,46 @@ public class ServiceProxy implements IVintedServiceProxy {
 			switch (e.getStatusCode().value()) {
 				case 404 -> throw new RuntimeException("User not found");
 				default -> throw new RuntimeException("Failed to fetch seller: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void createChatRoom(long buyerId, long sellerId, long itemId) {
+		ChatRoom chatRoomRequest = new ChatRoom(itemId, buyerId, sellerId);
+
+		try {
+			String url = apiBaseUrl + "/chatrooms";
+			restTemplate.postForObject(url, chatRoomRequest, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User or item not found");
+				default -> throw new RuntimeException("Failed to create chat room: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<ChatRoomInfo> getChatRoomsForUser(long userId) {
+		try {
+			String url = apiBaseUrl + "/chatrooms/user/" + userId;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<ChatRoomInfo>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch chat rooms: " + e.getStatusText());
+			}
+		}
+	}
+
+	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId) {
+		try {
+			String url = apiBaseUrl + "/chatrooms/" + chatRoomId + "/messages";
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<ChatMessage>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("ChatRoom not found");
+				default -> throw new RuntimeException("Failed to fetch chat messages: " + e.getStatusText());
 			}
 		}
 	}
