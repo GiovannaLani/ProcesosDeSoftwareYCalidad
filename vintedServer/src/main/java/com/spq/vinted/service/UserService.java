@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.UserRepository;
 
@@ -162,5 +163,10 @@ public class UserService {
 	public void saveUser(User user) {
         userRepository.save(user);
     }
+
+	public User getUserByUsername(String username, Long token) {
+		return userRepository.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+	}
 
 }

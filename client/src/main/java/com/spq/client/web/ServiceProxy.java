@@ -504,4 +504,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+	public User getUserByUsername(String username, Long token) {
+		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
+		try {
+			return restTemplate.getForObject(url, User.class);
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return null;
+		}
+	}
+
 }

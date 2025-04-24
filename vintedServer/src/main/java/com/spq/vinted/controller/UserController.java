@@ -162,6 +162,7 @@ public class UserController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	
 	@GetMapping("/userId")
     public ResponseEntity<Long> getUserIdFromToken(@RequestParam("token") Long token) {
         try {
@@ -175,5 +176,21 @@ public class UserController {
                     .body(null);
         }
     }
+
+	@GetMapping("/search")
+	public ResponseEntity<UserDTO> searchUser(
+			@RequestParam("username") String username,
+			@RequestParam("token") Long token) {
+		try {
+			UserDTO user = userService.getUserByUsername(username, token).toDTO();
+			if (user != null) {
+				return ResponseEntity.ok(user);
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
 
 }
