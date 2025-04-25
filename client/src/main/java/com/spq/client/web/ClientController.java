@@ -185,9 +185,13 @@ public class ClientController {
 		try {
 			Item item = vintedService.getItemById(id);
 			Long sellerId = vintedService.getSeller(item).id();
+			User seller = vintedService.getSeller(item);
 
 			model.addAttribute("item", item);
 			model.addAttribute("sellerId", sellerId);
+			model.addAttribute("seller", seller);
+			model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
+
 			return "product-details"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
