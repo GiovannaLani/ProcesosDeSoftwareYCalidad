@@ -4,6 +4,7 @@ import com.spq.vinted.dto.EditUserDTO;
 import com.spq.vinted.dto.LoginDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
+import com.spq.vinted.model.Item;
 import com.spq.vinted.model.User;
 import com.spq.vinted.service.UserService;
 
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -192,5 +194,17 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
+
+    @GetMapping("/{userId}/items")
+    public ResponseEntity<List<Item>> getUserItems(
+            @PathVariable Long userId,
+            @RequestParam("token") Long token) {
+        try {
+            List<Item> items = userService.getUserItems(userId, token);
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 }

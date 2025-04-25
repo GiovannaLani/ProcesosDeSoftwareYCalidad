@@ -716,11 +716,16 @@ public class ClientController {
 	public String searchUser(
 			@RequestParam("username") String username,
 			@RequestParam("token") Long token,
+			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
 			User user = vintedService.getUserByUsername(username, token);
 			if (user != null) {
-				return "redirect:/userProfile/" + user.id() + "?token=" + token;
+				List<Item> items = vintedService.getUserItems(user.id(), token);
+				model.addAttribute("user", user);
+				model.addAttribute("items", items);
+	
+				return "userProfile";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
 				return "redirect:/allItems";

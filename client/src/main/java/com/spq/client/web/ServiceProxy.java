@@ -36,7 +36,8 @@ import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
 import com.spq.client.data.HomeType;
 import java.util.Map;
-
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -513,6 +514,18 @@ public class ServiceProxy implements IVintedServiceProxy {
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
 			return null;
+		}
+	}
+
+	@Override
+	public List<Item> getUserItems(Long userId, Long token) {
+		String url = apiBaseUrl + "/users/" + userId + "/items?token=" + token;
+		try {
+			Item[] items = restTemplate.getForObject(url, Item[].class);
+			return Arrays.asList(items);
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return Collections.emptyList();
 		}
 	}
 
