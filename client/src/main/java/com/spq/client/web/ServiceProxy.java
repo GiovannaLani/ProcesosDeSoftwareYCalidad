@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.ResponseEntity;
 
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
@@ -215,6 +216,30 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public List<Purchase> createPurchases(long token, List<Purchase> purchases) {
+		try {
+			String url = apiBaseUrl + "/purchases/multipleCreate?token=" + token;
+	
+			ResponseEntity<List<Purchase>> response = restTemplate.exchange(
+					url,
+					HttpMethod.POST,
+					new HttpEntity<>(purchases),
+					new ParameterizedTypeReference<List<Purchase>>() {}
+			);
+	
+			return response.getBody();
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid purchase request");
+				case 404 -> throw new RuntimeException("One or more items not found");
+				case 409 -> throw new RuntimeException("Purchase conflict, one or more items already sold");
+				default -> throw new RuntimeException("Failed to create purchases: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
 	public boolean processPayment(long purchaseId, String paymentMethod, long token) {
 		String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
 		try {
@@ -228,6 +253,30 @@ public class ServiceProxy implements IVintedServiceProxy {
 				case 404 -> throw new RuntimeException("Purchase not found");
 				case 409 -> throw new RuntimeException("Payment conflict, already paid");
 				default -> throw new RuntimeException("Failed to process payment: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token) {
+		String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/payMultiple")
+				.queryParam("token", token)
+				.queryParam("paymentMethod", paymentMethod)
+				.queryParam("purchaseIds", purchaseIds.toArray())
+				.toUriString();
+	
+		try {
+			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
+			System.out.println("Server response: " + response);
+	
+			return "success".equalsIgnoreCase(response.get("status"));
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			switch (e.getStatusCode().value()) {
+				case 400 -> throw new RuntimeException("Invalid payment request");
+				case 404 -> throw new RuntimeException("One or more purchases not found");
+				case 409 -> throw new RuntimeException("Payment conflict, already paid for one or more purchases");
+				default -> throw new RuntimeException("Failed to process payments: " + e.getStatusText());
 			}
 		}
 	}

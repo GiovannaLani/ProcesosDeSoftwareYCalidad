@@ -32,7 +32,9 @@ public interface IVintedServiceProxy {
 	public List<Entertainment> getItemsForEntertainment(long token);
 	public void logout(long token);
 	public Purchase createPurchase(long token, Purchase purchase);
+	public List<Purchase> createPurchases(long token, List<Purchase> purchases);
 	public boolean processPayment(long purchaseId, String paymentMethod, long token);
+	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token);
 	public void deleteUser(long token);
 	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);
 	public User getUser(long id, long token);
