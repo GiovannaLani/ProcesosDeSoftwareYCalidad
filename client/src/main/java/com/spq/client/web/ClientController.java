@@ -687,7 +687,6 @@ public class ClientController {
 		return "redirect:" + redirectUrl;
 	}
 
-
 	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
 			@RequestParam("token") Long token,
@@ -737,5 +736,30 @@ public class ClientController {
 		}
 		return null;
 	}
+	@GetMapping("/searchUser")
+	public String searchUser(
+			@RequestParam("username") String username,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUserByUsername(username, token);
+			if (user != null) {
+				List<Item> items = vintedService.getUserItems(user.id(), token);
+				model.addAttribute("user", user);
+				model.addAttribute("items", items);
+	
+				return "userProfile";
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+				return "redirect:/allItems";
+			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+
 }
 

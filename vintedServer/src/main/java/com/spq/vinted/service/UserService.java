@@ -6,23 +6,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spq.vinted.dto.UserDTO;
+import com.spq.vinted.model.Item;
 import com.spq.vinted.model.User;
+import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.repository.UserRepository;
 
 @Service
 public class UserService {
     private Map<Long, User> activeUsers;
 	private UserRepository userRepository;
+	private final ItemRepository itemRepository;
 	
-	public UserService(UserRepository userRepository) {
+	public UserService(UserRepository userRepository, ItemRepository itemRepository) {
 		activeUsers = new HashMap<>();
 		this.userRepository = userRepository;
+		this.itemRepository = itemRepository;
 	}
 	
 	public void createUser(String email, String password, String username, String name, String surname) {
@@ -162,5 +168,16 @@ public class UserService {
 	public void saveUser(User user) {
         userRepository.save(user);
     }
+
+	public User getUserByUsername(String username, Long token) {
+		return userRepository.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+	}
+
+	public List<Item> getUserItems(Long userId, Long token) {
+		User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
+		List<Item> items = user.getItemsForSale();
+		return items;
+	}
 
 }
