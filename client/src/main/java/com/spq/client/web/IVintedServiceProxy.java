@@ -8,6 +8,9 @@ import com.spq.client.data.Purchase;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
+import com.spq.client.data.ChatMessage;
+import com.spq.client.data.ChatRoom;
+import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -48,4 +51,7 @@ public interface IVintedServiceProxy {
 	public List<Item> searchItems(Long token, String search);
 	public User getUserByUsername(String username, Long token);
 	public List<Item> getUserItems(Long userId, Long token);
+	public void createChatRoom(long buyerId, long sellerId, long itemId);
+	public List<ChatRoomInfo> getChatRoomsForUser(long userId);
+	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId);
 }

@@ -57,7 +57,11 @@ public class User {
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> itemsForSale = new ArrayList<>();
     
+    @OneToMany(mappedBy = "buyer")
+    private List<ChatRoom> chatsComoComprador = new ArrayList<>();
 
+    @OneToMany(mappedBy = "seller")
+    private List<ChatRoom> chatsComoVendedor = new ArrayList<>();
     public User() {
     }
     public User(String email, String password, String username, String name, String surname) {

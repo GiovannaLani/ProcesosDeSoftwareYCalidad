@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.spq.client.data.Category;
+import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
@@ -224,7 +225,7 @@ public class ClientController {
 		@PathVariable Category category,
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
-    try {
+			try {
 		List<Clothes> clothesCategory = null;
 		if(token == null) {
 			clothesCategory = vintedService.getClothesByCategory(category, -1);
@@ -260,7 +261,7 @@ public class ClientController {
 		}
 		return null;
 	}
-
+	
 	@GetMapping("/pet")
 	public String getItemsForPet(
 		@RequestParam(value = "token", required = false) Long token,
@@ -309,8 +310,8 @@ public class ClientController {
 		@RequestParam(value = "token", required = false) Long token,
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model
-	) {
-		try {
+		) {
+			try {
 			List<Home> homeItems = null;
 			if(token == null) {
 				homeItems = vintedService.getHomeItems(-1);
@@ -348,7 +349,7 @@ public class ClientController {
 			@RequestParam(value="token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
-		try {
+				try {
 			this.token = null;
 			vintedService.deleteUser(token);
 		} catch (RuntimeException e) {
@@ -376,7 +377,7 @@ public class ClientController {
 	
 		return "userProfile";
 	}
-
+	
 	@PostMapping("/editUser")
 	public String editUser(
 			@RequestParam("token") Long token,
@@ -386,7 +387,7 @@ public class ClientController {
 			@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			RedirectAttributes redirectAttributes) {
-
+				
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
@@ -504,14 +505,14 @@ public class ClientController {
 			return "error"; 
 		}
 	}
-
+	
 	@GetMapping("/createPurchase/{itemId}")
 	public String showPurchasePage(
 			@PathVariable Long itemId,
 			@RequestParam("token") Long token,
 			Model model,
 			RedirectAttributes redirectAttributes) {
-		try {
+				try {
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
@@ -535,10 +536,10 @@ public class ClientController {
 		}
 	}
 	
-
+	
 	@PostMapping("/createPurchase/{itemId}")
 	public String createPurchase(
-			@PathVariable Long itemId,
+		@PathVariable Long itemId,
 			@RequestParam("token") Long token,
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
@@ -569,13 +570,13 @@ public class ClientController {
 					item.getPrice(),
 					paymentMethod,
 					"PENDING"
-			);
+					);
 	
-			Purchase createdPurchase = vintedService.createPurchase(token, purchase);
+					Purchase createdPurchase = vintedService.createPurchase(token, purchase);
 	
-			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
+					redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
 			return "redirect:/processPayment/" + createdPurchase.id() + "?token=" + token;
-	
+			
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear la compra.");
 			e.printStackTrace();
@@ -610,7 +611,7 @@ public class ClientController {
 
 	@PostMapping("/processPayment/{purchaseId}")
 	public String processPayment(
-			@PathVariable Long purchaseId,
+		@PathVariable Long purchaseId,
 			@RequestParam("token") Long token,
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes,
@@ -650,7 +651,7 @@ public class ClientController {
 
 	@DeleteMapping("/deletePurchase/{purchaseId}")
 	public String deletePurchase(
-			@PathVariable Long purchaseId,
+		@PathVariable Long purchaseId,
 			@RequestParam("token") Long token,
 			RedirectAttributes redirectAttributes) {
 		try {
@@ -662,7 +663,7 @@ public class ClientController {
 		}
 		return "redirect:/allItems";
 	}
-
+	
 	@PostMapping("/shoppingCart/add")
 	public String addItemToCart(
 			@RequestParam("token") Long token,
@@ -686,10 +687,11 @@ public class ClientController {
 		}
 		return "redirect:" + redirectUrl;
 	}
+	
 
 	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
-			@RequestParam("token") Long token,
+		@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			RedirectAttributes redirectAttributes) {
@@ -757,6 +759,60 @@ public class ClientController {
 			e.printStackTrace();
 			return "redirect:/allItems";
 		}
+	}
+	
+	@GetMapping("/vintedChat")
+	public String showVintedChat(
+			@RequestParam(value="token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (token == null) {
+			return "redirect:/login";
+		}
+		if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
+			redirectUrl = "/vintedChat";
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
+		}
+		model.addAttribute("redirectUrl", redirectUrl);
+
+		Long userId = vintedService.getUserIdFromToken(token);
+		model.addAttribute("loggedUserId", userId);
+
+		if (userId == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("buyerId", userId);
+
+		List<ChatRoomInfo> chatRooms = vintedService.getChatRoomsForUser(userId);
+		model.addAttribute("chatRooms", chatRooms);
+		for(ChatRoomInfo chatRoom : chatRooms) {
+			System.out.println("user id: "+ userId + "seller id" + chatRoom.sellerId() + "seller name: " + chatRoom.sellerName() + "buyer id: " + chatRoom.buyerId() + "buyer name: " + chatRoom.buyerName() + "item id: " + chatRoom.itemId() + "item title: " + chatRoom.itemImage() );
+		}
+		return "vintedChat";
+	}
+
+	@PostMapping("/vintedChat/chatRoom")
+	public String createChatRoom(
+			@RequestParam("token") Long token,
+			@RequestParam("sellerId") long sellerId,
+			@RequestParam("itemId") long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+
+		if (token == null) {
+			return "redirect:/login";
+		}
+		long buyerId = vintedService.getUserIdFromToken(token);
+
+		vintedService.createChatRoom(buyerId, sellerId, itemId);
+
+		if (redirectUrl == null || redirectUrl.isBlank() || redirectUrl.equals("null")) {
+			redirectUrl = "/vintedChat?token=" + token;
+		}
+
+		return "redirect:" + redirectUrl;
 	}
 
 }
