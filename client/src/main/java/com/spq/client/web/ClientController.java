@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -707,6 +708,27 @@ public class ClientController {
 		return "redirect:" + redirectUrl + "?token=" + token;
 	}
 
+	@GetMapping("/search")
+    public String searchItems(
+            @RequestParam("search_text") String search,
+            @RequestParam("token") Long token,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            List<Item> items = vintedService.searchItems(token, search);
+            if (items != null && !items.isEmpty()) {
+                model.addAttribute("items", items);
+                return "search";
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
+                return "redirect:/allItems";
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
+            e.printStackTrace();
+            return "redirect:/allItems";
+        }
+    }
 	@GetMapping("/searchUser")
 	public String searchUser(
 			@RequestParam("username") String username,

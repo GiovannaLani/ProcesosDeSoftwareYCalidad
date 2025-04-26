@@ -67,8 +67,7 @@
 
 					<!-- Menu desktop -->
 
-					<div
-						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
+					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
 							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
@@ -84,6 +83,7 @@
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
+					
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
 												<div class="u-flexbox u-align-items-center">
@@ -98,6 +98,7 @@
 												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
 												aria-labelledby="search-item" name="username" required>
 										</div>
+					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
@@ -106,14 +107,13 @@
 						</div>
 					</div>
 
-
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
 							<i class="lnr lnr-envelope"></i>
 						</div>
 
-                        <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
 							<a th:href="@{/shoppingCart(token=${token})}" class="cart-link">
 								<i class="zmdi zmdi-shopping-cart"></i>
 							</a>
@@ -152,128 +152,212 @@
 					</div>
 				</nav>
 			</div>
-
-			<div class="wrap-menu-desktop">
-				<nav class="limiter-menu-desktop container">
-
-
-					<!-- Menu desktop -->
-					<div class="menu-desktop">
-						<ul class="main-menu">
-							<li>
-								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
-							</li>
-
-							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
-							</li>
-
-							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
-							</li>
-							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
-							</li>
-							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
-							</li>
-						</ul>
-					</div>
-
-				</nav>
-			</div>
 		</div>
 
 	</header>
 
 
-	<!-- Content page -->
+	<!-- Product -->
 	<section class="bg0 p-t-104 p-b-116">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
-						<div class="m-l-25 m-r--38 m-lr-0-xl">
-							<div class="wrap-table-shopping-cart">
-								<div th:if="${cartItems.isEmpty()}">
-									<p>El carrito está vacío.</p>
-								</div>
-								<div th:if="${!cartItems.isEmpty()}">
-									<table class="table-shopping-cart">
-										<tr class="table_head">
-											<th class="column-1">Product</th>
-											<th class="column-2"></th>
-											<th class="column-3">Price</th>
-										</tr>
-										<tr th:each="item : ${cartItems}" class="table_row">
-											<td class="column-1">
-												<div class="how-itemcart1">
-													<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" alt="IMG">
-												</div>
-											</td>
-											<td class="column-2" th:text="${item.title ?: 'Sin título'}">Nombre del producto</td>
-											<td class="column-3" th:text="${item.price ?: 0.0}">Precio</td>
-											<td class="column-4">
-												<form th:action="@{/shoppingCart/remove(redirectUrl=${currentUrl})}" method="post" class="m-r-20">
-													<input type="hidden" name="token" th:value="${token}" />
-													<input type="hidden" name="itemId" th:value="${item.id ?: 0}" />
-													<button type="submit" class="btn btn-danger">Eliminar</button>
-												</form>
-											</td>
-										</tr>
-									</table>
-								</div>
-							</div>
-						</div>
+		<div class="container">
+			<div class="flex-w flex-sb-m p-b-52">
+
+				<div class="flex-w flex-c-m m-tb-10">
+					<div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
+						<i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
+						<i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
+						 Filter
 					</div>
+				</div>
+				
+				<!-- Search product -->
+				<div class="dis-none panel-search w-full p-t-10 p-b-15">
+					<div class="bor8 dis-flex p-l-15">
+						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+							<i class="zmdi zmdi-search"></i>
+						</button>
 
-				<div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
-					<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
-						<h4 class="mtext-109 cl2 p-b-30">
-							Cart Totals
-						</h4>
+						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+					</div>	
+				</div>
 
-						<div class="flex-w flex-t bor12 p-b-13">
+				<!-- Filter -->
+				<div class="dis-none panel-filter w-full p-t-10">
+					<div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
+						<div class="filter-col1 p-r-15 p-b-27">
+							<div class="mtext-102 cl2 p-b-15">
+								Sort By
+							</div>
 
-                            <div class="flex-w flex-t p-t-27 p-b-33 align-total">
-                                <div class="size-208" style="width: 100%;">
-                                    <span class="mtext-101 cl2">
-                                        Total:
-                                    </span>
-                                </div>
-                                <div class="size-209">
-                                    <span class="mtext-110 cl2" th:text="${totalPrice}">
-                                    </span>
-                                </div>
-                            </div>
+							<ul id="sortBySelect">
+								<li class="p-b-6">
+									<a href="#" data-value="default" class="filter-link stext-106 trans-04">
+										Default
+									</a>
+								</li>
+							
+								<li class="p-b-6">
+									<a href="#" data-value="priceLowToHigh" class="filter-link stext-106 trans-04">
+										Price: Low to High
+									</a>
+								</li>
+							
+								<li class="p-b-6">
+									<a href="#" data-value="priceHighToLow" class="filter-link stext-106 trans-04">
+										Price: High to Low
+									</a>
+								</li>
+							</ul>
+						</div>
+							
+							<script>
+							document.querySelectorAll('#sortBySelect a').forEach(link => {
+								link.addEventListener('click', function(e) {
+									e.preventDefault();
+									
+									const sortBy = this.getAttribute('data-value');
+									const container = document.querySelector('.isotope-grid');
+									const products = Array.from(container.querySelectorAll('.isotope-item'));
+									
+									products.sort((a, b) => {
+										const priceA = parseFloat(a.querySelector('.stext-105').textContent.replace('€', '').replace('$', '').trim());
+										const priceB = parseFloat(b.querySelector('.stext-105').textContent.replace('€', '').replace('$', '').trim());
+										
+										if (sortBy === 'priceLowToHigh') {
+											return priceA - priceB;
+										} else if (sortBy === 'priceHighToLow') {
+											return priceB - priceA;
+										} else {
+											return 0;
+										}
+									});
+							
+									products.forEach(product => container.appendChild(product));
+							
+		
+									document.querySelectorAll('#sortBySelect a').forEach(a => a.classList.remove('filter-link-active'));
+									this.classList.add('filter-link-active');
+								});
+							});
+							</script>
 
-							<a th:if="${!cartItems.isEmpty()}" th:href="@{/createPurchase/{itemId}(itemId=${cartItems[0].id}, token=${token})}" 
-							class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							 Proceed to Checkout
-							</a>
+						<div class="filter-col2 p-r-15 p-b-27">
+							<div class="mtext-102 cl2 p-b-15">
+								Price
+							</div>
+
+							<ul id="priceFilter">
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04 filter-link-active" data-min="0" data-max="Infinity">
+										All
+									</a>
+								</li>
+
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="0" data-max="50">
+										$0.00 - $50.00
+									</a>
+								</li>
+
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="50" data-max="100">
+										$50.00 - $100.00
+									</a>
+								</li>
+
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="100" data-max="150">
+										$100.00 - $150.00
+									</a>
+								</li>
+
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="150" data-max="200">
+										$150.00 - $200.00
+									</a>
+								</li>
+
+								<li class="p-b-6">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="200" data-max="Infinity">
+										$200.00+
+									</a>
+								</li>
+							</ul>
+						</div>
+						<script>
+							document.querySelectorAll('#priceFilter a').forEach(link => {
+								link.addEventListener('click', function(e) {
+									e.preventDefault();
+							
+									const minPrice = parseFloat(this.getAttribute('data-min'));
+									const maxPrice = parseFloat(this.getAttribute('data-max'));
+							
+									const products = document.querySelectorAll('.isotope-item');
+							
+									products.forEach(product => {
+										const priceElement = product.querySelector('.stext-105');
+										if (!priceElement) return;
+							
+										const price = parseFloat(priceElement.textContent.replace('€', '').replace('$', '').trim());
+							
+										if (price >= minPrice && price <= maxPrice) {
+											product.style.display = '';
+										} else {
+											product.style.display = 'none';
+										}
+									});
+							
+									document.querySelectorAll('#priceFilter a').forEach(a => a.classList.remove('filter-link-active'));
+									this.classList.add('filter-link-active');
+								});
+							});
+							</script>
+
+						
 					</div>
 				</div>
 			</div>
+			<div th:if="${items == null or items.isEmpty()}" class="row isotope-grid" style="justify-content: center;">
+				<p class="stext-107 cl7 size-201 errorMessage txt-center"
+					style="text-align: center; display: block; width: 100%;">
+					No hay productos disponibles.
+				 </p>
+			</div>
+			<div class="row isotope-grid">
+				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women" th:each="item : ${items}">
+					<!-- Block2 -->
+					<div class="block2">
+						<a th:href="@{/item/{id}(id=${item.id}, token=${token})}">
+							<div class="block2-pic hov-img0">
+								<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" alt="IMG-PRODUCT">
+							</div>
+							<div class="block2-txt flex-w flex-t p-t-14">
+								<div class="block2-txt-child1 flex-col-l ">
+									<a href="product-detail.html" th:text="${item.title}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+										Esprit Ruffle Shirt
+									</a>
+
+									<span class="stext-105 cl3 " th:text="${item.price + ' €'}">
+										16.64€
+									</span>
+								</div>
+
+								<div class="block2-txt-child2 flex-r p-t-3">
+									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+										<img class="icon-heart1 dis-block trans-04" th:src="@{/images/icons/icon-heart-01.png}" alt="ICON">
+										<img class="icon-heart2 dis-block trans-04 ab-t-l" th:src="@{/images/icons/icon-heart-02.png}" alt="ICON">
+									</a>
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
 	</section>
+
+
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
@@ -391,23 +475,23 @@
 			<div class="p-t-40">
 				<div class="flex-c-m flex-w p-b-18">
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-01.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-02.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-03.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-04.png}"  alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-05.png}" alt="ICON-PAY">
 					</a>
 				</div>
 
@@ -434,14 +518,14 @@
 	</div>
 
 	<!--===============================================================================================-->
-	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script th:src="@{/vendor/jquery/jquery-3.2.1.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/bootstrap/js/popper.js"></script>
-	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/select2/select2.min.js"></script>
+	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
 		$(".js-select2").each(function () {
 			$(this).select2({
@@ -451,9 +535,9 @@
 		})
 	</script>
 	<!--===============================================================================================-->
-	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -471,9 +555,9 @@
 	</script>
 	<!--===============================================================================================-->
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
-	<script src="js/map-custom.js"></script>
+	<script th:src="@{/js/map-custom.js}"></script>
 	<!--===============================================================================================-->
-	<script src="js/main.js"></script>
+	<script th:src="@{/js/main.js}"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
         const userMenuToggle = document.querySelector(".user-menu-toggle");
@@ -491,38 +575,37 @@
         });
     });
 	</script>
-
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const searchForm = document.getElementById("search-form");
-		const searchType = document.getElementById("search-type");
-		const searchText = document.getElementById("search_text");
-	
-		function updateFormBeforeSubmit() {
-			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
-				searchText.name = "username"; 
-			} else {
-				searchForm.action = "/search";
-				searchText.name = "search_text";
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const searchForm = document.getElementById("search-form");
+			const searchType = document.getElementById("search-type");
+			const searchText = document.getElementById("search_text");
+		
+			function updateFormBeforeSubmit() {
+				if (searchType.value === "miembros") {
+					searchForm.action = "/searchUser";
+					searchText.name = "username"; 
+				} else {
+					searchForm.action = "/search";
+					searchText.name = "search_text";
+				}
 			}
-		}
-	
-		searchType.addEventListener("change", function () {
-			updateFormBeforeSubmit();
+		
+			searchType.addEventListener("change", function () {
+				updateFormBeforeSubmit();
+			});
+		
+			searchForm.addEventListener("submit", function (event) {
+				const text = searchText.value.trim();
+				if (!text) {
+					event.preventDefault();
+					alert("Por favor, introduce un término de búsqueda.");
+					return;
+				}
+				updateFormBeforeSubmit();
+			});
 		});
-	
-		searchForm.addEventListener("submit", function (event) {
-			const text = searchText.value.trim();
-			if (!text) {
-				event.preventDefault();
-				alert("Por favor, introduce un término de búsqueda.");
-				return;
-			}
-			updateFormBeforeSubmit();
-		});
-	});
-	</script>
+		</script>
 </body>
 
 </html>

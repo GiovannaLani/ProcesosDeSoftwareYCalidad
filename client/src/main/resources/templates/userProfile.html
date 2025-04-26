@@ -727,19 +727,36 @@
 		});
 	</script>
 
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const searchForm = document.getElementById("search-form");
-			const searchType = document.getElementById("search-type");
-
-			searchType.addEventListener("change", function () {
-				if (searchType.value === "miembros") {
-					searchForm.action = "/searchUser";
-				} else {
-					searchForm.action = "/searchUser";
-				}
-			});
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const searchForm = document.getElementById("search-form");
+		const searchType = document.getElementById("search-type");
+		const searchText = document.getElementById("search_text");
+	
+		function updateFormBeforeSubmit() {
+			if (searchType.value === "miembros") {
+				searchForm.action = "/searchUser";
+				searchText.name = "username"; 
+			} else {
+				searchForm.action = "/search";
+				searchText.name = "search_text";
+			}
+		}
+	
+		searchType.addEventListener("change", function () {
+			updateFormBeforeSubmit();
 		});
+	
+		searchForm.addEventListener("submit", function (event) {
+			const text = searchText.value.trim();
+			if (!text) {
+				event.preventDefault();
+				alert("Por favor, introduce un término de búsqueda.");
+				return;
+			}
+			updateFormBeforeSubmit();
+		});
+	});
 	</script>
 
 </body>

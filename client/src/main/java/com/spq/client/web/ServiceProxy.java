@@ -508,6 +508,19 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+    public List<Item> searchItems(Long token, String search) {
+        String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
+        try {
+            Item[] items = restTemplate.getForObject(url, Item[].class);
+            return Arrays.asList(items);
+        } catch (HttpStatusCodeException e) {
+            System.out.println("Error response: " + e.getResponseBodyAsString());
+            throw new RuntimeException("Failed to fetch items: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred while fetching items.", e);
+        }
+    }
+	
 	public User getUserByUsername(String username, Long token) {
 		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
 		try {
@@ -554,3 +567,4 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 }
+

@@ -216,8 +216,14 @@ public class ItemService {
         System.out.println("Item borrado correctamente.");
     }
     
-    
-
+    public List<Item> searchItems(Long token, String query) {
+        if (query == null || query.isBlank()) return getItems(token);
+        List<Item> items = itemRepository.findAll().stream()
+                .filter(item -> item.getTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        System.out.println("2"+items);
+        return items;
+    }
 }
 
 
