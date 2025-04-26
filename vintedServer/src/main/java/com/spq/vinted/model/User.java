@@ -3,6 +3,9 @@ package com.spq.vinted.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.spq.vinted.dto.UserDTO;
 
 import jakarta.persistence.CascadeType;
@@ -140,7 +143,7 @@ public class User {
     }
 
     public UserDTO toDTO() {
-        return new UserDTO(id, username, name, surname, description, profileImage, followers, following);
+        return new UserDTO(id, username, name, surname, description, profileImage);
     }
     public List<Item> getItemsForSale() {
         return itemsForSale;

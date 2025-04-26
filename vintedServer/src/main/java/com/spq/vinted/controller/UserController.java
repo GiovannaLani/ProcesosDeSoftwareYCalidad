@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -208,13 +209,18 @@ public class UserController {
 	}
 
 	@GetMapping("/followers")
-	public ResponseEntity<List<User>> getFollowers(@RequestParam("token") Long token) {
+	public ResponseEntity<List<UserDTO>> getFollowers(@RequestParam("token") Long token) {
 		try {
 			Long userId = userService.getUserIdByToken(token);
 			if (userId == null) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
-			return ResponseEntity.ok(userService.getFollowers(userId));
+			List<User> followers = userService.getFollowers(userId);
+
+			List<UserDTO> followersDTO = followers.stream()
+					.map(user -> user.toDTO())
+					.collect(Collectors.toList());
+			return ResponseEntity.ok(followersDTO);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -222,13 +228,19 @@ public class UserController {
 	}
 
 	@GetMapping("/following")
-	public ResponseEntity<List<User>> getFollowing(@RequestParam("token") Long token) {
+	public ResponseEntity<List<UserDTO>> getFollowing(@RequestParam("token") Long token) {
 		try {
 			Long userId = userService.getUserIdByToken(token);
 			if (userId == null) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}
-			return ResponseEntity.ok(userService.getFollowing(userId));
+			List<User> following = userService.getFollowing(userId);
+
+			List<UserDTO> followingDTO = following.stream()
+					.map(user -> user.toDTO())
+					.collect(Collectors.toList());
+
+			return ResponseEntity.ok(followingDTO);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

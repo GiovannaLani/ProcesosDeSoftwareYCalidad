@@ -10,7 +10,5 @@ public record UserDTO(
     String name,
     String surname,
     String description,
-    String profileImage,
-    List<User> followers, 
-    List<User> following
+    String profileImage
 ){}

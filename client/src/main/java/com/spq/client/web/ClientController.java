@@ -378,14 +378,17 @@ public class ClientController {
 		model.addAttribute("isMyProfile", isMyProfile);
 		User loggedUser = vintedService.getUser(userId, token);
 		User profileUser = vintedService.getUser(id, token);
-		model.addAttribute("isFollowing", loggedUser.followers().contains(profileUser));
-		// model.addAttribute("followersCount", profileUser.followers().size());
+		List<User> followers = vintedService.getFollowers(token, id);
+		List<User> following = vintedService.getFollowing(token, id);
+		model.addAttribute("isFollowing", following.contains(profileUser));
+		model.addAttribute("followersCount", followers.size());
+		model.addAttribute("followingCount", following.size());
 		// //model.addAttribute("followingCount", loggedUser.following().size());
 		// model.addAttribute("followingCount", profileUser.following().size());
 		
 		
-		model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
-		model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
+		// model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
+		// model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
 	
 		return "userProfile";
 	}
