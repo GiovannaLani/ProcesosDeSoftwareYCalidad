@@ -10,5 +10,5 @@ import com.spq.vinted.model.Message;
 public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByChatRoomOrderByTimestampAsc(ChatRoom chatRoom);
     List<Message> findByChatRoomId(Long chatRoomId);
-    Message findByOfferId(Long id);
+    List<Message> findByOfferOfferId(Long offerId);
 }

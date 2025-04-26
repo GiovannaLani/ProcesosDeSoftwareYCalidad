@@ -36,11 +36,6 @@ public class MessageService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    private ItemRepository itemRepository;
 
     public void sendMessage(long token, long chatRoomId, String content) {
         User sender = userService.getUserByToken(token);
@@ -75,41 +70,6 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    @Transactional
-    public Message saveAndSendMessage(Message message) {
-        Message savedMessage = messageRepository.save(message);
-        
-        // Convert to DTO or use a dedicated method to avoid circular references
-        ChatMessageDTO messageDTO = convertToDTO(savedMessage);
-        
-        // Send to WebSocket topic for this chat
-        messagingTemplate.convertAndSend("/topic/chat/" + message.getChatRoom().getId(), messageDTO);
-        
-        return savedMessage;
-    }
     
-    private ChatMessageDTO convertToDTO(Message message) {
-        ChatMessageDTO dto = new ChatMessageDTO();
-        dto.setSenderId(message.getSender().getId());
-        dto.setContent(message.getContent());
-        dto.setTimestamp(message.getTimestamp());
-        
-        if (message.getType() == Message.MessageType.OFFER && message.getOffer() != null) {
-            OfferDTO offerDTO = new OfferDTO();
-            offerDTO.setId(message.getOffer().getId());
-            offerDTO.setPrice(message.getOffer().getPrice());
-            offerDTO.setStatus(message.getOffer().getStatus().toString());
-            offerDTO.setSenderId(message.getOffer().getSender().getId());
-            offerDTO.setReceiverId(message.getOffer().getReceiver().getId());
-            
-            ItemDTO itemDTO = ItemService.getDTOById(message.getOffer().getItem().getId());
-            offerDTO.setItem(itemDTO); 
-            
-
-            dto.setOffer(offerDTO);
-        }
-
-        return dto;
-
-    }
+    
 }

@@ -1,73 +1,100 @@
+
 package com.spq.vinted.dto;
 
 public class OfferDTO {
-    private Long id;
-    private Double price;
-    private String status;
+    private Long offerId;
+    private Long chatRoomId;
     private Long senderId;
-    private Long receiverId;
-    private ItemDTO item;
+    private Long itemId;
+    private String itemName;
+    private String itemImage;
+    private float originalPrice;
+    private float offerPrice;
+    private String status;
     
+    public OfferDTO() {}
 
-    
-    public OfferDTO() {
-    }
-
-    public OfferDTO(Long id, Double price, String status, Long senderId, Long receiverId, ItemDTO item) {
-        this.id = id;
-        this.price = price;
-        this.status = status;
+    public OfferDTO(Long offerId, Long chatRoomId, Long senderId, Long itemId, String itemName, String itemImage, float originalPrice, float offerPrice, String status) {
+        this.offerId = offerId;
+        this.chatRoomId = chatRoomId;
         this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.item = item;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemImage = itemImage;
+        this.originalPrice = originalPrice;
+        this.offerPrice = offerPrice;
         this.status = status;
     }
-
+    
+    public Long getOfferId() {
+        return offerId;
+    }
+    
+    public void setOfferId(Long offerId) {
+        this.offerId = offerId;
+    }
+    
+    public Long getChatRoomId() {
+        return chatRoomId;
+    }
+    
+    public void setChatRoomId(Long chatRoomId) {
+        this.chatRoomId = chatRoomId;
+    }
+    
     public Long getSenderId() {
         return senderId;
     }
-
+    
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
     }
-
-    public Long getReceiverId() {
-        return receiverId;
+    
+    public Long getItemId() {
+        return itemId;
     }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
-
-    public ItemDTO getItem() {
-        return item;
+    
+    public String getItemName() {
+        return itemName;
     }
-
-    public void setItem(ItemDTO item) {
-        this.item = item;
+    
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
-
+    
+    public String getItemImage() {
+        return itemImage;
+    }
+    
+    public void setItemImage(String itemImage) {
+        this.itemImage = itemImage;
+    }
+    
+    public float getOriginalPrice() {
+        return originalPrice;
+    }
+    
+    public void setOriginalPrice(float originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+    
+    public float getOfferPrice() {
+        return offerPrice;
+    }
+    
+    public void setOfferPrice(float offerPrice) {
+        this.offerPrice = offerPrice;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
