@@ -16,6 +16,7 @@ import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -725,6 +726,9 @@ public class ClientController {
 				model.addAttribute("user", user);
 				model.addAttribute("items", items);
 	
+				boolean isMyProfile = user.id() == userId;
+				model.addAttribute("isMyProfile", isMyProfile);
+	
 				return "userProfile";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
@@ -734,6 +738,42 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
 			e.printStackTrace();
 			return "redirect:/allItems";
+		}
+	}
+
+	@PostMapping("/rateUser")
+	public String rateUser(
+			@RequestParam("ratedUserId") long ratedUserId,
+			@RequestParam("ratingUserId") long ratingUserId,
+			@RequestParam("score") int score,
+			@RequestParam(value = "comment", required = false) String comment,
+			@RequestParam("token") Long token,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Rating rating = new Rating(0, ratedUserId, ratingUserId, score, comment);
+			System.out.println("Rating user: " + rating.ratedUserId() + " by user: " + rating.ratingUserId() + " with score: " + rating.score() + " and comment: " + rating.comment());
+			String response = vintedService.addRating(rating, token);
+			redirectAttributes.addFlashAttribute("successMessage", response);
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al enviar la valoración.");
+			e.printStackTrace();
+		}
+		return "redirect:/userProfile/" + ratedUserId + "?token=" + token;
+	}
+
+	@GetMapping("/user/{userId}/ratings")
+	public String getUserRatings(
+			@PathVariable long userId,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+			return "userRatings";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al obtener las valoraciones.");
+			e.printStackTrace();
+			return "redirect:/userProfile/" + userId;
 		}
 	}
 

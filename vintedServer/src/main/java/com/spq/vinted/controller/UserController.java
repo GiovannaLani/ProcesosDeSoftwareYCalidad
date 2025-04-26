@@ -2,9 +2,11 @@ package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.EditUserDTO;
 import com.spq.vinted.dto.LoginDTO;
+import com.spq.vinted.dto.RatingDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Rating;
 import com.spq.vinted.model.User;
 import com.spq.vinted.service.UserService;
 
@@ -206,5 +208,40 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+	@PostMapping("/rate")
+	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
+		try {
+			User ratedUser = userService.getUserById(rating.getRatedUser().getId());
+			User ratingUser = userService.getUserById(rating.getRatingUser().getId());
+	
+			if (ratedUser == null || ratingUser == null) {
+				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+			}
+	
+			RatingDTO ratingDTO = new RatingDTO(
+				ratedUser.getId(),
+				ratingUser.getId(),
+				rating.getScore(),
+				rating.getComment()
+			);
+	
+			userService.addRating(ratingDTO);
+			return ResponseEntity.ok("Rating added successfully");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body("Error adding rating: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/{userId}/ratings")
+	public ResponseEntity<List<RatingDTO>> getUserRatings(@PathVariable long userId) {
+		try {
+			List<RatingDTO> ratings = userService.getRatingsForUser(userId);
+			return ResponseEntity.ok(ratings);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(null);
+		}
+	}
 
 }

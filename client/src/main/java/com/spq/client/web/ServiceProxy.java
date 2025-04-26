@@ -24,6 +24,7 @@ import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.Clothes;
@@ -523,6 +524,30 @@ public class ServiceProxy implements IVintedServiceProxy {
 		try {
 			Item[] items = restTemplate.getForObject(url, Item[].class);
 			return Arrays.asList(items);
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public String addRating(Rating rating, Long token) {
+		System.out.println("Rating user: " + rating.ratedUserId() + " by user: " + rating.ratingUserId() + " with score: " + rating.score() + " and comment: " + rating.comment());
+		String url = apiBaseUrl + "/users/rate?token=" + token;
+		try {
+			restTemplate.postForObject(url, rating, Void.class);
+			return "Rating added successfully";
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return "Error adding rating: " + e.getResponseBodyAsString();
+		}
+	}
+
+	@Override
+	public List<Rating> getRatingsForUser(long userId) {
+		String url = apiBaseUrl + "/users/" + userId + "/ratings";
+		try {
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Rating>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
 			return Collections.emptyList();
