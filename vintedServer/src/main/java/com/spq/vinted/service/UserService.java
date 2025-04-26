@@ -187,28 +187,22 @@ public class UserService {
 	}
 
 	public void addRating(RatingDTO ratingDTO) {
-		User ratedUser = userRepository.findById(String.valueOf(ratingDTO.getRatedUserId()))
-				.orElseThrow(() -> new RuntimeException("Rated user not found"));
-		User ratingUser = userRepository.findById(String.valueOf(ratingDTO.getRatingUserId()))
-				.orElseThrow(() -> new RuntimeException("Rating user not found"));
-
 		Rating rating = new Rating();
-		rating.setRatedUser(ratedUser);
-		rating.setRatingUser(ratingUser);
+		rating.setRatedUserId(ratingDTO.getRatedUserId());
+		rating.setRatingUserId(ratingDTO.getRatingUserId());
 		rating.setScore(ratingDTO.getScore());
 		rating.setComment(ratingDTO.getComment());
-
+		System.out.println("cosasverdes1 " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
 		ratingRepository.save(rating);
 	}
-
+	
 	public List<RatingDTO> getRatingsForUser(long userId) {
-		User user = userRepository.findById(String.valueOf(userId))
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		return user.getRatingsReceived().stream()
+		List<Rating> ratings = ratingRepository.findByRatedUserId(userId);
+	
+		return ratings.stream()
 				.map(rating -> new RatingDTO(
-						rating.getRatedUser().getId(),
-						rating.getRatingUser().getId(),
+						rating.getRatedUserId(),
+						rating.getRatingUserId(),
 						rating.getScore(),
 						rating.getComment()
 				))

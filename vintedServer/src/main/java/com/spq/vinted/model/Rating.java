@@ -8,13 +8,11 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "rated_user_id", nullable = false)
-    private User ratedUser;
+    @Column(name = "rated_user_id", nullable = false)
+    private Long ratedUserId;
 
-    @ManyToOne
-    @JoinColumn(name = "rating_user_id", nullable = false)
-    private User ratingUser;
+    @Column(name = "rating_user_id", nullable = false)
+    private Long ratingUserId;
 
     @Column(nullable = false)
     private int score;
@@ -30,20 +28,20 @@ public class Rating {
         this.id = id;
     }
 
-    public User getRatedUser() {
-        return ratedUser;
+    public Long getRatedUserId() {
+        return ratedUserId;
     }
 
-    public void setRatedUser(User ratedUser) {
-        this.ratedUser = ratedUser;
+    public void setRatedUserId(Long ratedUserId) {
+        this.ratedUserId = ratedUserId;
     }
 
-    public User getRatingUser() {
-        return ratingUser;
+    public Long getRatingUserId() {
+        return ratingUserId;
     }
 
-    public void setRatingUser(User ratingUser) {
-        this.ratingUser = ratingUser;
+    public void setRatingUserId(Long ratingUserId) {
+        this.ratingUserId = ratingUserId;
     }
 
     public int getScore() {

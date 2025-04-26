@@ -362,19 +362,13 @@ public class ClientController {
 			@PathVariable("id") Long id,
 			@RequestParam(value = "token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			Model model) {
+			Model model,
+			RedirectAttributes redirectAttributes) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-	
-		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-		List<Item> items = vintedService.getUserItems(id);
-    	model.addAttribute("items", items);
-		boolean isMyProfile = (id.equals(userId));
-		model.addAttribute("isMyProfile", isMyProfile);
-	
-		return "userProfile";
+		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 
 	@PostMapping("/editUser")
@@ -722,14 +716,7 @@ public class ClientController {
 		try {
 			User user = vintedService.getUserByUsername(username, token);
 			if (user != null) {
-				List<Item> items = vintedService.getUserItems(user.id(), token);
-				model.addAttribute("user", user);
-				model.addAttribute("items", items);
-	
-				boolean isMyProfile = user.id() == userId;
-				model.addAttribute("isMyProfile", isMyProfile);
-	
-				return "userProfile";
+				return loadUserProfile(user.id(), token, model, redirectAttributes);
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
 				return "redirect:/allItems";
@@ -743,22 +730,22 @@ public class ClientController {
 
 	@PostMapping("/rateUser")
 	public String rateUser(
-			@RequestParam("ratedUserId") long ratedUserId,
-			@RequestParam("ratingUserId") long ratingUserId,
+			@RequestParam("ratedUserId") Long ratedUserId,
+			@RequestParam("ratingUserId") Long ratingUserId,
 			@RequestParam("score") int score,
 			@RequestParam(value = "comment", required = false) String comment,
 			@RequestParam("token") Long token,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes,
+			Model model) {
 		try {
-			Rating rating = new Rating(0, ratedUserId, ratingUserId, score, comment);
-			System.out.println("Rating user: " + rating.ratedUserId() + " by user: " + rating.ratingUserId() + " with score: " + rating.score() + " and comment: " + rating.comment());
+			Rating rating = new Rating(0L, ratedUserId, ratingUserId, score, comment);
 			String response = vintedService.addRating(rating, token);
 			redirectAttributes.addFlashAttribute("successMessage", response);
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al enviar la valoración.");
 			e.printStackTrace();
 		}
-		return "redirect:/userProfile/" + ratedUserId + "?token=" + token;
+		return loadUserProfile(ratedUserId, token, model, redirectAttributes);
 	}
 
 	@GetMapping("/user/{userId}/ratings")
@@ -769,11 +756,33 @@ public class ClientController {
 		try {
 			List<Rating> ratings = vintedService.getRatingsForUser(userId);
 			model.addAttribute("ratings", ratings);
-			return "userRatings";
+			return "userProfile";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al obtener las valoraciones.");
 			e.printStackTrace();
 			return "redirect:/userProfile/" + userId;
+		}
+	}
+
+	private String loadUserProfile(Long userId, Long token, Model model, RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUser(userId, token);
+			model.addAttribute("user", user);
+	
+			List<Item> items = vintedService.getUserItems(userId);
+			model.addAttribute("items", items);
+	
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+	
+			boolean isMyProfile = userId.equals(this.userId);
+			model.addAttribute("isMyProfile", isMyProfile);
+	
+			return "userProfile";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar el perfil del usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
 		}
 	}
 

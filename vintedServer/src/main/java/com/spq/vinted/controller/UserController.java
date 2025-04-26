@@ -212,13 +212,15 @@ public class UserController {
 	@PostMapping("/rate")
 	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
 		try {
-			User ratedUser = userService.getUserById(rating.getRatedUser().getId());
-			User ratingUser = userService.getUserById(rating.getRatingUser().getId());
+			System.out.println("cosasverdes " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
+			User ratedUser = userService.getUserById(rating.getRatedUserId());
+			User ratingUser = userService.getUserById(rating.getRatingUserId());
+			System.out.println(ratedUser.getId() + " " + ratingUser.getId() + " " + rating.getScore() + " " + rating.getComment());
 	
 			if (ratedUser == null || ratingUser == null) {
 				return ResponseEntity.badRequest().body("Rated user or rating user not found");
 			}
-	
+			
 			RatingDTO ratingDTO = new RatingDTO(
 				ratedUser.getId(),
 				ratingUser.getId(),

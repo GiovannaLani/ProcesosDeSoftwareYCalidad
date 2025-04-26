@@ -532,7 +532,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 
 	@Override
 	public String addRating(Rating rating, Long token) {
-		System.out.println("Rating user: " + rating.ratedUserId() + " by user: " + rating.ratingUserId() + " with score: " + rating.score() + " and comment: " + rating.comment());
 		String url = apiBaseUrl + "/users/rate?token=" + token;
 		try {
 			restTemplate.postForObject(url, rating, Void.class);

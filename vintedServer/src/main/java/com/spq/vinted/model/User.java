@@ -57,9 +57,6 @@ public class User {
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> itemsForSale = new ArrayList<>();
 
-    @OneToMany(mappedBy = "ratedUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Rating> ratingsReceived = new ArrayList<>();
-
     public User() {
     }
     public User(String email, String password, String username, String name, String surname) {
@@ -70,12 +67,7 @@ public class User {
         this.surname = surname;
         this.cartItems = new ArrayList<>();
     }
-    public List<Rating> getRatingsReceived() {
-        return ratingsReceived;
-    }
-    public void setRatingsReceived(List<Rating> ratingsReceived) {
-        this.ratingsReceived = ratingsReceived;
-    }
+
     public Long getId() {
         return id;
     }

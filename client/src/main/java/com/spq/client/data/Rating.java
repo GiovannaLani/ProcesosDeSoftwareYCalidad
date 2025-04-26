@@ -1,9 +1,9 @@
 package com.spq.client.data;
 
 public record Rating(
-    long id,
-    long ratedUserId,
-    long ratingUserId,
+    Long id,
+    Long ratedUserId,
+    Long ratingUserId,
     int score,
     String comment
 ) {}
