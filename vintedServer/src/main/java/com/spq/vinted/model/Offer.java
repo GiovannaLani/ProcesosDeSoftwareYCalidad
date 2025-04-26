@@ -1,114 +1,133 @@
 package com.spq.vinted.model;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-@Table(name = "offers")
 public class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long offerId;
+    private Long id;
     
-    private Long chatRoomId;
-    private Long senderId;
-    private Long itemId;
-    private String itemName;
-    private String itemImage;
-    private float originalPrice;
-    private float offerPrice;
-    private String status;
-
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    private User sender;
+    
+    @ManyToOne
+    @JoinColumn(name = "receiver_id")
+    private User receiver;
+    
+    @ManyToOne
+    @JoinColumn(name = "Item_id")
+    private Item item;
+    
+    @Column(nullable = false)
+    private Double price;
+    
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OfferStatus status;
+    
+    @ManyToOne
+    @JoinColumn(name = "chat_id")
+    private ChatRoom chat;
+    
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
     public enum OfferStatus {
-        PENDING,
-        ACCEPTED,
-        REJECTED
+        PENDING, ACCEPTED, REJECTED
     }
-
+    
+    
     public Offer() {
     }
 
-    public Offer(Long chatRoomId, Long senderId, Long itemId, String itemName, String itemImage, float originalPrice, float offerPrice, String status) {
-        this.chatRoomId = chatRoomId;
-        this.senderId = senderId;
-        this.itemId = itemId;
-        this.itemName = itemName;
-        this.itemImage = itemImage;
-        this.originalPrice = originalPrice;
-        this.offerPrice = offerPrice;
+    public Offer(User sender, User receiver, Item item, Double price, OfferStatus status, ChatRoom chat) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.item = item;
+        this.price = price;
         this.status = status;
+        this.chat = chat;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Long getOfferId() {
-        return offerId;
+    public Long getId() {
+        return id;
     }
 
-    public void setOfferId(Long offerId) {
-        this.offerId = offerId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Long getChatRoomId() {
-        return chatRoomId;
+    public User getSender() {
+        return sender;
     }
 
-    public void setChatRoomId(Long chatRoomId) {
-        this.chatRoomId = chatRoomId;
+    public void setSender(User sender) {
+        this.sender = sender;
     }
 
-    public Long getSenderId() {
-        return senderId;
+    public User getReceiver() {
+        return receiver;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
     }
 
-    public Long getItemId() {
-        return itemId;
+    public Item getItem() {
+        return item;
     }
 
-    public void setItemId(Long itemId) {
-        this.itemId = itemId;
+    public void setItem(Item item) {
+        this.item = item;
     }
 
-    public String getItemName() {
-        return itemName;
+    public Double getPrice() {
+        return price;
     }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
-    public String getItemImage() {
-        return itemImage;
-    }
-
-    public void setItemImage(String itemImage) {
-        this.itemImage = itemImage;
-    }
-
-    public float getOriginalPrice() {
-        return originalPrice;
-    }
-
-    public void setOriginalPrice(float originalPrice) {
-        this.originalPrice = originalPrice;
-    }
-
-    public float getOfferPrice() {
-        return offerPrice;
-    }
-
-    public void setOfferPrice(float offerPrice) {
-        this.offerPrice = offerPrice;
-    }
-
-    public String getStatus() {
+    public OfferStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OfferStatus status) {
         this.status = status;
     }
-    
+
+    public ChatRoom getChat() {
+        return chat;
+    }
+    public void setChat(ChatRoom chat) {
+        this.chat = chat;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+
+
+
 
 }
