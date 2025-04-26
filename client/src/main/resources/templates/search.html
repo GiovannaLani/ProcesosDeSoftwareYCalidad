@@ -70,10 +70,6 @@
 					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
 							<form action="/search" method="get">
-								<!-- Ocultos: token y redirectUrl -->
-								<input type="hidden" name="token" th:value="${token}" />
-								<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
-					
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
@@ -106,6 +102,9 @@
 												data-testid="search-text--input" class="web_ui__InputBar__value"
 												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
 												name="search_text" value="">
+											<!-- Ocultos: token y redirectUrl -->
+											<input type="hidden" name="token" th:value="${token}" />
+											<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
 										</div>
 					
 										<div class="web_ui__InputBar__suffix"></div>
@@ -114,6 +113,7 @@
 							</form>
 						</div>
 					</div>
+
 
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
@@ -158,56 +158,6 @@
 							</button>
 						</form>
 					</div>
-				</nav>
-			</div>
-
-			<div class="wrap-menu-desktop">
-				<nav class="limiter-menu-desktop container">
-
-
-					<!-- Menu desktop -->
-					<div class="menu-desktop">
-						<ul class="main-menu">
-							<li>
-								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
-							</li>
-
-							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
-							</li>
-
-							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
-							</li>
-							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
-							</li>
-							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
-							</li>
-						</ul>
-					</div>
-
 				</nav>
 			</div>
 		</div>
@@ -347,10 +297,11 @@
 								link.addEventListener('click', function(e) {
 									e.preventDefault();
 							
-					
+									// Obtener min y max
 									const minPrice = parseFloat(this.getAttribute('data-min'));
 									const maxPrice = parseFloat(this.getAttribute('data-max'));
 							
+									// Productos
 									const products = document.querySelectorAll('.isotope-item');
 							
 									products.forEach(product => {
@@ -360,13 +311,13 @@
 										const price = parseFloat(priceElement.textContent.replace('€', '').replace('$', '').trim());
 							
 										if (price >= minPrice && price <= maxPrice) {
-											product.style.display = ''; 
+											product.style.display = ''; // Mostrar
 										} else {
-											product.style.display = 'none';
+											product.style.display = 'none'; // Ocultar
 										}
 									});
 							
-
+									// Marcar activo
 									document.querySelectorAll('#priceFilter a').forEach(a => a.classList.remove('filter-link-active'));
 									this.classList.add('filter-link-active');
 								});
@@ -448,23 +399,39 @@
 
 							<div class="flex-w p-t-4 m-r--5">
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Fashion
+									Ropa
 								</a>
 
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Lifestyle
+									Mujer
 								</a>
 
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Denim
+									Hombre
 								</a>
 
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Streetstyle
+									Niñas
 								</a>
 
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Crafts
+									Niños
+								</a>
+
+                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+									Hogar
+								</a>
+
+                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+									Electrónica
+								</a>
+
+                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+									Entretenimiento
+								</a>
+
+                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
+									Mascotas
 								</a>
 							</div>
 						</div>

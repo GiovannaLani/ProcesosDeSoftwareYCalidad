@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -713,5 +714,28 @@ public class ClientController {
 		return "redirect:" + redirectUrl + "?token=" + token;
 	}
 
+	@GetMapping("/search")
+	public String searchItems(
+		@RequestParam(value = "token", required = false) Long token,
+			@RequestParam("search_text") String search,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:" + redirectUrl;
+		}
+		try {
+			List<Item> items = vintedService.searchItems(token, search);
+			model.addAttribute("items", items);
+			return "search"; 
+		} catch (RuntimeException e) {
+			System.err.println("Ha ocurrido un error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
 

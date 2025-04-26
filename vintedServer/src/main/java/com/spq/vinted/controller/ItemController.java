@@ -358,4 +358,20 @@ public class ItemController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ItemDTO>> searchItems(
+        @RequestParam(value = "token", required = false) Long token,
+        @RequestParam("search_text") String query) {
+        try {
+            List<Item> items = itemService.searchItems(token, query);
+            List<ItemDTO> itemDTOs = items.stream()
+                                      .map(Item::toDTO)
+                                      .collect(Collectors.toList());
+            return ResponseEntity.ok(itemDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
+

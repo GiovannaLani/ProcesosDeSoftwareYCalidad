@@ -504,4 +504,18 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+	public List<Item> searchItems(Long token, String search) {
+		try {
+			if(token == null) {
+				return restTemplate.exchange(apiBaseUrl + "/search?search_text=" + search, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			}else{
+				return restTemplate.exchange(apiBaseUrl + "/search?search_text=" + search + "&token=" + token, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			}
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
+	}
 }
+
