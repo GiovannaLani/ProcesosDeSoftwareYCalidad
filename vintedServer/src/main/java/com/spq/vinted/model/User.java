@@ -3,9 +3,7 @@ package com.spq.vinted.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import com.spq.vinted.dto.UserDTO;
 
 import jakarta.persistence.CascadeType;
@@ -82,6 +80,7 @@ public class User {
         this.surname = surname;
         this.cartItems = new ArrayList<>();
     }
+
     public Long getId() {
         return id;
     }

@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
@@ -49,4 +50,9 @@ public interface IVintedServiceProxy {
 	public void unfollowUser(Long token, Long targetUserId);
 	public List<User> getFollowers(Long token, Long userId);
 	public List<User> getFollowing(Long token, Long userId);
+	public List<Item> searchItems(Long token, String search);
+	public User getUserByUsername(String username, Long token);
+	public List<Item> getUserItems(Long userId, Long token);
+	public String addRating(Rating rating, Long token);
+	public List<Rating> getRatingsForUser(long userId);
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -16,6 +17,7 @@ import com.spq.client.data.Category;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -365,12 +367,11 @@ public class ClientController {
 			@PathVariable("id") Long id,
 			@RequestParam(value = "token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			Model model) {
+			Model model,
+			RedirectAttributes redirectAttributes) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-	
-		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
 		List<Item> items = vintedService.getUserItems(id);
     	model.addAttribute("items", items);
@@ -390,7 +391,8 @@ public class ClientController {
 		// model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
 		// model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
 	
-		return "userProfile";
+		// return "userProfile";
+		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 
 	@PostMapping("/editUser")
@@ -703,7 +705,6 @@ public class ClientController {
 		return "redirect:" + redirectUrl;
 	}
 
-
 	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
 			@RequestParam("token") Long token,
@@ -805,6 +806,105 @@ public class ClientController {
 		}
 	}
 
+	@GetMapping("/search")
+    public String searchItems(
+            @RequestParam("search_text") String search,
+            @RequestParam("token") Long token,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            List<Item> items = vintedService.searchItems(token, search);
+            if (items != null && !items.isEmpty()) {
+                model.addAttribute("items", items);
+                return "search";
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
+                return "redirect:/allItems";
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
+            e.printStackTrace();
+            return "redirect:/allItems";
+        }
+    }
+	@GetMapping("/searchUser")
+	public String searchUser(
+			@RequestParam("username") String username,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUserByUsername(username, token);
+			if (user != null) {
+				return loadUserProfile(user.id(), token, model, redirectAttributes);
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+				return "redirect:/allItems";
+			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+
+	@PostMapping("/rateUser")
+	public String rateUser(
+			@RequestParam("ratedUserId") Long ratedUserId,
+			@RequestParam("ratingUserId") Long ratingUserId,
+			@RequestParam("score") int score,
+			@RequestParam(value = "comment", required = false) String comment,
+			@RequestParam("token") Long token,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+		try {
+			Rating rating = new Rating(0L, ratedUserId, ratingUserId, score, comment);
+			String response = vintedService.addRating(rating, token);
+			redirectAttributes.addFlashAttribute("successMessage", response);
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al enviar la valoración.");
+			e.printStackTrace();
+		}
+		return loadUserProfile(ratedUserId, token, model, redirectAttributes);
+	}
+
+	@GetMapping("/user/{userId}/ratings")
+	public String getUserRatings(
+			@PathVariable long userId,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+			return "userProfile";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al obtener las valoraciones.");
+			e.printStackTrace();
+			return "redirect:/userProfile/" + userId;
+		}
+	}
+
+	private String loadUserProfile(Long userId, Long token, Model model, RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUser(userId, token);
+			model.addAttribute("user", user);
+	
+			List<Item> items = vintedService.getUserItems(userId);
+			model.addAttribute("items", items);
+	
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+	
+			boolean isMyProfile = userId.equals(this.userId);
+			model.addAttribute("isMyProfile", isMyProfile);
+	
+			return "userProfile";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar el perfil del usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
 
 }
 

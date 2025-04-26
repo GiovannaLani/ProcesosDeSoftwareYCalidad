@@ -67,46 +67,45 @@
 
 					<!-- Menu desktop -->
 
-					<div
-						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
+					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
-							<form action="/catalog" method="get">
+							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" class=" web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
-													  </select>
-													  
-																</div>
+													</select>
+												</div>
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
+					
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
-												<div class="u-flexbox u-align-items-center"><span
-														class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2"
-														style="width:16px"><svg viewBox="0 0 16 16" width="16"
-															height="16" aria-hidden="true">
-															<path
-																d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z">
-															</path>
-														</svg></span></div>
-											</div><input id="search_text" placeholder="Busca artículos"
-												data-testid="search-text--input" class="web_ui__InputBar__value"
-												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
-												name="search_text" value="">
+												<div class="u-flexbox u-align-items-center">
+													<span class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2" style="width:16px">
+														<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z"></path>
+														</svg>
+													</span>
+												</div>
+											</div>
+											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
+												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
+												aria-labelledby="search-item" name="username" required>
 										</div>
+					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
+								<input type="hidden" name="token" th:value="${token}">
 							</form>
 						</div>
 					</div>
-
 
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
@@ -240,184 +239,132 @@
 								Sort By
 							</div>
 
-							<ul>
+							<ul id="sortBySelect">
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" data-value="default" class="filter-link stext-106 trans-04">
 										Default
 									</a>
 								</li>
-
+							
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Popularity
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Average rating
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Newness
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" data-value="priceLowToHigh" class="filter-link stext-106 trans-04">
 										Price: Low to High
 									</a>
 								</li>
-
+							
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" data-value="priceHighToLow" class="filter-link stext-106 trans-04">
 										Price: High to Low
 									</a>
 								</li>
 							</ul>
 						</div>
+							
+							<script>
+							document.querySelectorAll('#sortBySelect a').forEach(link => {
+								link.addEventListener('click', function(e) {
+									e.preventDefault();
+									
+									const sortBy = this.getAttribute('data-value');
+									const container = document.querySelector('.isotope-grid');
+									const products = Array.from(container.querySelectorAll('.isotope-item'));
+									
+									products.sort((a, b) => {
+										const priceA = parseFloat(a.querySelector('.stext-105').textContent.replace('€', '').replace('$', '').trim());
+										const priceB = parseFloat(b.querySelector('.stext-105').textContent.replace('€', '').replace('$', '').trim());
+										
+										if (sortBy === 'priceLowToHigh') {
+											return priceA - priceB;
+										} else if (sortBy === 'priceHighToLow') {
+											return priceB - priceA;
+										} else {
+											return 0;
+										}
+									});
+							
+									products.forEach(product => container.appendChild(product));
+							
+									// (Opcional) Marcar activo
+									document.querySelectorAll('#sortBySelect a').forEach(a => a.classList.remove('filter-link-active'));
+									this.classList.add('filter-link-active');
+								});
+							});
+							</script>
 
 						<div class="filter-col2 p-r-15 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
 								Price
 							</div>
 
-							<ul>
+							<ul id="priceFilter">
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
+									<a href="#" class="filter-link stext-106 trans-04 filter-link-active" data-min="0" data-max="Infinity">
 										All
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="0" data-max="50">
 										$0.00 - $50.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="50" data-max="100">
 										$50.00 - $100.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="100" data-max="150">
 										$100.00 - $150.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="150" data-max="200">
 										$150.00 - $200.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
+									<a href="#" class="filter-link stext-106 trans-04" data-min="200" data-max="Infinity">
 										$200.00+
 									</a>
 								</li>
 							</ul>
 						</div>
+						<script>
+							document.querySelectorAll('#priceFilter a').forEach(link => {
+								link.addEventListener('click', function(e) {
+									e.preventDefault();
+							
+					
+									const minPrice = parseFloat(this.getAttribute('data-min'));
+									const maxPrice = parseFloat(this.getAttribute('data-max'));
+							
+									const products = document.querySelectorAll('.isotope-item');
+							
+									products.forEach(product => {
+										const priceElement = product.querySelector('.stext-105');
+										if (!priceElement) return;
+							
+										const price = parseFloat(priceElement.textContent.replace('€', '').replace('$', '').trim());
+							
+										if (price >= minPrice && price <= maxPrice) {
+											product.style.display = ''; 
+										} else {
+											product.style.display = 'none';
+										}
+									});
+							
 
-						<div class="filter-col3 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Color
-							</div>
+									document.querySelectorAll('#priceFilter a').forEach(a => a.classList.remove('filter-link-active'));
+									this.classList.add('filter-link-active');
+								});
+							});
+						</script>
 
-							<ul>
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #222;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Black
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #4272d7;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Blue
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #b3b3b3;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Grey
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #00ad5f;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Green
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #fa4251;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Red
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #aaa;">
-										<i class="zmdi zmdi-circle-o"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										White
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<div class="filter-col4 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Tags
-							</div>
-
-							<div class="flex-w p-t-4 m-r--5">
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Fashion
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Lifestyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Denim
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Streetstyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Crafts
-								</a>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -679,6 +626,39 @@
         });
     });
 	</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const searchForm = document.getElementById("search-form");
+		const searchType = document.getElementById("search-type");
+		const searchText = document.getElementById("search_text");
+	
+		function updateFormBeforeSubmit() {
+			if (searchType.value === "miembros") {
+				searchForm.action = "/searchUser";
+				searchText.name = "username"; 
+			} else {
+				searchForm.action = "/search";
+				searchText.name = "search_text";
+			}
+		}
+	
+		searchType.addEventListener("change", function () {
+			updateFormBeforeSubmit();
+		});
+	
+		searchForm.addEventListener("submit", function (event) {
+			const text = searchText.value.trim();
+			if (!text) {
+				event.preventDefault();
+				alert("Por favor, introduce un término de búsqueda.");
+				return;
+			}
+			updateFormBeforeSubmit();
+		});
+	});
+	</script>
+	
 	
 </body>
 

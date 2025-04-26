@@ -24,6 +24,7 @@ import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.Clothes;
@@ -36,7 +37,8 @@ import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
 import com.spq.client.data.HomeType;
 import java.util.Map;
-
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -523,6 +525,29 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+	
+    public List<Item> searchItems(Long token, String search) {
+        String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
+        try {
+            Item[] items = restTemplate.getForObject(url, Item[].class);
+            return Arrays.asList(items);
+        } catch (HttpStatusCodeException e) {
+            System.out.println("Error response: " + e.getResponseBodyAsString());
+            throw new RuntimeException("Failed to fetch items: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred while fetching items.", e);
+        }
+    }
+	
+	public User getUserByUsername(String username, Long token) {
+		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
+		try {
+			return restTemplate.getForObject(url, User.class);
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return null;
+		}
+	}
 
 	@Override
 	public void unfollowUser(Long token, Long targetUserId) {
@@ -542,6 +567,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+	public List<Item> getUserItems(Long userId, Long token) {
+		String url = apiBaseUrl + "/users/" + userId + "/items?token=" + token;
+		try {
+			Item[] items = restTemplate.getForObject(url, Item[].class);
+			return Arrays.asList(items);
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return Collections.emptyList();
+		}
+	}
 
 	@Override
 	public List<User> getFollowers(Long token, Long userId) {
@@ -553,6 +588,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 				case 404 -> throw new RuntimeException("User not found");
 				default -> throw new RuntimeException("Failed to fetch followers: " + e.getStatusText());
 			}
+		}
+	}
+	public String addRating(Rating rating, Long token) {
+		String url = apiBaseUrl + "/users/rate?token=" + token;
+		try {
+			restTemplate.postForObject(url, rating, Void.class);
+			return "Rating added successfully";
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return "Error adding rating: " + e.getResponseBodyAsString();
 		}
 	}
 
@@ -568,4 +613,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+	public List<Rating> getRatingsForUser(long userId) {
+		String url = apiBaseUrl + "/users/" + userId + "/ratings";
+		try {
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Rating>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			System.out.println("Error response: " + e.getResponseBodyAsString());
+			return Collections.emptyList();
+		}
+	}
+
 }
+	
+
