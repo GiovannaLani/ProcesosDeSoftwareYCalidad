@@ -69,14 +69,13 @@
 
 					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
-							<form action="/search" method="get">
+							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" name="type"
-														class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
 													</select>
@@ -90,30 +89,23 @@
 												<div class="u-flexbox u-align-items-center">
 													<span class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2" style="width:16px">
 														<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z">
-															</path>
+															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z"></path>
 														</svg>
 													</span>
 												</div>
 											</div>
-					
-											<!-- Input de búsqueda -->
-											<input id="search_text" placeholder="Busca artículos"
-												data-testid="search-text--input" class="web_ui__InputBar__value"
-												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
-												name="search_text" value="">
-											<!-- Ocultos: token y redirectUrl -->
-											<input type="hidden" name="token" th:value="${token}" />
-											<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
+											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
+												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
+												aria-labelledby="search-item" name="username" required>
 										</div>
 					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
+								<input type="hidden" name="token" th:value="${token}">
 							</form>
 						</div>
 					</div>
-
 
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
@@ -242,7 +234,7 @@
 							
 									products.forEach(product => container.appendChild(product));
 							
-									// (Opcional) Marcar activo
+		
 									document.querySelectorAll('#sortBySelect a').forEach(a => a.classList.remove('filter-link-active'));
 									this.classList.add('filter-link-active');
 								});
@@ -297,11 +289,9 @@
 								link.addEventListener('click', function(e) {
 									e.preventDefault();
 							
-									// Obtener min y max
 									const minPrice = parseFloat(this.getAttribute('data-min'));
 									const maxPrice = parseFloat(this.getAttribute('data-max'));
 							
-									// Productos
 									const products = document.querySelectorAll('.isotope-item');
 							
 									products.forEach(product => {
@@ -311,130 +301,19 @@
 										const price = parseFloat(priceElement.textContent.replace('€', '').replace('$', '').trim());
 							
 										if (price >= minPrice && price <= maxPrice) {
-											product.style.display = ''; // Mostrar
+											product.style.display = '';
 										} else {
-											product.style.display = 'none'; // Ocultar
+											product.style.display = 'none';
 										}
 									});
 							
-									// Marcar activo
 									document.querySelectorAll('#priceFilter a').forEach(a => a.classList.remove('filter-link-active'));
 									this.classList.add('filter-link-active');
 								});
 							});
 							</script>
 
-						<div class="filter-col3 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Color
-							</div>
-
-							<ul>
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #222;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Black
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #4272d7;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Blue
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #b3b3b3;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Grey
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #00ad5f;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Green
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #fa4251;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Red
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #aaa;">
-										<i class="zmdi zmdi-circle-o"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										White
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<div class="filter-col4 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Tags
-							</div>
-
-							<div class="flex-w p-t-4 m-r--5">
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Ropa
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Mujer
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Hombre
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Niñas
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Niños
-								</a>
-
-                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Hogar
-								</a>
-
-                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Electrónica
-								</a>
-
-                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Entretenimiento
-								</a>
-
-                                <a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Mascotas
-								</a>
-							</div>
-						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -696,7 +575,37 @@
         });
     });
 	</script>
-	
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const searchForm = document.getElementById("search-form");
+			const searchType = document.getElementById("search-type");
+			const searchText = document.getElementById("search_text");
+		
+			function updateFormBeforeSubmit() {
+				if (searchType.value === "miembros") {
+					searchForm.action = "/searchUser";
+					searchText.name = "username"; 
+				} else {
+					searchForm.action = "/search";
+					searchText.name = "search_text";
+				}
+			}
+		
+			searchType.addEventListener("change", function () {
+				updateFormBeforeSubmit();
+			});
+		
+			searchForm.addEventListener("submit", function (event) {
+				const text = searchText.value.trim();
+				if (!text) {
+					event.preventDefault();
+					alert("Por favor, introduce un término de búsqueda.");
+					return;
+				}
+				updateFormBeforeSubmit();
+			});
+		});
+		</script>
 </body>
 
 </html>

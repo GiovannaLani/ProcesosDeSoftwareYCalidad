@@ -714,28 +714,26 @@ public class ClientController {
 	}
 
 	@GetMapping("/search")
-	public String searchItems(
-		@RequestParam(value = "token", required = false) Long token,
-			@RequestParam("search_text") String search,
-			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			Model model) {
-		if (redirectUrl == null) {
-			redirectUrl = "/";
-		}
-
-		if (token == null) {
-			return "redirect:" + redirectUrl;
-		}
-		try {
-			List<Item> items = vintedService.searchItems(token, search);
-			model.addAttribute("items", items);
-			return "search"; 
-		} catch (RuntimeException e) {
-			System.err.println("Ha ocurrido un error: " + e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}
+    public String searchItems(
+            @RequestParam("search_text") String search,
+            @RequestParam("token") Long token,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            List<Item> items = vintedService.searchItems(token, search);
+            if (items != null && !items.isEmpty()) {
+                model.addAttribute("items", items);
+                return "search";
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
+                return "redirect:/allItems";
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
+            e.printStackTrace();
+            return "redirect:/allItems";
+        }
+    }
 	@GetMapping("/searchUser")
 	public String searchUser(
 			@RequestParam("username") String username,
