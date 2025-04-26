@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
@@ -54,4 +55,6 @@ public interface IVintedServiceProxy {
 	public void createChatRoom(long buyerId, long sellerId, long itemId);
 	public List<ChatRoomInfo> getChatRoomsForUser(long userId);
 	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId);
+	public String addRating(Rating rating, Long token);
+	public List<Rating> getRatingsForUser(long userId);
 }

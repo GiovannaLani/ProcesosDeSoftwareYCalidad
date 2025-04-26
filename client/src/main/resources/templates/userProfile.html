@@ -248,6 +248,27 @@
 										</div>
 									</div>
 									<div class="web_ui__Cell__suffix">
+										<div th:if="${not isMyProfile}">
+											<h3>Valorar a este usuario</h3>
+											<form th:action="@{/rateUser}" method="post">
+												<input type="hidden" name="ratedUserId" th:value="${user.id}" />
+												<input type="hidden" name="ratingUserId" th:value="${loggedUserId}" />
+												<input type="hidden" name="token" th:value="${token}" />
+												<label for="score">Puntuación:</label>
+												<select name="score" id="score" required>
+													<option value="1">1 - Muy malo</option>
+													<option value="2">2 - Malo</option>
+													<option value="3">3 - Regular</option>
+													<option value="4">4 - Bueno</option>
+													<option value="5">5 - Excelente</option>
+												</select>
+												<br />
+												<label for="comment">Comentario:</label>
+												<textarea name="comment" id="comment" rows="3" maxlength="500"></textarea>
+												<br />
+												<button type="submit">Enviar valoración</button>
+											</form>
+										</div>
 										<div th:unless="${isMyProfile}" class="u-flexbox">
 											<a th:href="@{/editUser}" class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
 												<span class="web_ui__Button__content">
@@ -438,7 +459,7 @@
 							</div>
 						</div>
 						<div id="feedback-content" class="profile__ratings-wrapper m-t-30" style="display: none;">
-							<div class="web_ui__EmptyState__empty-state" data-testid="closet-empty-state">
+							<div th:if="${#lists.isEmpty(ratings)}" class="web_ui__EmptyState__empty-state" data-testid="closet-empty-state">
 								<div class="web_ui__Container__container web_ui__Container__styling-wide m-b-10">
 									<h1 class="web_ui__Text__heading web_ui__Text__center txt-center">
 										Aún no hay valoraciones
@@ -446,6 +467,24 @@
 									<p class="web_ui__Text__body web_ui__Text__center txt-center">
 										Recibir valoraciones lleva algo de tiempo. Vuelve a mirar pronto.
 									</p>
+								</div>
+							</div>
+							<div th:if="${not #lists.isEmpty(ratings)}" class="web_ui__Container__container web_ui__Container__styling-wide m-b-10">
+								<h1 class="web_ui__Text__heading web_ui__Text__center txt-center">
+									Valoraciones recibidas
+								</h1>
+								<div th:each="rating : ${ratings}" class="web_ui__Card__card web_ui__Card__default m-b-10">
+									<div class="web_ui__Card__content">
+										<p class="web_ui__Text__body">
+											<strong>Usuario:</strong> <span th:text="${rating.ratingUserId}">Usuario</span>
+										</p>
+										<p class="web_ui__Text__body">
+											<strong>Puntuación:</strong> <span th:text="${rating.score}">5</span>
+										</p>
+										<p class="web_ui__Text__body">
+											<strong>Comentario:</strong> <span th:text="${rating.comment}">Sin comentario</span>
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>

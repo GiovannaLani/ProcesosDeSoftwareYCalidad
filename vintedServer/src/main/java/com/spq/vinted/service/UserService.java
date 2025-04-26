@@ -9,14 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spq.vinted.dto.RatingDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Rating;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.ItemRepository;
+import com.spq.vinted.repository.RatingRepository;
 import com.spq.vinted.repository.UserRepository;
 
 @Service
@@ -24,11 +28,13 @@ public class UserService {
     private Map<Long, User> activeUsers;
 	private UserRepository userRepository;
 	private final ItemRepository itemRepository;
+	private final RatingRepository ratingRepository;
 	
-	public UserService(UserRepository userRepository, ItemRepository itemRepository) {
+	public UserService(UserRepository userRepository, ItemRepository itemRepository, RatingRepository ratingRepository) {
 		activeUsers = new HashMap<>();
 		this.userRepository = userRepository;
 		this.itemRepository = itemRepository;
+		this.ratingRepository = ratingRepository;
 	}
 	
 	public void createUser(String email, String password, String username, String name, String surname) {
@@ -178,6 +184,29 @@ public class UserService {
 		User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
 		List<Item> items = user.getItemsForSale();
 		return items;
+	}
+
+	public void addRating(RatingDTO ratingDTO) {
+		Rating rating = new Rating();
+		rating.setRatedUserId(ratingDTO.getRatedUserId());
+		rating.setRatingUserId(ratingDTO.getRatingUserId());
+		rating.setScore(ratingDTO.getScore());
+		rating.setComment(ratingDTO.getComment());
+		System.out.println("cosasverdes1 " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
+		ratingRepository.save(rating);
+	}
+	
+	public List<RatingDTO> getRatingsForUser(long userId) {
+		List<Rating> ratings = ratingRepository.findByRatedUserId(userId);
+	
+		return ratings.stream()
+				.map(rating -> new RatingDTO(
+						rating.getRatedUserId(),
+						rating.getRatingUserId(),
+						rating.getScore(),
+						rating.getComment()
+				))
+				.collect(Collectors.toList());
 	}
 
 }
