@@ -126,8 +126,8 @@ public class Offer {
         this.createdAt = createdAt;
     }
 
-
-
-
-
 }
+
+
+
+

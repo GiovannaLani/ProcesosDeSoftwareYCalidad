@@ -676,8 +676,6 @@
 		}
 	});
 
-
-
 	function scrollToBottom() {
 		const scrollContainer = document.getElementById("chatMessagesContainer");
 		requestAnimationFrame(() => {
@@ -685,7 +683,7 @@
 		});
 	}
 	
-	function loadChat(chatRoomId) {
+	/* function loadChat(chatRoomId) {
 		const chatRoomElement = document.querySelector(`[onclick*="loadChat(${chatRoomId})"]`);
 
 		document.getElementById("chatName").style.display = "flex";
@@ -818,9 +816,7 @@
 			if (offerButton) {
 				offerButton.onclick = openOfferModal;
 			}
-	}
-
-
+	} */
 	
 	function getTokenFromURL() {
 		const params = new URLSearchParams(window.location.search);
@@ -829,7 +825,7 @@
 	
 </script>
 
-<!-- Offer Modal -->
+<!-- Pop up oferta -->
 <div id="offerModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -847,9 +843,7 @@
             <div class="offer-form">
                 <label for="offerPrice">Ofrece un precio</label>
                 <input type="number" id="offerPrice" step="0.01" min="0">
-                <p class="price-with-protection">
-                    <span id="offerPriceWithProtection"></span> € incl. tasa de protección al comprador
-                </p>
+                
             </div>
         </div>
         <div class="modal-footer">
@@ -872,7 +866,7 @@ const offerPriceInput = document.getElementById('offerPrice');
 const offerPriceWithProtection = document.getElementById('offerPriceWithProtection');
 const submitOfferBtn = document.getElementById('submitOfferBtn');
 
-// Setup event listeners
+// listeners botones
 document.addEventListener('DOMContentLoaded', function() {
     
     const offerButton = document.querySelector('.web_ui__Button__primary');
@@ -891,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitOfferBtn.addEventListener('click', submitOffer);
 });
 
-
+//modal = pop-up
 //abre el pop-up de la oferta
 function openOfferModal() {
     const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
@@ -914,18 +908,21 @@ function closeOfferModal() {
 }
 
 function submitOffer() {
+	const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
+	const otherUserId = chatRoomElement ? chatRoomElement.getAttribute("data-other-user-id") : null;
 
-	if (!currentChatRoomId || !userId || !currentItemId) {
-        console.error("Missing required values:", { 
-            currentChatRoomId, 
-            userId, 
-            currentItemId 
-        });
-        alert('Falta información para enviar la oferta. Vuelve a intentarlo.');
-        return;
-    }
+	if (!currentChatRoomId || !userId || !currentItemId || !otherUserId) {
+		console.error("Missing required values:", { 
+			currentChatRoomId, 
+			userId, 
+			currentItemId,
+			otherUserId
+		});
+		alert('Falta información para enviar la oferta. Vuelve a intentarlo.');
+		return;
+	}
 
-    const offerPrice = parseFloat(offerPriceInput.value);
+	const offerPrice = parseFloat(offerPriceInput.value);
     
     if (isNaN(offerPrice) || offerPrice <= 0) {
         alert('Por favor, introduce un precio válido');
@@ -933,19 +930,13 @@ function submitOffer() {
     }
     
     const offerData = {
-        chatRoomId: currentChatRoomId,
-        senderId: userId,
+        receiverId: otherUserId,
         itemId: currentItemId,
-        itemName: currentItemName,
-        itemImage: currentItemImage,
-        originalPrice: currentItemPrice,
-        offerPrice: offerPrice,
-        status: 'PENDING'
+        chatId: currentChatRoomId,
+        price: offerPrice
     };
-    
-	console.log("Sending offer with data2:", offerData);
-
-    fetch('http://localhost:8081/offers/create', {
+    console.log("Sending offer with data:", offerData);
+    fetch('/offers/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -959,16 +950,26 @@ function submitOffer() {
         return response.json();
     })
     .then(data => {
+        const offerMessage = {
+            type: 'OFFER',
+            content: data.id.toString(), 
+            senderId: userId,
+            timestamp: new Date().getTime()
+        };
+        
+        if (stompClient && stompClient.connected) {
+            stompClient.send(`/app/chat/${currentChatRoomId}`, {}, JSON.stringify(offerMessage));
+        }
+        
+        showMessage(offerMessage);
+        
         closeOfferModal();
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('No se pudo enviar la oferta. Inténtalo de nuevo.' + error.message);
+        alert('No se pudo enviar la oferta. ' + error.message);
     });
 }
-
-
-
 
 function showMessage(message) {
     if (!message) return;
@@ -1109,7 +1110,6 @@ function showMessage(message) {
     }
 }
 
-
 function getOfferStatusText(status) {
     switch(status) {
         case 'PENDING':
@@ -1124,7 +1124,10 @@ function getOfferStatusText(status) {
 }
 
 function respondToOffer(offerId, status) {
-    fetch(`offers/${offerId}/status?status=${status}`, {
+    
+    const url = status === 'ACCEPTED' ? `/offers/${offerId}/accept` : `/offers/${offerId}/reject`;
+    
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1135,6 +1138,10 @@ function respondToOffer(offerId, status) {
             throw new Error('Error al responder a la oferta');
         }
         return response.json();
+    })
+    .then(data => {
+        // Actualizar el mensaje de oferta en el chat
+        updateOfferMessage(offerId, status);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -1279,228 +1286,232 @@ function loadChat(chatRoomId) {
 
 </script>
 
+
+
+
 <style>
+
+/*Provisional*/
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 450px;
-    max-width: 90%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  margin-bottom: 20px;
 }
 
 .close {
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .close:hover {
-    color: #000;
+  color: #000;
 }
 
 .item-details {
-    display: flex;
-    margin-bottom: 20px;
+  display: flex;
+  margin-bottom: 20px;
 }
 
 .modal-item-image {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-right: 15px;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
 }
 
 .item-info {
-    flex: 1;
+  flex: 1;
 }
 
 .offer-form {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .offer-form input {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .price-with-protection {
-    margin-top: 8px;
-    color: #666;
-    font-size: 14px;
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
 }
 
 .modal-footer {
-    text-align: center;
+  text-align: center;
 }
 
-/* Offer message styling */
 .offer-message {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 12px;
-    margin: 10px 0;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 10px 0;
 }
 
 .offer-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .offer-price {
-    font-weight: bold;
-    font-size: 18px;
-    color: #09b1ba;
+  font-weight: bold;
+  font-size: 18px;
+  color: #09b1ba;
 }
 
 .offer-original {
-    text-decoration: line-through;
-    color: #666;
-    margin-left: 10px;
+  text-decoration: line-through;
+  color: #666;
+  margin-left: 10px;
 }
 
 .offer-status {
-    text-align: center;
-    margin: 10px 0;
+  text-align: center;
+  margin: 10px 0;
 }
 
 .offer-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .button-accept {
-    background-color: #09b1ba;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 8px;
+  background-color: #09b1ba;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 8px;
 }
 
 .button-reject {
-    background-color: white;
-    color: #09b1ba;
-    border: 1px solid #09b1ba;
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 48%;
+  background-color: white;
+  color: #09b1ba;
+  border: 1px solid #09b1ba;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 48%;
 }
 
 .button-counter {
-    background-color: white;
-    color: #09b1ba;
-    border: 1px solid #09b1ba;
-    padding: 8px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 48%;
+  background-color: white;
+  color: #09b1ba;
+  border: 1px solid #09b1ba;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 48%;
 }
 
 .offer-timestamp {
-    text-align: center;
-    color: #666;
-    font-size: 12px;
-    margin-top: 8px;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
 }
 
 
 .offer-container-sender,
 .offer-container-receiver {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 12px;
-    margin: 5px 0;
-    min-width: 200px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 5px 0;
+  min-width: 200px;
 }
 
 .offer-container-sender {
-    background-color: #e8f5e9; 
+  background-color: #e8f5e9; 
 }
 
 .offer-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .offer-price {
-    font-weight: bold;
-    font-size: 18px;
-    color: #09b1ba;
+  font-weight: bold;
+  font-size: 18px;
+  color: #09b1ba;
 }
 
 .offer-original {
-    text-decoration: line-through;
-    color: #666;
-    margin-left: 10px;
-    font-size: 14px;
+  text-decoration: line-through;
+  color: #666;
+  margin-left: 10px;
+  font-size: 14px;
 }
 
 .offer-status {
-    text-align: center;
-    margin: 8px 0;
-    font-size: 14px;
-    color: #666;
+  text-align: center;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .offer-buttons {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .offer-buttons button {
-    width: 100%;
-    margin-bottom: 8px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .offer-buttons-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .offer-timestamp {
-    text-align: center;
-    color: #999;
-    font-size: 12px;
-    margin-top: 8px;
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
 }
-</style>
 
+</style>
 </body>
 
 </html>

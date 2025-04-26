@@ -39,20 +39,12 @@ public class OfferService {
     @Autowired
     private MessageService messageService;
     
- 
-    @Transactional
+    
     public Offer createOffer(Long senderId, Long receiverId, Long itemId, Long chatId, Double price) {
-        User sender = userRepository.findById(senderId.toString())
-                .orElseThrow();
-        
-        User receiver = userRepository.findById(receiverId.toString())
-                .orElseThrow();
-        
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow();
-        
-        ChatRoom chat = chatRepository.findById(chatId)
-                .orElseThrow();
+        User sender = userRepository.findById(senderId.toString()).orElseThrow();
+        User receiver = userRepository.findById(receiverId.toString()).orElseThrow();
+        Item item = itemRepository.findById(itemId).orElseThrow();
+        ChatRoom chat = chatRepository.findById(chatId).orElseThrow();
         
         Offer offer = new Offer();
         offer.setSender(sender);
@@ -76,11 +68,7 @@ public class OfferService {
         return offer;
     }
     
-    /**
-     * Accept an offer
-     * @throws Exception 
-     */
-    @Transactional
+
     public Offer acceptOffer(Long offerId, Long userId) throws Exception {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow();
@@ -105,11 +93,7 @@ public class OfferService {
     }
     
 
-    /**
-     * Reject an offer
-     * @throws Exception 
-     */
-    @Transactional
+   
     public Offer rejectOffer(Long offerId, Long userId) throws Exception {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow();

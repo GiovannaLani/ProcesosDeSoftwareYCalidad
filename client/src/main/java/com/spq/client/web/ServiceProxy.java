@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,6 +21,7 @@ import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
+import com.spq.client.data.Offer;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
@@ -547,4 +549,34 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+    public Map<String, Offer> createOffer(Offer offer) {
+        String url = apiBaseUrl + "/offers/create";
+        return restTemplate.postForObject(url, offer, Map.class);
+    }
+    
+    @Override
+    public Offer getOffer(Long id) {
+        String url = apiBaseUrl + "/offers/" + id;
+		return restTemplate.getForObject(url, Offer.class);
+    }
+    
+    @Override
+    public Map<String, Offer> updateOfferStatus(Long id, String status) {
+        String url = apiBaseUrl + "/offers/" + id + "/status?status=" + status;
+        return restTemplate.postForObject(url, null, Map.class);
+    }
+
+	@Override
+    public Offer acceptOffer(Long id) {
+        String url = apiBaseUrl + "/api/offers/" + id + "/accept";
+        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
+    }
+    
+    @Override
+    public Offer rejectOffer(Long id) {
+        String url = apiBaseUrl + "/api/offers/" + id + "/reject";
+        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
+    }
 }

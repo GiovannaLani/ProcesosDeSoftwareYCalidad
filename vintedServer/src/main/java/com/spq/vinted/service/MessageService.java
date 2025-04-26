@@ -39,8 +39,6 @@ public class MessageService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private ItemRepository itemRepository;
 
     public void sendMessage(long token, long chatRoomId, String content) {
         User sender = userService.getUserByToken(token);
@@ -75,7 +73,6 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    @Transactional
     public Message saveAndSendMessage(Message message) {
         Message savedMessage = messageRepository.save(message);
         

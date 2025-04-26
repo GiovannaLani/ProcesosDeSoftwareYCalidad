@@ -22,66 +22,40 @@ public class OfferController {
     private OfferService offerService;
     
     @PostMapping
-    public ResponseEntity<Offer> createOffer(@RequestBody CreateOfferRequest request,
-                                           @AuthenticationPrincipal User userDetails) {
+    public ResponseEntity<Offer> createOffer(@RequestBody Offer request, @AuthenticationPrincipal User userDetails) {
         Long userId = userDetails.getId();
         Offer offer = offerService.createOffer(
                 userId,
-                request.getReceiverId(),
-                request.getProductId(),
-                request.getChatId(),
+                request.getReceiver().getId(),
+                request.getItem().getId(),
+                request.getChat().getId(),
                 request.getPrice()
         );
         return ResponseEntity.ok(offer);
     }
     
     @PutMapping("/{id}/accept")
-    public ResponseEntity<Offer> acceptOffer(@PathVariable Long id,
-                                           @AuthenticationPrincipal User userDetails) throws Exception {
-        Long userId = userDetails.getId();
-        Offer offer = offerService.acceptOffer(id, userId);
-        return ResponseEntity.ok(offer);
+    public ResponseEntity<Offer> acceptOffer(@PathVariable Long id, @AuthenticationPrincipal User userDetails) {
+        try {
+            Long userId = userDetails.getId();
+            Offer offer = offerService.acceptOffer(id, userId);
+            return ResponseEntity.ok(offer);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @PutMapping("/{id}/reject")
-    public ResponseEntity<Offer> rejectOffer(@PathVariable Long id,
-                                           @AuthenticationPrincipal User userDetails) throws Exception {
-        Long userId = userDetails.getId();
-        Offer offer = offerService.rejectOffer(id, userId);
-        return ResponseEntity.ok(offer);
+    public ResponseEntity<Offer> rejectOffer(@PathVariable Long id, @AuthenticationPrincipal User userDetails) {
+        try {
+            Long userId = userDetails.getId();
+            Offer offer = offerService.rejectOffer(id, userId);
+            return ResponseEntity.ok(offer);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
 
-class CreateOfferRequest {
-    private Long receiverId;
-    private Long productId;
-    private Long chatId;
-    private Double price;
+
     
-    
-    public Long getReceiverId() {
-        return receiverId;
-    }
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
-    public Long getProductId() {
-        return productId;
-    }
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-    public Long getChatId() {
-        return chatId;
-    }
-    public void setChatId(Long chatId) {
-        this.chatId = chatId;
-    }
-    public Double getPrice() {
-        return price;
-    }
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-    
-}
