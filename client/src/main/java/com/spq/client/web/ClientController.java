@@ -376,6 +376,16 @@ public class ClientController {
     	model.addAttribute("items", items);
 		boolean isMyProfile = (id.equals(userId));
 		model.addAttribute("isMyProfile", isMyProfile);
+		User loggedUser = vintedService.getUser(userId, token);
+		User profileUser = vintedService.getUser(id, token);
+		model.addAttribute("isFollowing", loggedUser.followers().contains(profileUser));
+		// model.addAttribute("followersCount", profileUser.followers().size());
+		// //model.addAttribute("followingCount", loggedUser.following().size());
+		// model.addAttribute("followingCount", profileUser.following().size());
+		
+		
+		model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
+		model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
 	
 		return "userProfile";
 	}
@@ -716,6 +726,82 @@ public class ClientController {
 
 		return "redirect:" + redirectUrl + "?token=" + token;
 	}
+
+	@PostMapping("/userProfile/{id}/follow")
+	public String followUser(
+			@PathVariable("id") Long targetUserId,
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			System.out.println("TOKEN USUARIO: " + token + " ID USUARIO TARGET: " + targetUserId);
+			vintedService.followUser(token, targetUserId);
+			redirectAttributes.addFlashAttribute("successMessage", "Has comenzado a seguir al usuario.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al seguir al usuario.");
+			e.printStackTrace();
+		}
+		System.out.println("REDIRECT" + redirectUrl);
+		return "redirect:" + redirectUrl + "?token=" + token;
+	}
+
+	@PostMapping("/userProfile/{id}/unfollow")
+	public String unfollowUser(
+			@PathVariable("id") Long targetUserId,
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			vintedService.unfollowUser(token, targetUserId);
+			redirectAttributes.addFlashAttribute("successMessage", "Has dejado de seguir al usuario.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al dejar de seguir al usuario.");
+			e.printStackTrace();
+		}
+
+		return "redirect:" + redirectUrl;
+	}
+
+	@GetMapping("/userProfile/{id}/followers")
+	public String getFollowers(
+			@PathVariable("id") Long userId,
+			@RequestParam("token") Long token,
+			Model model) {
+		try {
+			List<User> followers = vintedService.getFollowers(userId, token);
+			model.addAttribute("followers", followers);
+			return "userProfile"; // EDITAR
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar los seguidores.");
+			e.printStackTrace();
+			return "error";
+		}
+	}
+
+	@GetMapping("/userProfile/{id}/following")
+	public String getFollowing(
+			@PathVariable("id") Long userId,
+			@RequestParam("token") Long token,
+			Model model) {
+		try {
+			List<User> following = vintedService.getFollowing(userId, token);
+			model.addAttribute("following", following);
+			return "userProfile"; // EDITAR
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar los usuarios seguidos.");
+			e.printStackTrace();
+			return "error";
+		}
+	}
+
 
 }
 

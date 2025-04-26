@@ -248,13 +248,17 @@
 									</div>
 									<div class="web_ui__Cell__suffix">
 										<div th:unless="${isMyProfile}" class="u-flexbox">
-											<a th:href="@{/editUser}" class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
-												<span class="web_ui__Button__content">
-													<span class="web_ui__Button__label">
-														Seguir
+											<form th:action="@{/userProfile/{id}/follow(id=${user.id})}" method="post">
+												<input type="hidden" name="token" th:value="${token}" />
+												<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
+												<button type="submit" class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
+													<span class="web_ui__Button__content">
+														<span class="web_ui__Button__label">
+															<span th:text="${isFollowing ? 'Siguiendo' : 'Seguir'}"></span>
+														</span>
 													</span>
-												</span>
-											</a>
+												</button>
+											</form>
 										</div>
 										<div th:if="${isMyProfile}" class="u-flexbox">
 											
@@ -345,7 +349,7 @@
 														<div class="web_ui__Cell__body">
 															<div class="u-flexbox u-flex-wrap">
 																<div class="u-flexbox">
-																	<a href="/member/general/followers/261147319">0</a>
+																	<a href="/member/general/followers/261147319" th:text="${followersCount}">0</a>
 																	<div class="web_ui__Spacer__small web_ui__Spacer__vertical">
 																	</div>
 																	Seguidores
@@ -354,7 +358,7 @@
 																	</div>
 																</div>
 																<div class="u-flexbox">
-																	<a href="/member/general/following/261147319">0</a>
+																	<a href="/member/general/following/261147319" th:text="${followingCount}">0</a>
 																	<div class="web_ui__Spacer__small web_ui__Spacer__vertical">
 																	</div>
 																	siguiendo

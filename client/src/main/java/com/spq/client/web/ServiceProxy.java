@@ -504,4 +504,68 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
+
+	@Override
+	public void followUser(Long token, Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/follow?token=" + token + "&targetUserId=" + targetUserId;
+			System.out.println("URL: " + url);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+	
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to follow user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void unfollowUser(Long token, Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/unfollow?token=" + token + "&targetUserId=" + targetUserId;
+			System.out.println("Generated URL: " + url);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+	
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to unfollow user: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<User> getFollowers(Long token, Long userId) {
+		try {
+			String url = apiBaseUrl + "/users/followers?token=" + token;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch followers: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<User> getFollowing(Long token, Long userId) {
+		try {
+			String url = apiBaseUrl + "/users/following?token=" + token;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch following: " + e.getStatusText());
+			}
+		}
+	}
 }

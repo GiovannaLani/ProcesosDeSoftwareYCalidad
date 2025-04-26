@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -175,5 +176,63 @@ public class UserController {
                     .body(null);
         }
     }
+
+	@PostMapping("/follow")
+	public ResponseEntity<String> followUser(@RequestParam("token") Long token, @RequestParam Long targetUserId) {
+		try {
+			Long userId = userService.getUserIdByToken(token);
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
+			}
+			userService.followUser(userId, targetUserId);
+			return new ResponseEntity<>("Usuario seguido con éxito", HttpStatus.OK);
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Error al seguir al usuario", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/unfollow")
+	public ResponseEntity<String> unfollowUser(@RequestParam("token") Long token, @RequestParam Long targetUserId) {
+		try {
+			Long userId = userService.getUserIdByToken(token);
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
+			}
+			userService.unfollowUser(userId, targetUserId);
+			return new ResponseEntity<>("Usuario dejado de seguir con éxito", HttpStatus.OK);
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Error al dejar de seguir al usuario", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/followers")
+	public ResponseEntity<List<User>> getFollowers(@RequestParam("token") Long token) {
+		try {
+			Long userId = userService.getUserIdByToken(token);
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			}
+			return ResponseEntity.ok(userService.getFollowers(userId));
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/following")
+	public ResponseEntity<List<User>> getFollowing(@RequestParam("token") Long token) {
+		try {
+			Long userId = userService.getUserIdByToken(token);
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			}
+			return ResponseEntity.ok(userService.getFollowing(userId));
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 }
