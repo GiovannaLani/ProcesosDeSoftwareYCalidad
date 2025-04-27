@@ -376,26 +376,7 @@ public class ClientController {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-		// model.addAttribute("redirectUrl", redirectUrl);
-		// List<Item> items = vintedService.getUserItems(id);
-    	// model.addAttribute("items", items);
-		// boolean isMyProfile = (id.equals(userId));
-		// model.addAttribute("isMyProfile", isMyProfile);
-		// User loggedUser = vintedService.getUser(userId, token);
-		// User profileUser = vintedService.getUser(id, token);
-		// List<User> followers = vintedService.getFollowers(token, id);
-		// List<User> following = vintedService.getFollowing(token, id);
-		// model.addAttribute("isFollowing", following.contains(profileUser));
-		// model.addAttribute("followersCount", followers.size());
-		// model.addAttribute("followingCount", following.size());
-		// //model.addAttribute("followingCount", loggedUser.following().size());
-		// model.addAttribute("followingCount", profileUser.following().size());
-		
-		
-		// model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
-		// model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
-	
-		// return "userProfile";
+
 		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 	
@@ -1113,34 +1094,24 @@ public class ClientController {
 
 	private String loadUserProfile(Long userId, Long token, Model model, RedirectAttributes redirectAttributes) {
 		try {
-			// Obtiene el usuario y lo agrega al modelo
 			User user = vintedService.getUser(userId, token);
 			model.addAttribute("user", user);
 	
-			// Obtiene los artículos del usuario y los agrega al modelo
 			List<Item> items = vintedService.getUserItems(userId);
 			model.addAttribute("items", items);
 	
-			// Obtiene las valoraciones del usuario y las agrega al modelo
 			List<Rating> ratings = vintedService.getRatingsForUser(userId);
 			model.addAttribute("ratings", ratings);
 	
-			// Determina si el perfil pertenece al usuario actual
 			boolean isMyProfile = userId.equals(this.userId);
 			model.addAttribute("isMyProfile", isMyProfile);
 			
-			
-			// Obtiene los seguidores y seguidos del usuario
 			List<User> followers = vintedService.getFollowers(userId);
 			List<User> following = vintedService.getFollowing(userId);
 			
 			model.addAttribute("isFollowing", vintedService.getFollowing(this.userId).contains(user));
-			// System.out.println("Is Following: " + following.contains(user));
-			// Agrega los seguidores y seguidos al modelo
 			model.addAttribute("followers", followers);
 			model.addAttribute("following", following);
-	
-			// Agrega el conteo de seguidores y seguidos al modelo
 			model.addAttribute("followersCount", followers.size());
 			model.addAttribute("followingCount", following.size());
 	
