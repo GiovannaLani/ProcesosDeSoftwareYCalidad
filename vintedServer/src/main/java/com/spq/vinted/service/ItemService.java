@@ -140,7 +140,6 @@ public class ItemService {
         }
     }
     
-    
     public List<Item> getCartItems(long token) {
         User user = userService.getUserByToken(token);
         if (user == null) {
@@ -182,7 +181,74 @@ public class ItemService {
         itemRepository.save(itemToRemove);
         userRepository.save(user);
     }
+
+    public void addItemToWishlist(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
     
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado"));
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        if (user.getWishlistItems() == null) {
+            user.setWishlistItems(new ArrayList<>());
+        }
+    
+        if (!user.getWishlistItems().contains(item)) {
+            user.getWishlistItems().add(item);
+            item.getUsersWithItemInWishlist().add(user);
+    
+            userRepository.save(user);
+            itemRepository.save(item);
+        }
+    }
+
+    public List<Item> getWishlistItems(long token) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        List<Item> wishlistItems = user.getWishlistItems();
+        if (wishlistItems == null || wishlistItems.isEmpty()) {
+            return Collections.emptyList();
+        }
+    
+        return wishlistItems;
+    }
+
+    public void removeItemFromWishlist(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+    
+        user = userRepository.findById(String.valueOf(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        if (user.getWishlistItems() == null || user.getWishlistItems().isEmpty()) {
+            throw new RuntimeException("La wishlist está vacía.");
+        }
+    
+        Item itemToRemove = user.getWishlistItems().stream()
+                .filter(item -> item.getId() == itemId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado en la wishlist"));
+    
+        user.getWishlistItems().remove(itemToRemove);
+        itemToRemove.getUsersWithItemInWishlist().remove(user);
+    
+        itemRepository.save(itemToRemove);
+        userRepository.save(user);
+    }
 
     public List<Item> getUserItems(long userId) {
         User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
@@ -195,22 +261,29 @@ public class ItemService {
         if (user == null) {
             throw new RuntimeException("Not authorized");
         }
-    
+
         Item item = getItemById(itemId);
         if (item == null) {
             throw new RuntimeException("Item not found");
         }
-    
+
+        // Eliminar el item del carrito de todos los usuarios
         for (User u : item.getUsersWithItemInCart()) {
             u.getCartItems().remove(item);
             userRepository.save(u);
         }
-    
         item.getUsersWithItemInCart().clear();
+
+        // Eliminar el item de la wishlist de todos los usuarios
+        for (User u : item.getUsersWithItemInWishlist()) {
+            u.getWishlistItems().remove(item);
+            userRepository.save(u);
+        }
+        item.getUsersWithItemInWishlist().clear();
+
         itemRepository.save(item);
-    
         itemRepository.delete(item);
-    
+
         System.out.println("Item borrado correctamente.");
     }
     

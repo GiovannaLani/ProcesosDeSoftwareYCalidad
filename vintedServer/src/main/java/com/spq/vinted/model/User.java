@@ -39,6 +39,14 @@ public class User {
     )
     private List<Item> cartItems = new ArrayList<>();
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_wishlist",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private List<Item> wishlistItems = new ArrayList<>();
+
     @Column(unique = true, nullable = false)
     private String username;
 
@@ -71,6 +79,7 @@ public class User {
         this.name = name;
         this.surname = surname;
         this.cartItems = new ArrayList<>();
+        this.wishlistItems = new ArrayList<>();
     }
 
     public Long getId() {
@@ -92,15 +101,22 @@ public class User {
         this.password = password;
     }
     public List<Item> getCartItems() {
-        System.out.println("Cart items: " + cartItems.size());
         return cartItems;
     }
     public void setCartItems(List<Item> cartItems) {
         this.cartItems = cartItems;
     }
-
-    public void addItemToCart(Item item) { //editar
+    public void addItemToCart(Item item) { 
         this.cartItems.add(item);
+    }
+    public List<Item> getWishlistItems() {
+        return wishlistItems;
+    }
+    public void setWishlistItems(List<Item> wishlistItems) {
+        this.wishlistItems = wishlistItems;
+    }
+    public void addItemToWishlist(Item item) { 
+        this.wishlistItems.add(item);
     }
     public String getUsername() {
         return username;

@@ -103,6 +103,45 @@ public class ItemController {
         }
     }
 
+    @PostMapping("/wishlist/add")
+    public ResponseEntity<Void> addItemToWishlist(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.addItemToWishlist(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @GetMapping("/wishlist")
+    public ResponseEntity<List<ItemDTO>> getWishlist(@RequestParam("token") long token) {
+        try {
+            List<Item> wishlistItems = itemService.getWishlistItems(token);
+            if (wishlistItems == null || wishlistItems.isEmpty()) {
+                return ResponseEntity.ok(null);
+            }
+            List<ItemDTO> wishlistItemDTOs = new ArrayList<ItemDTO>();
+            for (Item item : wishlistItems) {
+                wishlistItemDTOs.add(item.toDTO());
+            }
+            return ResponseEntity.ok(wishlistItemDTOs);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping("/wishlist/remove")
+    public ResponseEntity<Void> removeItemFromWishlist(@RequestParam("token") long token, @RequestParam("itemId") long itemId) {
+        try {
+            itemService.removeItemFromWishlist(token, itemId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
     @PostMapping("/itemData")
     public ResponseEntity<Long> uploadItemData(
             @RequestParam("token") long token,

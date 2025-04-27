@@ -51,16 +51,28 @@ public class ClientController {
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
 		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
-		if(token!= null) {
-			if(vintedService.getCartItems(token) != null) {
+		
+		// Manejo del carrito
+		if (token != null) {
+			if (vintedService.getCartItems(token) != null) {
 				model.addAttribute("cartSize", vintedService.getCartItems(token).size());
-			}else {
+			} else {
 				model.addAttribute("cartSize", 0);
 			}
-		}else{
+		} else {
 			model.addAttribute("cartSize", 0);
 		}
 
+		// Manejo de la wishlist
+		if (token != null) {
+			if (vintedService.getWishlistItems(token) != null) {
+				model.addAttribute("wishlistSize", vintedService.getWishlistItems(token).size());
+			} else {
+				model.addAttribute("wishlistSize", 0);
+			}
+		} else {
+			model.addAttribute("wishlistSize", 0);
+		}
 	}
 	
 	@GetMapping("/register")
@@ -503,6 +515,28 @@ public class ClientController {
 			return "error"; 
 		}
 	}
+
+	@GetMapping("/wishlist")
+	public String showWishlist(
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (token == null) {
+			return "redirect:/login";
+		}
+		try {
+			List<Item> wishlistItems = vintedService.getWishlistItems(token);
+			if (wishlistItems == null || wishlistItems.isEmpty()) {
+				wishlistItems = List.of();
+			}
+			model.addAttribute("wishlistItems", wishlistItems);
+			return "wishlist";
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar la wishlist.");
+			e.printStackTrace();
+			return "error";
+		}
+	}
 	
 	@GetMapping("/createPurchase/{itemId}")
 	public String showPurchasePage(
@@ -853,6 +887,30 @@ public class ClientController {
 		}
 		return "redirect:" + redirectUrl;
 	}
+
+	@PostMapping("/wishlist/add")
+	public String addItemToWishlist(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:" + redirectUrl;
+		}
+		try {
+			vintedService.addItemToWishlist(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo añadido a la wishlist.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al añadir el artículo a la wishlist.");
+			e.printStackTrace();
+		}
+		return "redirect:" + redirectUrl;
+	}
 	
 
 	@PostMapping("/shoppingCart/remove")
@@ -875,6 +933,30 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado del carrito.");
 		} catch (RuntimeException e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el artículo del carrito.");
+			e.printStackTrace();
+		}
+
+		return "redirect:" + redirectUrl + "?token=" + token;
+	}
+
+	@PostMapping("/wishlist/remove")
+	public String removeItemFromWishlist(
+			@RequestParam("token") Long token,
+			@RequestParam("itemId") Long itemId,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		if (token == null) {
+			return "redirect:" + redirectUrl;
+		}
+		try {
+			vintedService.removeItemFromWishlist(token, itemId);
+			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado de la wishlist.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el artículo de la wishlist.");
 			e.printStackTrace();
 		}
 
