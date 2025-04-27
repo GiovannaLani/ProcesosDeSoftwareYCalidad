@@ -525,7 +525,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	
+
     public List<Item> searchItems(Long token, String search) {
         String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
         try {
@@ -579,9 +579,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<User> getFollowers(Long token, Long userId) {
+	public List<User> getFollowers(Long targetUserId) {
 		try {
-			String url = apiBaseUrl + "/users/followers?token=" + token;
+			String url = apiBaseUrl + "/users/followers?targetUserId=" + targetUserId;
 			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {
@@ -602,9 +602,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<User> getFollowing(Long token, Long userId) {
+	public List<User> getFollowing(Long targetUserId) {
 		try {
-			String url = apiBaseUrl + "/users/following?token=" + token;
+			String url = apiBaseUrl + "/users/following?targetUserId=" + targetUserId;
 			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			switch (e.getStatusCode().value()) {

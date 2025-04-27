@@ -268,13 +268,15 @@
 											</form>
 										</div>
 										<div th:unless="${isMyProfile}" class="u-flexbox">
-											<form th:action="@{/userProfile/{id}/follow(id=${user.id})}" method="post">
+											<form th:action="${isFollowing} ? @{/userProfile/{id}/unfollow(id=${user.id})} : @{/userProfile/{id}/follow(id=${user.id})}" method="post">
 												<input type="hidden" name="token" th:value="${token}" />
 												<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
-												<button type="submit" class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
+												<button type="submit" 
+														th:classappend="${isFollowing ? 'btn-red' : 'btn-green'}" 
+														class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
 													<span class="web_ui__Button__content">
 														<span class="web_ui__Button__label">
-															<span th:text="${isFollowing ? 'Siguiendo' : 'Seguir'}"></span>
+															<span th:text="${isFollowing ? 'Dejar de seguir' : 'Seguir'}"></span>
 														</span>
 													</span>
 												</button>

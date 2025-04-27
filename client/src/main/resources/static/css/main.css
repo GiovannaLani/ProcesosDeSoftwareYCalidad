@@ -4258,3 +4258,14 @@ a{
 .cart-link:hover {
   color: inherit; 
 }
+
+.btn-red {
+  background-color: red;
+  color: white;
+  border-color: red;
+}
+
+.btn-red:hover {
+  background-color: darkred;
+  border-color: darkred;
+}

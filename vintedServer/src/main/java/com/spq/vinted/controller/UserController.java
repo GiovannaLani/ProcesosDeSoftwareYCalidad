@@ -213,13 +213,9 @@ public class UserController {
 	}
 
 	@GetMapping("/followers")
-	public ResponseEntity<List<UserDTO>> getFollowers(@RequestParam("token") Long token) {
+	public ResponseEntity<List<UserDTO>> getFollowers(@RequestParam Long targetUserId) {
 		try {
-			Long userId = userService.getUserIdByToken(token);
-			if (userId == null) {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-			}
-			List<User> followers = userService.getFollowers(userId);
+			List<User> followers = userService.getFollowers(targetUserId);
 
 			List<UserDTO> followersDTO = followers.stream()
 					.map(user -> user.toDTO())
@@ -232,13 +228,9 @@ public class UserController {
 	}
 
 	@GetMapping("/following")
-	public ResponseEntity<List<UserDTO>> getFollowing(@RequestParam("token") Long token) {
+	public ResponseEntity<List<UserDTO>> getFollowing(@RequestParam Long targetUserId) {
 		try {
-			Long userId = userService.getUserIdByToken(token);
-			if (userId == null) {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-			}
-			List<User> following = userService.getFollowing(userId);
+			List<User> following = userService.getFollowing(targetUserId);
 
 			List<UserDTO> followingDTO = following.stream()
 					.map(user -> user.toDTO())
@@ -250,7 +242,7 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@GetMapping("/search")
 	public ResponseEntity<UserDTO> searchUser(
 			@RequestParam("username") String username,
