@@ -560,6 +560,24 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public void followUser(Long token, Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/follow?token=" + token + "&targetUserId=" + targetUserId;
+			System.out.println("URL: " + url);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+	
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to follow user: " + e.getStatusText());
+			}
+		}
+	}
+
     public List<Item> searchItems(Long token, String search) {
         String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
         try {
@@ -597,6 +615,23 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public void unfollowUser(Long token, Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/unfollow?token=" + token + "&targetUserId=" + targetUserId;
+			System.out.println("Generated URL: " + url);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+	
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to unfollow user: " + e.getStatusText());
+			}
+		}
+	}
 	public List<Item> getUserItems(Long userId, Long token) {
 		String url = apiBaseUrl + "/users/" + userId + "/items?token=" + token;
 		try {
@@ -632,6 +667,17 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 	@Override
+	public List<User> getFollowers(Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/followers?targetUserId=" + targetUserId;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch followers: " + e.getStatusText());
+			}
+		}
+	}
 	public String addRating(Rating rating, Long token) {
 		String url = apiBaseUrl + "/users/rate?token=" + token;
 		try {
@@ -644,6 +690,17 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public List<User> getFollowing(Long targetUserId) {
+		try {
+			String url = apiBaseUrl + "/users/following?targetUserId=" + targetUserId;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<User>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch following: " + e.getStatusText());
+			}
+		}
+	}
 	public List<Rating> getRatingsForUser(long userId) {
 		String url = apiBaseUrl + "/users/" + userId + "/ratings";
 		try {
@@ -655,4 +712,5 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 }
+	
 

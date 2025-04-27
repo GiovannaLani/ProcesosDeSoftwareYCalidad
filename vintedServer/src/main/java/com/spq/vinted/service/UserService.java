@@ -175,6 +175,39 @@ public class UserService {
         userRepository.save(user);
     }
 
+	public void followUser(Long userId, Long targetUserId) {
+		User user = userRepository.findById(String.valueOf(userId))
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+		User targetUser = userRepository.findById(String.valueOf(targetUserId))
+				.orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+	
+		if (!user.getFollowing().contains(targetUser)) {
+			user.getFollowing().add(targetUser);
+			userRepository.save(user);
+		}
+	}
+
+    public void unfollowUser(Long userId, Long targetUserId) {
+		User user = userRepository.findById(String.valueOf(userId))
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+		User targetUser = userRepository.findById(String.valueOf(targetUserId))
+				.orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+	
+		if (user.getFollowing().contains(targetUser)) {
+			user.getFollowing().remove(targetUser);
+			userRepository.save(user);
+		}
+	}
+
+	public List<User> getFollowers(Long userId) {
+        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return user.getFollowers();
+    }
+
+    public List<User> getFollowing(Long userId) {
+        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return user.getFollowing();
+    }
 	public User getUserByUsername(String username, Long token) {
 		return userRepository.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("User not found"));

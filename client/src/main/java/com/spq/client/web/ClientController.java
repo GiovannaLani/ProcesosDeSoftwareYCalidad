@@ -191,9 +191,13 @@ public class ClientController {
 		try {
 			Item item = vintedService.getItemById(id);
 			Long sellerId = vintedService.getSeller(item).id();
+			User seller = vintedService.getSeller(item);
 
 			model.addAttribute("item", item);
 			model.addAttribute("sellerId", sellerId);
+			model.addAttribute("seller", seller);
+			model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
+
 			return "product-details"; 
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
@@ -372,7 +376,26 @@ public class ClientController {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-		model.addAttribute("redirectUrl", redirectUrl);
+		// model.addAttribute("redirectUrl", redirectUrl);
+		// List<Item> items = vintedService.getUserItems(id);
+    	// model.addAttribute("items", items);
+		// boolean isMyProfile = (id.equals(userId));
+		// model.addAttribute("isMyProfile", isMyProfile);
+		// User loggedUser = vintedService.getUser(userId, token);
+		// User profileUser = vintedService.getUser(id, token);
+		// List<User> followers = vintedService.getFollowers(token, id);
+		// List<User> following = vintedService.getFollowing(token, id);
+		// model.addAttribute("isFollowing", following.contains(profileUser));
+		// model.addAttribute("followersCount", followers.size());
+		// model.addAttribute("followingCount", following.size());
+		// //model.addAttribute("followingCount", loggedUser.following().size());
+		// model.addAttribute("followingCount", profileUser.following().size());
+		
+		
+		// model.addAttribute("followersCount", (profileUser.followers() == null) ? 0 : profileUser.followers().size());
+		// model.addAttribute("followingCount", (profileUser.following() == null) ? 0 : profileUser.following().size());
+	
+		// return "userProfile";
 		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 	
@@ -881,6 +904,81 @@ public class ClientController {
 		return "redirect:" + redirectUrl + "?token=" + token;
 	}
 
+	@PostMapping("/userProfile/{id}/follow")
+	public String followUser(
+			@PathVariable("id") Long targetUserId,
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			System.out.println("TOKEN USUARIO: " + token + " ID USUARIO TARGET: " + targetUserId);
+			vintedService.followUser(token, targetUserId);
+			redirectAttributes.addFlashAttribute("successMessage", "Has comenzado a seguir al usuario.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al seguir al usuario.");
+			e.printStackTrace();
+		}
+		System.out.println("REDIRECT" + redirectUrl);
+		return "redirect:" + redirectUrl;
+	}
+
+	@PostMapping("/userProfile/{id}/unfollow")
+	public String unfollowUser(
+			@PathVariable("id") Long targetUserId,
+			@RequestParam("token") Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			vintedService.unfollowUser(token, targetUserId);
+			redirectAttributes.addFlashAttribute("successMessage", "Has dejado de seguir al usuario.");
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al dejar de seguir al usuario.");
+			e.printStackTrace();
+		}
+
+		return "redirect:" + redirectUrl;
+	}
+
+	@GetMapping("/userProfile/{id}/followers")
+	public String getFollowers(
+			@PathVariable("id") Long userId,
+			@RequestParam("token") Long token,
+			Model model) {
+		try {
+			List<User> followers = vintedService.getFollowers(userId);
+			model.addAttribute("followers", followers);
+			return "userProfile"; 
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar los seguidores.");
+			e.printStackTrace();
+			return "error";
+		}
+	}
+
+	@GetMapping("/userProfile/{id}/following")
+	public String getFollowing(
+			@PathVariable("id") Long userId,
+			@RequestParam("token") Long token,
+			Model model) {
+		try {
+			List<User> following = vintedService.getFollowing(userId);
+			model.addAttribute("following", following);
+			return "userProfile"; 
+		} catch (RuntimeException e) {
+			model.addAttribute("errorMessage", "Error al cargar los usuarios seguidos.");
+			e.printStackTrace();
+			return "error";
+		}
+	}
+
 	@GetMapping("/search")
     public String searchItems(
             @RequestParam("search_text") String search,
@@ -1015,23 +1113,42 @@ public class ClientController {
 
 	private String loadUserProfile(Long userId, Long token, Model model, RedirectAttributes redirectAttributes) {
 		try {
+			// Obtiene el usuario y lo agrega al modelo
 			User user = vintedService.getUser(userId, token);
 			model.addAttribute("user", user);
 	
+			// Obtiene los artículos del usuario y los agrega al modelo
 			List<Item> items = vintedService.getUserItems(userId);
 			model.addAttribute("items", items);
 	
+			// Obtiene las valoraciones del usuario y las agrega al modelo
 			List<Rating> ratings = vintedService.getRatingsForUser(userId);
 			model.addAttribute("ratings", ratings);
 	
+			// Determina si el perfil pertenece al usuario actual
 			boolean isMyProfile = userId.equals(this.userId);
 			model.addAttribute("isMyProfile", isMyProfile);
+			
+			
+			// Obtiene los seguidores y seguidos del usuario
+			List<User> followers = vintedService.getFollowers(userId);
+			List<User> following = vintedService.getFollowing(userId);
+			
+			model.addAttribute("isFollowing", vintedService.getFollowing(this.userId).contains(user));
+			// System.out.println("Is Following: " + following.contains(user));
+			// Agrega los seguidores y seguidos al modelo
+			model.addAttribute("followers", followers);
+			model.addAttribute("following", following);
+	
+			// Agrega el conteo de seguidores y seguidos al modelo
+			model.addAttribute("followersCount", followers.size());
+			model.addAttribute("followingCount", following.size());
 	
 			return "userProfile";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar el perfil del usuario.");
 			e.printStackTrace();
-			return "redirect:/allItems";
+			return "redirect:/userProfile";
 		}
 	}
 

@@ -51,6 +51,10 @@ public interface IVintedServiceProxy {
 	public User getSeller(Item item);
 	public void deletePurchase(Long token, Long purchaseId);
 	public void deleteItem(Long token, Long itemId);
+	public void followUser(Long token, Long targetUserId);
+	public void unfollowUser(Long token, Long targetUserId);
+	public List<User> getFollowers(Long targetUserId);
+	public List<User> getFollowing(Long targetUserId);
 	public List<Item> searchItems(Long token, String search);
 	public User getUserByUsername(String username, Long token);
 	public List<Item> getUserItems(Long userId, Long token);

@@ -1,5 +1,6 @@
 package com.spq.client.data;
 
+
 public record User(
     long id,
     String username,

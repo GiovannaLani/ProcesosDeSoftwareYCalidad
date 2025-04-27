@@ -3,6 +3,7 @@ package com.spq.vinted.model;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.spq.vinted.dto.UserDTO;
 
 import jakarta.persistence.CascadeType;
@@ -59,6 +60,17 @@ public class User {
     
     @OneToMany(mappedBy = "buyer")
     private List<ChatRoom> chatsComoComprador = new ArrayList<>();
+    
+    @ManyToMany
+    @JoinTable(
+        name = "user_following",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private List<User> following = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "following")
+    private List<User> followers = new ArrayList<>();
 
     @OneToMany(mappedBy = "seller")
     private List<ChatRoom> chatsComoVendedor = new ArrayList<>();
@@ -99,7 +111,7 @@ public class User {
         this.cartItems = cartItems;
     }
 
-    public void addItemToCart(Item item) { //editar
+    public void addItemToCart(Item item) { 
         this.cartItems.add(item);
     }
     public String getUsername() {
@@ -142,4 +154,29 @@ public class User {
     public void setItemsForSale(List<Item> itemsForSale) {
         this.itemsForSale = itemsForSale;
     }
+    public List<User> getFollowing() {
+        return following;
+    }
+    public void setFollowing(List<User> following) {
+        this.following = following;
+    }
+    public List<User> getFollowers() {
+        return followers;
+    }
+    public void setFollowers(List<User> followers) {
+        this.followers = followers;
+    }
+    public void follow(User user) {
+        if (!following.contains(user)) {
+            following.add(user);
+            user.getFollowers().add(this);
+        }
+    }
+    public void unfollow(User user) {
+        if (following.contains(user)) {
+            following.remove(user);
+            user.getFollowers().remove(this);
+        }
+    }
+    
 }

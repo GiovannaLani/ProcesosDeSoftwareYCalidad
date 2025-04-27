@@ -4268,3 +4268,14 @@ a{
   background-color: rgba(0,119,130,1);
   color: white;
 }
+
+.btn-red {
+  background-color: red;
+  color: white;
+  border-color: red;
+}
+
+.btn-red:hover {
+  background-color: darkred;
+  border-color: darkred;
+}
