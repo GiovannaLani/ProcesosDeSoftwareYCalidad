@@ -1,10 +1,9 @@
 package com.spq.client.data;
 
-import java.time.LocalDateTime;
-
 public record Offer (
     Long id,
     Double price,
+    Double originalPrice,
     String status,
     Long senderId,
     Long receiverId,

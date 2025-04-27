@@ -53,12 +53,15 @@ public class ChatRoomController {
     @GetMapping("/{chatRoomId}/messages")
     public List<ChatMessageDTO> getMessages(@PathVariable long chatRoomId) {
         List<Message> messages = messageService.getMessagesForChatRoom(chatRoomId);
-        return messages.stream().map(message -> new ChatMessageDTO(
+        List<ChatMessageDTO> chatm = messages.stream().map(message -> new ChatMessageDTO(
             message.getContent(),
             message.getChatRoom().getId(),
             message.getSender().getId(),
-            message.getTimestamp()
+            message.getTimestamp(),
+            message.getType().toString()
         )).toList();
+        System.out.println("ChatRoom mesa:"+chatm);
+        return chatm;
     }
 
 }

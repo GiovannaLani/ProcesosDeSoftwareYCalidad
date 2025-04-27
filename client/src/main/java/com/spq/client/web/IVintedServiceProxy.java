@@ -49,6 +49,9 @@ public interface IVintedServiceProxy {
 	public List<Item> getCartItems(Long token);
 	public void addItemToCart(Long token, Long itemId);
 	public void removeItemFromCart(Long token, Long itemId);
+	public List<Item> getWishlistItems(Long token);
+	public void addItemToWishlist(Long token, Long itemId);
+	public void removeItemFromWishlist(Long token, Long itemId);
 	public User getUserByItemId(Long itemId);
 	public Purchase getPurchaseById(Long token, Long purchaseId);
 	public List<Item> getUserItems(Long userId);
@@ -61,10 +64,12 @@ public interface IVintedServiceProxy {
 	public void createChatRoom(long buyerId, long sellerId, long itemId);
 	public List<ChatRoomInfo> getChatRoomsForUser(long userId);
 	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId);
-	public Offer getOffer(Long id);
-	public void createOffer(OfferCreator offer, long token);
+	public Offer getOfferById(Long id);
+	public Offer createOffer(OfferCreator offer, long token);
 	public Map<String, Offer> updateOfferStatus(Long id, String status);
 	public List<Offer> getOffersByItem(Long itemId, Long token);
 	public String addRating(Rating rating, Long token);
 	public List<Rating> getRatingsForUser(long userId);
+	public Offer acceptOffer(Long id);
+	public Offer rejectOffer(Long id);
 }

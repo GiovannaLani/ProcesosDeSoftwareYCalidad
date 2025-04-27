@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.spq.vinted.dto.ItemDTO;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -16,6 +18,7 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.InheritanceType;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -58,7 +61,13 @@ public abstract class Item {
 
     @ManyToMany(mappedBy = "cartItems", fetch = FetchType.EAGER)
     private List<User> usersWithItemInCart = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "wishlistItems", fetch = FetchType.EAGER)
+    private List<User> usersWithItemInWishlist = new ArrayList<>();
     
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRooms = new ArrayList<>();
+
     public Item() {
     }
     
@@ -123,6 +132,15 @@ public abstract class Item {
     public void setUsersWithItemInCart(List<User> usersWithItemInCart) {
         this.usersWithItemInCart = usersWithItemInCart;
     }
+
+    public List<User> getUsersWithItemInWishlist() {
+        return usersWithItemInWishlist;
+    }
+    
+    public void setUsersWithItemInWishlist(List<User> usersWithItemInWishlist) {
+        this.usersWithItemInWishlist = usersWithItemInWishlist;
+    }
+
     public abstract ItemDTO toDTO();
 
     @Override

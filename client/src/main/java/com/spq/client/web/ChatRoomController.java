@@ -30,7 +30,9 @@ public class ChatRoomController {
 
     @GetMapping("/{chatRoomId}/messages")
     public List<ChatMessage> getMessages(@PathVariable Long chatRoomId) {
-        return vintedService.getMessagesForChatRoom(chatRoomId);
+        List<ChatMessage> m = vintedService.getMessagesForChatRoom(chatRoomId);
+        System.out.println("ChatRoom mesa:" + m);
+        return m;
     }
     @GetMapping("/otherUser/{userId}")
     public User getOtherUser(@PathVariable Long userId, @RequestParam Long token) {
@@ -40,15 +42,11 @@ public class ChatRoomController {
     @PostMapping("/offers/create")
     public ResponseEntity<Object> createOffer(@RequestBody OfferCreator request, @RequestParam Long token, RedirectAttributes redirectAttributes, Model model) {    
         try {
-            vintedService.createOffer(request, token);
-            redirectAttributes.addFlashAttribute("success", "Oferta realizada con éxito.");
-            return ResponseEntity.ok().build();
-            //return "vintedChat"; // Redirige a la URL proporcionada
+            Offer createdOffer = vintedService.createOffer(request, token);
+            return ResponseEntity.ok(createdOffer);  // 👈 Devolver el Offer al JS
         } catch (Exception e) {
             e.printStackTrace(); 
-            redirectAttributes.addFlashAttribute("error", "Error al realizar la oferta: " + e.getMessage());
             return ResponseEntity.badRequest().body("Error al realizar la oferta: " + e.getMessage());
-            //return "vintedChat"; // Redirige a la URL proporcionada
         }
     }
 
@@ -56,6 +54,33 @@ public class ChatRoomController {
     public ResponseEntity<List<Offer>> getOffersByItem(@PathVariable Long itemId, @RequestParam Long token) {
         List<Offer> offers = vintedService.getOffersByItem(itemId, token);
         return new ResponseEntity<>(offers, HttpStatus.OK);
+    }
+
+    @GetMapping("/offers/{offerId}")
+    public ResponseEntity<Offer> getOfferById(@PathVariable Long offerId) {
+        Offer offer = vintedService.getOfferById(offerId);
+        return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    @PostMapping("/offers/{offerId}/accept")
+    public ResponseEntity<Object> acceptOffer(@PathVariable Long offerId) {    
+        try {
+            vintedService.acceptOffer(offerId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return ResponseEntity.badRequest().body("Error al aceptar la oferta: " + e.getMessage());
+        }
+    }
+    @PostMapping("/offers/{offerId}/reject")
+    public ResponseEntity<Object> rejectOffer(@PathVariable Long offerId) {    
+        try {
+            vintedService.rejectOffer(offerId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return ResponseEntity.badRequest().body("Error al aceptar la oferta: " + e.getMessage());
+        }
     }
 }
 

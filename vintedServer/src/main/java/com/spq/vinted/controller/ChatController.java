@@ -21,6 +21,10 @@ public class ChatController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageDTO message) {
         
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+        
         String destination = "/topic/chat/" + message.getChatRoomId();;
         
         messagingTemplate.convertAndSend(destination, message);

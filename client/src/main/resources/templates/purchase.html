@@ -119,10 +119,11 @@
 							</a>
 						</div>
 
-						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
-							data-notify="0">
-							<i class="zmdi zmdi-favorite-outline"></i>
-						</a>
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" th:data-notify="${wishlistSize}">
+							<a th:href="@{/wishlist(token=${token})}" class="cart-link">
+								<i class="zmdi zmdi-favorite-outline"></i>
+							</a>
+						</div>
 						<div th:if="${token}" class="user-menu-container">
 							<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-menu-toggle">
 								<i class="zmdi zmdi-account"></i>
@@ -210,11 +211,75 @@
 	<section class="bg0 p-t-104 p-b-116">
 		<div class="container">
 			<div class="flex-w flex-tr flex-login">
-				<div th:if="${items != null and not #lists.isEmpty(items)}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
+				<div th:if="${items != null and not #lists.isEmpty(items)|| offer != null}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
 					<h4 class="mtext-105 cl2 txt-center p-b-30">
 						Comprar Artículos
 					</h4>
-					<form th:action="@{/createMultiplePurchase}" method="POST">
+					<div th:if="${offer != null}" class="txt-center p-b-30">
+						<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" 
+							 alt="Imagen del artículo" 
+							 style="max-width: 300px; max-height: 300px;">
+					</div>
+					<p th:if="${offer != null}" class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
+					<p th:if="${offer != null}" class="txt-center">Precio: <span th:text="${offer.price}"></span> €</p>
+	
+					<form th:if="${offer != null}" th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
+						<h4 class="mtext-105 cl2 txt-center p-b-30">
+							Confirmar Compra
+						</h4>
+						<div class="m-b-20">
+							<label for="paymentMethod" class="stext-111 cl2 p-b-10">Método de pago</label>
+							<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" required onchange="togglePaymentFields(this.value)">
+								<option value="">Elegir opción</option>
+								<option value="credit_card">Tarjeta de crédito</option>
+								<option value="paypal">PayPal</option>
+								<option value="bank_transfer">Transferencia bancaria</option>
+							</select>
+						</div>
+	
+						<div id="creditCardFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
+								<input type="text" id="cardNumber" name="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
+							</div>
+							<div class="m-b-20">
+								<label for="cardExpiry" class="stext-111 cl2 p-b-10">Fecha de expiración</label>
+								<input type="text" id="cardExpiry" name="cardExpiry" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
+							</div>
+							<div class="m-b-20">
+								<label for="cardCVV" class="stext-111 cl2 p-b-10">CVV</label>
+								<input type="text" id="cardCVV" name="cardCVV" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
+							</div>
+						</div>
+	
+						<div id="paypalFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
+								<input type="email" id="paypalEmail" name="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
+							</div>
+						</div>
+	
+						<div id="bankTransferFields" style="display: none;">
+							<div class="m-b-20">
+								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
+								<input type="text" id="bankAccount" name="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES76 1234 5678 9012 3456">
+							</div>
+							<div class="m-b-20">
+								<label for="bankName" class="stext-111 cl2 p-b-10">Nombre del banco</label>
+								<input type="text" id="bankName" name="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del banco">
+							</div>
+						</div>
+	
+						<input type="hidden" name="token" th:value="${token}">
+						<input type="hidden" name="offerId" th:value="${offer != null ? offer.id : ''}">
+						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
+							Confirmar compra
+						</button>
+						<div th:if="${errorMessage}">
+							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
+						</div>
+					</form>
+					<form th:if="${offer == null}" th:action="@{/createMultiplePurchase}" method="POST">
 						<div th:each="item : ${items}" class="item-box p-b-30">
 							<h5 class="mtext-105 cl2 txt-center">
 								<span th:text="${item.title}"></span>
@@ -274,6 +339,7 @@
 						</div>
 	
 						<input type="hidden" name="token" th:value="${token}">
+						<input type="hidden" name="offerId" th:value="${offer != null ? offer.id : ''}">
 						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
 							Confirmar compra
 						</button>

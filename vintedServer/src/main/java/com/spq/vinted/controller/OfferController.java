@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.spq.vinted.dto.OfferDTO;
 import com.spq.vinted.dto.OfferReturnerDTO;
 import com.spq.vinted.model.Offer;
-import com.spq.vinted.model.User;
 import com.spq.vinted.service.OfferService;
 
 @RestController
@@ -27,49 +26,56 @@ public class OfferController {
     @Autowired
     private OfferService offerService;
 
-    
-
-
     @PostMapping("/create")
-    public ResponseEntity<Void> createOffer(@RequestBody OfferDTO request, @RequestParam Long token) {
-        Boolean isSaved = offerService.createOffer(token, request.getReceiverId(), request.getItemId(), request.getChatRoomId(), request.getPrice());
-        return ResponseEntity.status(isSaved ? 200 : 400).build();
+    public ResponseEntity<OfferReturnerDTO> createOffer(@RequestBody OfferDTO request, @RequestParam Long token) {
+        Offer createdOffer = offerService.createOffer(token, request.getReceiverId(), request.getItemId(), request.getChatRoomId(), request.getPrice());
+        return ResponseEntity.ok(convertToOfferReturnerDTO(createdOffer));
     }
-/*     
+  
     @PutMapping("/{id}/accept")
-    public ResponseEntity<Offer> acceptOffer(@PathVariable Long id, @AuthenticationPrincipal User userDetails) {
+    public ResponseEntity<OfferReturnerDTO> acceptOffer(@PathVariable Long id) {
         try {
-            Long userId = userDetails.getId();
-            Offer offer = offerService.acceptOffer(id, userId);
-            return ResponseEntity.ok(offer);
+            Offer offer = offerService.acceptOffer(id);
+            return ResponseEntity.ok(convertToOfferReturnerDTO(offer));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
     
     @PutMapping("/{id}/reject")
-    public ResponseEntity<Offer> rejectOffer(@PathVariable Long id, @AuthenticationPrincipal User userDetails) {
+    public ResponseEntity<OfferReturnerDTO> rejectOffer(@PathVariable Long id) {
         try {
-            Long userId = userDetails.getId();
-            Offer offer = offerService.rejectOffer(id, userId);
-            return ResponseEntity.ok(offer);
+            Offer offer = offerService.rejectOffer(id);
+            return ResponseEntity.ok(convertToOfferReturnerDTO(offer));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-    } */
+    }
 
-    @GetMapping("/item/{itemId}/offers")
+    @GetMapping("/item/{itemId}")
     public ResponseEntity<List<OfferReturnerDTO>> getOffersByItem(@PathVariable Long itemId, @RequestParam Long token) {
         List<Offer> offers = offerService.getOffersByItem(itemId, token);
         List<OfferReturnerDTO> offerReturnerDTOs = new ArrayList<>();
         for (Offer offer : offers) {
             offerReturnerDTOs.add(convertToOfferReturnerDTO(offer));
         }
+        
         return ResponseEntity.ok(offerReturnerDTOs);
     }
 
+    @GetMapping("/{offerId}")
+    public ResponseEntity<OfferReturnerDTO> getOfferById(@PathVariable Long offerId) {
+        Offer offer = offerService.getOfferById(offerId);
+        if (offer != null) {
+            OfferReturnerDTO offerReturnerDTO = convertToOfferReturnerDTO(offer);
+            return ResponseEntity.ok(offerReturnerDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private OfferReturnerDTO convertToOfferReturnerDTO(Offer offer) {
-        return new OfferReturnerDTO(offer.getId(), offer.getPrice(), offer.getStatus().toString(), offer.getSender().getId(), offer.getReceiver().getId(), offer.getItem().getId(), offer.getChat().getId());
+        return new OfferReturnerDTO(offer.getId(), offer.getPrice(), offer.getItem().getPrice(), offer.getStatus().toString(), offer.getSender().getId(), offer.getReceiver().getId(), offer.getItem().getId(), offer.getChat().getId());
     }
 }
 
