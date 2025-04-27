@@ -2,7 +2,7 @@ package com.spq.vinted.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
@@ -75,9 +75,10 @@ public class UserServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.createUser("test@example.com", "password123", "testuser", "Test", "User");
         });
+        assertEquals("User already exists", exception.getMessage());
     }
 
     @Test
@@ -87,9 +88,10 @@ public class UserServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.createUser("test@example.com", "password123", "testuser", "Test", "User");
         });
+        assertEquals("Username already exists", exception.getMessage());
     }
 
     @Test
@@ -111,9 +113,10 @@ public class UserServiceTest {
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.logIn("nonexistent@example.com", "password123");
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -122,9 +125,10 @@ public class UserServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.logIn("test@example.com", "wrongpassword");
         });
+        assertEquals("Invalid credentials", exception.getMessage());
     }
 
     @Test
@@ -143,9 +147,10 @@ public class UserServiceTest {
     @Test
     void testLogOut_TokenNotFound() {
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.LogOut(999999L);
         });
+        assertEquals("Token not found in active users list", exception.getMessage());
     }
 
     @Test
@@ -166,9 +171,10 @@ public class UserServiceTest {
         when(userRepository.findById("999")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.getUserById(999L);
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -188,9 +194,10 @@ public class UserServiceTest {
     @Test
     void testDeleteUser_TokenNotFound() {
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.deleteUser(999999L);
         });
+        assertEquals("Token not found in active users list", exception.getMessage());
     }
 
     @Test
@@ -212,9 +219,10 @@ public class UserServiceTest {
     @Test
     void testEditUserData_UserNotFound() {
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.editUserData(999999L, "NewName", "NewSurname", "New description");
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -237,9 +245,10 @@ public class UserServiceTest {
     @Test
     void testEditProfileImage_UserNotFound() {
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.editProfileImage(999999L, mockFile);
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -260,9 +269,10 @@ public class UserServiceTest {
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.getUserByUsername("nonexistent", 123L);
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -291,9 +301,10 @@ public class UserServiceTest {
         when(userRepository.findById("999")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.getUserItems(999L, 123L);
         });
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
@@ -406,8 +417,9 @@ public class UserServiceTest {
     @Test
     void testEditUser_UserNotFound() {
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.editUser(999999L, "NewName", "NewSurname", "New description", null);
         });
+        assertEquals("User not found", exception.getMessage());
     }
 }
