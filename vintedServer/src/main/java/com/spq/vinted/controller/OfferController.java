@@ -35,7 +35,7 @@ public class OfferController {
         Boolean isSaved = offerService.createOffer(token, request.getReceiverId(), request.getItemId(), request.getChatRoomId(), request.getPrice());
         return ResponseEntity.status(isSaved ? 200 : 400).build();
     }
-    
+/*     
     @PutMapping("/{id}/accept")
     public ResponseEntity<Offer> acceptOffer(@PathVariable Long id, @AuthenticationPrincipal User userDetails) {
         try {
@@ -56,7 +56,7 @@ public class OfferController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-    }
+    } */
 
     @GetMapping("/item/{itemId}/offers")
     public ResponseEntity<List<OfferReturnerDTO>> getOffersByItem(@PathVariable Long itemId, @RequestParam Long token) {

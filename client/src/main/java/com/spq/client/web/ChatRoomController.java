@@ -38,15 +38,17 @@ public class ChatRoomController {
     }
 
     @PostMapping("/offers/create")
-    public String createOffer(@RequestBody OfferCreator request, @RequestParam Long token, RedirectAttributes redirectAttributes, Model model) {    
+    public ResponseEntity<Object> createOffer(@RequestBody OfferCreator request, @RequestParam Long token, RedirectAttributes redirectAttributes, Model model) {    
         try {
             vintedService.createOffer(request, token);
             redirectAttributes.addFlashAttribute("success", "Oferta realizada con éxito.");
-            return "vintedChat"; // Redirige a la URL proporcionada
+            return ResponseEntity.ok().build();
+            //return "vintedChat"; // Redirige a la URL proporcionada
         } catch (Exception e) {
-            e.printStackTrace(); // Log del error
+            e.printStackTrace(); 
             redirectAttributes.addFlashAttribute("error", "Error al realizar la oferta: " + e.getMessage());
-            return "vintedChat"; // Redirige a la URL proporcionada
+            return ResponseEntity.badRequest().body("Error al realizar la oferta: " + e.getMessage());
+            //return "vintedChat"; // Redirige a la URL proporcionada
         }
     }
 
