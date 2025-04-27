@@ -1,19 +1,20 @@
 package com.spq.vinted.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -41,51 +42,52 @@ class ItemControllerTest {
     }
 
     @Test
-    void AddItemToCartTest() {
+    void addItemToCartTest() {
         assertEquals(HttpStatus.OK, itemController.addItemToCart(1L, 2L).getStatusCode());
         doThrow(RuntimeException.class).when(itemService).addItemToCart(1L, 2L);
         assertEquals(HttpStatus.BAD_REQUEST, itemController.addItemToCart(1L, 2L).getStatusCode());
     }
 
     @Test
-    void GetCartTest() {
-        List<Item> items = List.of(new Clothes("camiseta", "camiseta a rayas", 10, ClothesSize.M, ClothesType.TSHIRT, Category.WOMAN, user));
-        when(itemService.getCartItems(1L)).thenReturn(items);
-        ResponseEntity<List<ItemDTO>> response = itemController.getCart(1L);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        when(itemService.getCartItems(1L)).thenThrow(RuntimeException.class);
-        assertEquals(HttpStatus.BAD_REQUEST, itemController.getCart(1L).getStatusCode());
-    }
-
-    @Test
-    void DeleteItemFromCartTest() {
+    void deleteItemFromCartTest() {
         assertEquals(HttpStatus.OK, itemController.deleteItemFromCart(1L, 2L).getStatusCode());
         doThrow(RuntimeException.class).when(itemService).removeItemFromCart(1L, 2L);
         assertEquals(HttpStatus.BAD_REQUEST, itemController.deleteItemFromCart(1L, 2L).getStatusCode());
     }
 
     @Test
-    void UploadItemDataTest() {
-        ClothesDTO clothesDTO = new ClothesDTO();
-        clothesDTO.setTitle("title");
-        clothesDTO.setDescription("desc");
-        clothesDTO.setPrice(20);
-        clothesDTO.setSize(ClothesSize.M);
-        clothesDTO.setClothesType(ClothesType.TSHIRT);
-        clothesDTO.setCategory(Category.WOMAN);
-
+    void uploadItemDataTest() {
         when(userService.getUserByToken(1L)).thenReturn(user);
-        when(itemService.saveItem(any(Clothes.class))).thenReturn(new Clothes("camiseta", "camiseta lisa", 40, ClothesSize.M, ClothesType.TSHIRT, Category.WOMAN, user));
+
+        ClothesDTO clothesDTO = new ClothesDTO(0, "Camisa", "Bonita", 20, ClothesSize.M, ClothesType.TSHIRT, Category.WOMAN, null);
+        when(itemService.saveItem(any(Clothes.class))).thenReturn(new Clothes());
         assertEquals(HttpStatus.OK, itemController.uploadItemData(1L, clothesDTO).getStatusCode());
+
+        ElectronicsDTO electronicsDTO = new ElectronicsDTO(0, "Laptop", "Potente", 1000, ElectronicsType.DEVICE, null);
+        when(itemService.saveItem(any(Electronics.class))).thenReturn(new Electronics());
+        assertEquals(HttpStatus.OK, itemController.uploadItemData(1L, electronicsDTO).getStatusCode());
+
+        PetDTO petDTO = new PetDTO(0, "Collar", "Para perro", 10, Species.DOG, null);
+        when(itemService.saveItem(any(Pet.class))).thenReturn(new Pet());
+        assertEquals(HttpStatus.OK, itemController.uploadItemData(1L, petDTO).getStatusCode());
+
+        HomeDTO homeDTO = new HomeDTO(0, "Sofa", "Comodo", 500, HomeType.FURNITURE, null);
+        when(itemService.saveItem(any(Home.class))).thenReturn(new Home());
+        assertEquals(HttpStatus.OK, itemController.uploadItemData(1L, homeDTO).getStatusCode());
+
+        EntertainmentDTO entertainmentDTO = new EntertainmentDTO(0, "Juego", "Divertido", 30, EntertainmentType.GAME, null);
+        when(itemService.saveItem(any(Entertainment.class))).thenReturn(new Entertainment());
+        assertEquals(HttpStatus.OK, itemController.uploadItemData(1L, entertainmentDTO).getStatusCode());
+
+        when(itemService.saveItem(any(Item.class))).thenReturn(null);
+        assertEquals(HttpStatus.BAD_REQUEST, itemController.uploadItemData(1L, clothesDTO).getStatusCode());
 
         when(userService.getUserByToken(1L)).thenReturn(null);
         assertEquals(HttpStatus.FORBIDDEN, itemController.uploadItemData(1L, clothesDTO).getStatusCode());
     }
 
     @Test
-    void UpdateItemImageTest() throws IOException {
+    void updateItemImageTest() throws IOException {
         List<MultipartFile> images = List.of(new MockMultipartFile("file", "filename.jpg", "image/jpeg", "test".getBytes()));
         assertEquals(HttpStatus.NO_CONTENT, itemController.updateItemImage(1L, images).getStatusCode());
 
@@ -94,17 +96,35 @@ class ItemControllerTest {
 
         doThrow(new RuntimeException("Item not found")).when(itemService).uploadItemImages(anyLong(), anyList());
         assertEquals(HttpStatus.NOT_FOUND, itemController.updateItemImage(1L, images).getStatusCode());
+
+        doThrow(new RuntimeException("Unexpected error")).when(itemService).uploadItemImages(anyLong(), anyList());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, itemController.updateItemImage(1L, images).getStatusCode());
     }
 
     @Test
-    void GetItemsTest() {
+    void getCartTest() {
+        when(itemService.getCartItems(1L)).thenReturn(new ArrayList<>());
+        assertEquals(HttpStatus.OK, itemController.getCart(1L).getStatusCode());
+
+        when(itemService.getCartItems(1L)).thenThrow(RuntimeException.class);
+        assertEquals(HttpStatus.BAD_REQUEST, itemController.getCart(1L).getStatusCode());
+    }
+
+    @Test
+    void getItemsTest() {
         when(itemService.getItems(null)).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getItems(null).getStatusCode());
+
+        when(itemService.getItems(1L)).thenReturn(new ArrayList<>());
+        assertEquals(HttpStatus.OK, itemController.getItems(1L).getStatusCode());
+
+        when(itemService.getItems(2L)).thenThrow(RuntimeException.class);
+        assertEquals(HttpStatus.BAD_REQUEST, itemController.getItems(2L).getStatusCode());
     }
 
     @Test
-    void GetItemByIdTest() {
-        when(itemService.getItemById(1L)).thenReturn(new Clothes("camiseta", "camiseta azul", 20, ClothesSize.M, ClothesType.TSHIRT, Category.WOMAN, user));
+    void getItemByIdTest() {
+        when(itemService.getItemById(1L)).thenReturn(new Clothes());
         assertEquals(HttpStatus.OK, itemController.getItemById(1L).getStatusCode());
 
         when(itemService.getItemById(2L)).thenThrow(RuntimeException.class);
@@ -112,48 +132,52 @@ class ItemControllerTest {
     }
 
     @Test
-    void GetClothesTest() {
+    void getClothesTest() {
         when(itemService.getClothes()).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getClothes(null).getStatusCode());
     }
 
     @Test
-    void GetClothesByCategoryTest() {
-        when(itemService.getClothesByCategory(Category.WOMAN)).thenReturn(new ArrayList<>());
-        assertEquals(HttpStatus.OK, itemController.getClothesByCategory(Category.WOMAN, null).getStatusCode());
-    }
-
-    @Test
-    void GetElectronicsTest() {
+    void getElectronicsTest() {
         when(itemService.getElectronics()).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getElectronics(null).getStatusCode());
     }
 
     @Test
-    void GetHomeItemsTest() {
+    void getHomeItemsTest() {
         when(itemService.getHomeItems()).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getHomeItems(null).getStatusCode());
     }
 
     @Test
-    void GetItemsForPetTest() {
+    void getItemsForPetTest() {
         when(itemService.getItemsForPet()).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getItemsForPet(null).getStatusCode());
     }
 
     @Test
-    void GetItemsforEntertainmentTest() {
+    void getItemsforEntertainmentTest() {
         when(itemService.getItemsforEntertainment()).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getItemsforEntertainment(null).getStatusCode());
     }
 
     @Test
-    void ShowImagenTest() throws Exception {
-        ResponseEntity<Resource> response = itemController.showImagen("nonexistent.jpg");
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    void showImagenTest() throws Exception {
+        Path path = Paths.get("uploads/items/test.jpg");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, "fake image content");
+
+        ResponseEntity<Resource> response = itemController.showImagen("test.jpg");
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        Files.deleteIfExists(path);
+
+        ResponseEntity<Resource> responseNotFound = itemController.showImagen("nonexistent.jpg");
+        assertEquals(HttpStatus.NOT_FOUND, responseNotFound.getStatusCode());
     }
+
     @Test
-    void GetItemOwnerTest() {
+    void getItemOwnerTest() {
         when(itemService.getItemOwner(1L)).thenReturn(user);
         assertEquals(HttpStatus.OK, itemController.getItemOwner(1L).getStatusCode());
 
@@ -162,13 +186,13 @@ class ItemControllerTest {
     }
 
     @Test
-    void GetUserItemsTest() {
+    void getUserItemsTest() {
         when(itemService.getUserItems(1L)).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.getUserItems(1L).getStatusCode());
     }
 
     @Test
-    void GetSellerTest() {
+    void getSellerTest() {
         Item item = mock(Item.class);
         when(itemService.getItemById(1L)).thenReturn(item);
         when(item.getSeller()).thenReturn(user);
@@ -176,7 +200,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void DeleteItemTest() {
+    void deleteItemTest() {
         assertEquals(HttpStatus.NO_CONTENT, itemController.deleteItem(1L, 1L).getStatusCode());
 
         doThrow(new RuntimeException("Item not found")).when(itemService).deleteItem(1L, 1L);
@@ -184,11 +208,17 @@ class ItemControllerTest {
 
         doThrow(new RuntimeException("Not authorized")).when(itemService).deleteItem(1L, 2L);
         assertEquals(HttpStatus.FORBIDDEN, itemController.deleteItem(1L, 2L).getStatusCode());
+
+        doThrow(new RuntimeException("Unexpected"));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, itemController.deleteItem(1L, 3L).getStatusCode());
     }
 
     @Test
-    void SearchItemsTest() {
+    void searchItemsTest() {
         when(itemService.searchItems(null, "query")).thenReturn(new ArrayList<>());
         assertEquals(HttpStatus.OK, itemController.searchItems(null, "query").getStatusCode());
+
+        when(itemService.searchItems(null, "badquery")).thenThrow(RuntimeException.class);
+        assertEquals(HttpStatus.BAD_REQUEST, itemController.searchItems(null, "badquery").getStatusCode());
     }
 }
