@@ -1,6 +1,6 @@
 package com.spq.vinted.controller;
 
-import com.spq.vinted.dto.ChatMessage;
+import com.spq.vinted.dto.ChatMessageDTO;
 import com.spq.vinted.dto.ChatRoomDTO;
 import com.spq.vinted.dto.ChatRoomInfoDTO;
 import com.spq.vinted.model.ChatRoom;
@@ -51,9 +51,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/{chatRoomId}/messages")
-    public List<ChatMessage> getMessages(@PathVariable long chatRoomId) {
+    public List<ChatMessageDTO> getMessages(@PathVariable long chatRoomId) {
         List<Message> messages = messageService.getMessagesForChatRoom(chatRoomId);
-        return messages.stream().map(message -> new ChatMessage(
+        return messages.stream().map(message -> new ChatMessageDTO(
             message.getContent(),
             message.getChatRoom().getId(),
             message.getSender().getId(),

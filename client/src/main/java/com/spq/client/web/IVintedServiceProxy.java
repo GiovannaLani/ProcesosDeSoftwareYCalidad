@@ -1,12 +1,14 @@
 package com.spq.client.web;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
-import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
+import com.spq.client.data.Offer;
+import com.spq.client.data.OfferCreator;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
@@ -18,6 +20,7 @@ import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IVintedServiceProxy {
     public void createUser(Signup user);
@@ -32,9 +35,7 @@ public interface IVintedServiceProxy {
 	public List<Entertainment> getItemsForEntertainment(long token);
 	public void logout(long token);
 	public Purchase createPurchase(long token, Purchase purchase);
-	public List<Purchase> createPurchases(long token, List<Purchase> purchases);
 	public boolean processPayment(long purchaseId, String paymentMethod, long token);
-	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token);
 	public void deleteUser(long token);
 	public void updateUser(long token, String name, String surname, String description, MultipartFile profileImage);
 	public User getUser(long id, long token);
@@ -51,12 +52,13 @@ public interface IVintedServiceProxy {
 	public User getSeller(Item item);
 	public void deletePurchase(Long token, Long purchaseId);
 	public void deleteItem(Long token, Long itemId);
-	public List<Item> searchItems(Long token, String search);
-	public User getUserByUsername(String username, Long token);
-	public List<Item> getUserItems(Long userId, Long token);
 	public void createChatRoom(long buyerId, long sellerId, long itemId);
 	public List<ChatRoomInfo> getChatRoomsForUser(long userId);
 	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId);
-	public String addRating(Rating rating, Long token);
-	public List<Rating> getRatingsForUser(long userId);
+	public Offer getOffer(Long id);
+	public void createOffer(OfferCreator offer, long token);
+	public Map<String, Offer> updateOfferStatus(Long id, String status);
+	public Offer acceptOffer(Long id);
+	public Offer rejectOffer(Long id);
+	public List<Offer> getOffersByItem(Long itemId, Long token);
 }
