@@ -496,6 +496,55 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public void addItemToWishlist(Long token, Long itemId) {
+		try {
+			String url = apiBaseUrl + "/items/wishlist/add?token=" + token + "&itemId=" + itemId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item or user not found");
+				default -> throw new RuntimeException("Failed to add item to wishlist: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public List<Item> getWishlistItems(Long token) {
+		try {
+			String url = apiBaseUrl + "/items/wishlist?token=" + token;
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Item>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("User not found");
+				default -> throw new RuntimeException("Failed to fetch wishlist items: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
+	public void removeItemFromWishlist(Long token, Long itemId) {
+		try {
+			String url = apiBaseUrl + "/items/wishlist/remove?token=" + token + "&itemId=" + itemId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+			restTemplate.postForObject(url, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item or user not found");
+				default -> throw new RuntimeException("Failed to remove item from wishlist: " + e.getStatusText());
+			}
+		}
+	}
+
+	@Override
 	public Purchase getPurchaseById(Long token, Long purchaseId) {
 		try {
 			String url = apiBaseUrl + "/purchases/" + purchaseId + "?token=" + token;
@@ -672,18 +721,6 @@ public class ServiceProxy implements IVintedServiceProxy {
     public Map<String, Offer> updateOfferStatus(Long id, String status) {
         String url = apiBaseUrl + "/offers/" + id + "/status?status=" + status;
         return restTemplate.postForObject(url, null, Map.class);
-    }
-
-    @Override
-    public Offer acceptOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/accept";
-        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
-    }
-
-    @Override
-    public Offer rejectOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/reject";
-        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
     }
 	
 	@Override
