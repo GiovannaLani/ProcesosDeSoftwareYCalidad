@@ -1,3 +1,19 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,18 +35,30 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    # Espera a que el servicio de MySQL esté listo
     - name: Wait for MySQL to be ready
       run: |
         apt-get update
         apt-get install -y wait-for-it
         wait-for-it mysql:3306 --timeout=60 --strict -- echo "MySQL is ready"
+
+    # Ejecuta un script para crear la base de datos (si aún no existe)
+    - name: Initialize Database
+      run: |
+        mysql -h mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS restapidb;"
+        mysql -h mysql -u root -proot -e "GRANT ALL PRIVILEGES ON restapidb.* TO 'spq'@'%';"
+        mysql -h mysql -u root -proot -e "FLUSH PRIVILEGES;"
+
     - name: Build with client Maven
       run: mvn -B package --file client/pom.xml
+
     - name: Build with vinted Maven
       run: mvn -B package --file vintedServer/pom.xml
