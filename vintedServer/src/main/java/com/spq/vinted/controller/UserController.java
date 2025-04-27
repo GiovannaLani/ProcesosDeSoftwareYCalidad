@@ -85,7 +85,7 @@ public class UserController {
 			userService.deleteUser(token);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
-			if ("User not found".equals(e.getMessage())) {
+			if (e.getMessage().equals("User not found")) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -100,10 +100,11 @@ public class UserController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		try {
-			if (name == null || name.isEmpty() || surname == null || surname.isEmpty()) {
+			// Validar parámetros requeridos
+			if (name == null || name.trim().isEmpty() || surname == null || surname.trim().isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
-	
+			
 			userService.editUser(token, name, surname, description, profileImage);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
@@ -114,7 +115,7 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PutMapping("/editUserData")
 	public ResponseEntity<Void> updateUserData(
 			@RequestParam("token") long token,
@@ -220,24 +221,25 @@ public class UserController {
 	@PostMapping("/rate")
 	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
 		try {
+			// Validar que los IDs no sean nulos
 			if (rating.getRatedUserId() == null || rating.getRatingUserId() == null) {
 				return ResponseEntity.badRequest().body("Rated user or rating user not found");
 			}
-	
+			
 			User ratedUser = userService.getUserById(rating.getRatedUserId());
 			User ratingUser = userService.getUserById(rating.getRatingUserId());
-	
+			
 			if (ratedUser == null || ratingUser == null) {
 				return ResponseEntity.badRequest().body("Rated user or rating user not found");
 			}
-	
+			
 			RatingDTO ratingDTO = new RatingDTO(
-					ratedUser.getId(),
-					ratingUser.getId(),
-					rating.getScore(),
-					rating.getComment()
+				ratedUser.getId(),
+				ratingUser.getId(),
+				rating.getScore(),
+				rating.getComment()
 			);
-	
+
 			userService.addRating(ratingDTO);
 			return ResponseEntity.ok("Rating added successfully");
 		} catch (Exception e) {
