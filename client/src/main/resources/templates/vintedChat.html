@@ -890,7 +890,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function openOfferModal() {
     const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
     
-    currentItemId = chatRoomElement.getAttribute("data-item-id");
+    currentItemId = parseInt(chatRoomElement.getAttribute("data-item-id"));
     currentItemName = chatRoomElement.getAttribute("data-item-name");
     currentItemImage = chatRoomElement.getAttribute("data-item-img");
     currentItemPrice = parseFloat(chatRoomElement.getAttribute("data-item-price"));
@@ -913,10 +913,11 @@ function submitOffer() {
 
 	if (!currentChatRoomId || !userId || !currentItemId || !otherUserId) {
 		console.error("Missing required values:", { 
-			currentChatRoomId, 
-			userId, 
-			currentItemId,
-			otherUserId
+		price,
+		senderId,
+        receiverId,
+        itemId,
+        chatRoomId
 		});
 		alert('Falta información para enviar la oferta. Vuelve a intentarlo.');
 		return;
@@ -930,46 +931,36 @@ function submitOffer() {
     }
     
     const offerData = {
-        receiverId: otherUserId,
+        price: offerPrice,
+		status: "PENDING",
+		senderId: userId,
+        receiverId: parseInt(otherUserId),
+        chatRoomId: currentChatRoomId,
         itemId: currentItemId,
-        chatId: currentChatRoomId,
-        price: offerPrice
     };
     console.log("Sending offer with data:", offerData);
-    fetch('/offers/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(offerData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error al enviar la oferta: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        const offerMessage = {
-            type: 'OFFER',
-            content: data.id.toString(), 
-            senderId: userId,
-            timestamp: new Date().getTime()
-        };
-        
-        if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/chat/${currentChatRoomId}`, {}, JSON.stringify(offerMessage));
-        }
-        
-        showMessage(offerMessage);
-        
-        closeOfferModal();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('No se pudo enviar la oferta. ' + error.message);
-    });
+
+	fetch(`/chatrooms/offers/create?token=${userToken}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(offerData),
+	})
+	.then(response => {
+		if (response.status === 404) {
+			throw new Error('Endpoint no encontrado. Verifica la URL del servidor.');
+		}
+		if (response.status !== 200) {
+			throw new Error(`Error al enviar la oferta: ${response.status} ${response.statusText}`);
+		}
+	})
+	.catch(error => {
+		console.error('Error:', error);
+		alert('No se pudo enviar la oferta. ' + error.message);
+	});
 }
+
 
 function showMessage(message) {
     if (!message) return;

@@ -7,5 +7,7 @@ public record Offer (
     Double price,
     String status,
     Long senderId,
-    Long receiverId
+    Long receiverId,
+    Long itemId,
+    Long chatRoomId
 ){}

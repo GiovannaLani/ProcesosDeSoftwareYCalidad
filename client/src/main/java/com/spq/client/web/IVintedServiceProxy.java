@@ -8,6 +8,7 @@ import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
+import com.spq.client.data.OfferCreator;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
@@ -55,9 +56,9 @@ public interface IVintedServiceProxy {
 	public List<ChatRoomInfo> getChatRoomsForUser(long userId);
 	public List<ChatMessage> getMessagesForChatRoom(Long chatRoomId);
 	public Offer getOffer(Long id);
-	public Map<String, Offer> createOffer(Offer offer);
+	public void createOffer(OfferCreator offer, long token);
 	public Map<String, Offer> updateOfferStatus(Long id, String status);
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
-
+	public List<Offer> getOffersByItem(Long itemId, Long token);
 }

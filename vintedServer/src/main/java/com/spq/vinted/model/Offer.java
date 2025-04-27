@@ -126,6 +126,19 @@ public class Offer {
         this.createdAt = createdAt;
     }
 
+    @Override
+    public String toString() {
+        return "Offer{" +
+                "id=" + id +
+                ", sender=" + sender.getId() +
+                ", receiver=" + receiver.getId() +
+                ", item=" + item.getId() +
+                ", price=" + price +
+                ", status=" + status +
+                ", chat=" + chat +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }
 
 

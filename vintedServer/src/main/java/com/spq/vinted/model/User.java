@@ -141,4 +141,19 @@ public class User {
     public void setItemsForSale(List<Item> itemsForSale) {
         this.itemsForSale = itemsForSale;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", cartItems=" + cartItems +
+                ", username='" + username + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", description='" + description + '\'' +
+                ", profileImage='" + profileImage + '\'' +
+                '}';
+    }
 }

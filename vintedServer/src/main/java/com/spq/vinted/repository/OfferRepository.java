@@ -10,4 +10,5 @@ import com.spq.vinted.model.Offer;
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
     List<Offer> findByChatIdAndStatus(Long chatId, Offer.OfferStatus status);
+    List<Offer> findByItemIdAndSenderId(Long item, Long senderId); ;
 }

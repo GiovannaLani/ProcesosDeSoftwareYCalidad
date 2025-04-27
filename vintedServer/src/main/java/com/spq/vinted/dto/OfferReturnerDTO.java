@@ -1,6 +1,7 @@
 package com.spq.vinted.dto;
 
-public class OfferDTO {
+public class OfferReturnerDTO {
+    private long id;
     private double price;
     private String status;
     private long senderId;
@@ -10,16 +11,20 @@ public class OfferDTO {
     
 
     
-    public OfferDTO() {
+    public OfferReturnerDTO() {
     }
 
-    public OfferDTO(double price, String status, long senderId, long receiverId, long itemId, long chatRoomId) {
+    public OfferReturnerDTO(long id, double price, String status, long senderId, long receiverId, long itemId, long chatRoomId) {
         this.price = price;
         this.status = status;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.itemId = itemId;
         this.chatRoomId = chatRoomId;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public double getPrice() {

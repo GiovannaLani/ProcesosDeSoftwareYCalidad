@@ -42,7 +42,6 @@ public class MessageService {
 
     public void sendMessage(long token, long chatRoomId, String content) {
         User sender = userService.getUserByToken(token);
-
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new RuntimeException("ChatRoom not found"));
 
         Message message = new Message();
@@ -91,14 +90,13 @@ public class MessageService {
         
         if (message.getType() == Message.MessageType.OFFER && message.getOffer() != null) {
             OfferDTO offerDTO = new OfferDTO();
-            offerDTO.setId(message.getOffer().getId());
             offerDTO.setPrice(message.getOffer().getPrice());
             offerDTO.setStatus(message.getOffer().getStatus().toString());
             offerDTO.setSenderId(message.getOffer().getSender().getId());
             offerDTO.setReceiverId(message.getOffer().getReceiver().getId());
             
             ItemDTO itemDTO = ItemService.getDTOById(message.getOffer().getItem().getId());
-            offerDTO.setItem(itemDTO); 
+            offerDTO.setItemId(itemDTO.getId()); 
             
 
             dto.setOffer(offerDTO);

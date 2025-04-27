@@ -22,6 +22,7 @@ import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
 import com.spq.client.data.Offer;
+import com.spq.client.data.OfferCreator;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
@@ -551,9 +552,9 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public Map<String, Offer> createOffer(Offer offer) {
-        String url = apiBaseUrl + "/offers/create";
-        return restTemplate.postForObject(url, offer, Map.class);
+    public void createOffer(OfferCreator offer, long token) {
+        String url = apiBaseUrl + "/offers/create?token=" + token;
+		restTemplate.postForObject(url, offer, OfferCreator.class);
     }
     
     @Override
@@ -579,4 +580,10 @@ public class ServiceProxy implements IVintedServiceProxy {
         String url = apiBaseUrl + "/api/offers/" + id + "/reject";
         return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
     }
+
+	@Override
+	public List<Offer> getOffersByItem(Long itemId, Long token) {
+		String url = apiBaseUrl + "/offers/item/" + itemId + "?token=" + token;
+		return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Offer>>() {}).getBody();
+	}
 }

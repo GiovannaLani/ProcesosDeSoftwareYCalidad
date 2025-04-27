@@ -1,10 +1,13 @@
 package com.spq.vinted.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spq.vinted.dto.OfferReturnerDTO;
 import com.spq.vinted.model.ChatRoom;
 import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Message;
@@ -39,12 +42,15 @@ public class OfferService {
     @Autowired
     private MessageService messageService;
     
+    @Autowired
+    private UserService userService;
     
-    public Offer createOffer(Long senderId, Long receiverId, Long itemId, Long chatId, Double price) {
-        User sender = userRepository.findById(senderId.toString()).orElseThrow();
-        User receiver = userRepository.findById(receiverId.toString()).orElseThrow();
-        Item item = itemRepository.findById(itemId).orElseThrow();
-        ChatRoom chat = chatRepository.findById(chatId).orElseThrow();
+    
+    public Boolean createOffer(Long token, Long receiverId, Long itemId, Long chatId,Double price) {
+        User sender = userService.getUserByToken(token);
+        User receiver = userRepository.findById(receiverId.toString()).orElseThrow(() -> new NoSuchElementException("Receiver not found"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("Item not found"));
+        ChatRoom chat = chatRepository.findById(chatId).orElseThrow(() -> new NoSuchElementException("ChatRoom not found"));
         
         Offer offer = new Offer();
         offer.setSender(sender);
@@ -57,23 +63,15 @@ public class OfferService {
         
         offerRepository.save(offer);
         
-        Message message = new Message();
-        message.setSender(sender);
-        message.setChatRoom(chat);
-        message.setOffer(offer);
-        message.setTimestamp(LocalDateTime.now());
-        
-        messageRepository.save(message);
-        
-        return offer;
+        return true;
     }
     
 
-    public Offer acceptOffer(Long offerId, Long userId) throws Exception {
+    public Offer acceptOffer(Long offerId, Long token) throws Exception {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow();
         
-        if (!offer.getReceiver().getId().equals(userId)) {
+        if (!offer.getReceiver().getId().equals(token)) {
             throw new Exception("This offer is no longer pending");
         }
         
@@ -94,11 +92,11 @@ public class OfferService {
     
 
    
-    public Offer rejectOffer(Long offerId, Long userId) throws Exception {
+    public Offer rejectOffer(Long offerId, Long token) throws Exception {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow();
         
-        if (!offer.getReceiver().getId().equals(userId)) {
+        if (!offer.getReceiver().getId().equals(token)) {
             throw new Exception("Only the receiver can reject the offer");
         }
         
@@ -115,5 +113,10 @@ public class OfferService {
         }
         
         return offer;
+    }
+
+    public List<Offer> getOffersByItem(Long itemId, Long token) {
+        User user = userService.getUserByToken(token);
+        return offerRepository.findByItemIdAndSenderId(itemId, user.getId());
     }
 }
