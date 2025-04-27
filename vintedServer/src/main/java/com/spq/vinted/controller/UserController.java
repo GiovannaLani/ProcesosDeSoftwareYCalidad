@@ -85,10 +85,7 @@ public class UserController {
 			userService.deleteUser(token);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
-			if ("User not found".equals(e.getMessage())) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -100,10 +97,6 @@ public class UserController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		try {
-			if (name == null || name.isEmpty() || surname == null || surname.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}
-	
 			userService.editUser(token, name, surname, description, profileImage);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
@@ -114,7 +107,6 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
 	@PutMapping("/editUserData")
 	public ResponseEntity<Void> updateUserData(
 			@RequestParam("token") long token,
@@ -194,9 +186,9 @@ public class UserController {
 			@RequestParam("username") String username,
 			@RequestParam("token") Long token) {
 		try {
-			User user = userService.getUserByUsername(username, token);
+			UserDTO user = userService.getUserByUsername(username, token).toDTO();
 			if (user != null) {
-				return ResponseEntity.ok(user.toDTO());
+				return ResponseEntity.ok(user);
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 			}
@@ -220,22 +212,20 @@ public class UserController {
 	@PostMapping("/rate")
 	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
 		try {
-			if (rating.getRatedUserId() == null || rating.getRatingUserId() == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
-			}
-	
+			System.out.println("cosasverdes " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
 			User ratedUser = userService.getUserById(rating.getRatedUserId());
 			User ratingUser = userService.getUserById(rating.getRatingUserId());
+			System.out.println(ratedUser.getId() + " " + ratingUser.getId() + " " + rating.getScore() + " " + rating.getComment());
 	
 			if (ratedUser == null || ratingUser == null) {
 				return ResponseEntity.badRequest().body("Rated user or rating user not found");
 			}
-	
+			
 			RatingDTO ratingDTO = new RatingDTO(
-					ratedUser.getId(),
-					ratingUser.getId(),
-					rating.getScore(),
-					rating.getComment()
+				ratedUser.getId(),
+				ratingUser.getId(),
+				rating.getScore(),
+				rating.getComment()
 			);
 	
 			userService.addRating(ratingDTO);
