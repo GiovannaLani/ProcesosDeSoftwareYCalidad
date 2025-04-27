@@ -25,6 +25,7 @@ public class IntegrationTest {
 
     private long token;
     private long userId;
+    private long itemId;
 
     @BeforeEach
     public void setup() {
@@ -37,11 +38,11 @@ public class IntegrationTest {
         try {
             // 1. Crear usuario
             ObjectNode signupData = objectMapper.createObjectNode();
-            signupData.put("email", "integrationtest@example.com");
-            signupData.put("password", "testpassword");
-            signupData.put("username", "integrationtestuser");
-            signupData.put("name", "Test");
-            signupData.put("surname", "User");
+            signupData.put("email", "integrationtest6@example.com");
+            signupData.put("password", "testpassword6");
+            signupData.put("username", "integrationtestuser6");
+            signupData.put("name", "Test6");
+            signupData.put("surname", "User6");
 
             HttpRequest signupRequest = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:8080/users/signup"))
@@ -54,8 +55,8 @@ public class IntegrationTest {
 
             // 2. Login
             ObjectNode loginData = objectMapper.createObjectNode();
-            loginData.put("email", "integrationtest@example.com");
-            loginData.put("password", "testpassword");
+            loginData.put("email", "integrationtest6@example.com");
+            loginData.put("password", "testpassword6");
 
             HttpRequest loginRequest = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:8080/users/login"))
@@ -108,4 +109,91 @@ public class IntegrationTest {
             fail("Test falló por excepción: " + ex.getMessage());
         }
     }
+
+    @Test
+    public void testLogin_UploadItem_ViewItems_Logout() {
+        try {
+            // 1. Crear usuario
+            ObjectNode signupData = objectMapper.createObjectNode();
+            signupData.put("email", "itemintegration8@example.com");
+            signupData.put("password", "testpassword8");
+            signupData.put("username", "itemintegrationuser8");
+            signupData.put("name", "Item8");
+            signupData.put("surname", "Tester8");
+
+            HttpRequest signupRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/users/signup"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(signupData)))
+                    .build();
+
+            HttpResponse<String> signupResponse = client.send(signupRequest, HttpResponse.BodyHandlers.ofString());
+            assertEquals(201, signupResponse.statusCode(), "Error al crear usuario");
+
+            // 2. Login
+            ObjectNode loginData = objectMapper.createObjectNode();
+            loginData.put("email", "itemintegration8@example.com");
+            loginData.put("password", "testpassword8");
+
+            HttpRequest loginRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/users/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(loginData)))
+                    .build();
+
+            HttpResponse<String> loginResponse = client.send(loginRequest, HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, loginResponse.statusCode(), "Error en login");
+
+            token = Long.parseLong(loginResponse.body());
+            System.out.println("Token recibido: " + token);
+
+            /* 3. Subir un ítem
+            ObjectNode itemData = objectMapper.createObjectNode();
+            itemData.put("title", "Integration Test Item");
+            itemData.put("description", "Item created during integration test");
+            itemData.put("price", 15.99);
+            itemData.put("size", "M");
+            itemData.put("clothesType", "TSHIRT");
+            itemData.put("category", "BOY");
+            itemData.put("type", "clothes");
+
+            HttpRequest uploadItemRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/items/itemData?token=" + token))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(itemData)))
+                    .build();
+
+            HttpResponse<String> uploadItemResponse = client.send(uploadItemRequest, HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, uploadItemResponse.statusCode(), "Error al subir ítem");
+
+            itemId = Long.parseLong(uploadItemResponse.body());
+            System.out.println("Item creado con ID: " + itemId);
+*/
+            // 4. Ver ítems
+            HttpRequest getItemsRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/items/items?token=" + token))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> getItemsResponse = client.send(getItemsRequest, HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, getItemsResponse.statusCode(), "Error al obtener items");
+            System.out.println("Items actuales: " + getItemsResponse.body());
+
+            // 5. Logout
+            HttpRequest logoutRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/users/logout?token=" + token))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpResponse<String> logoutResponse = client.send(logoutRequest, HttpResponse.BodyHandlers.ofString());
+            assertEquals(204, logoutResponse.statusCode(), "Error al hacer logout");
+
+            System.out.println("Logout exitoso");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Test falló por excepción: " + ex.getMessage());
+        }
+    }
+    
 }
