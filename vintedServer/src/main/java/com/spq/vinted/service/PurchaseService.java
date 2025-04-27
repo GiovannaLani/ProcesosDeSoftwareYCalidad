@@ -11,6 +11,15 @@ public class PurchaseService {
     private final Map<Long, List<Long>> userPurchases = new HashMap<>();
     private long purchaseCounter = 1;
 
+    public List<PurchaseDTO> createMultiplePurchases(long token, List<PurchaseDTO> purchases) {
+        List<PurchaseDTO> createdPurchases = new ArrayList<>();
+        for (PurchaseDTO purchase : purchases) {
+            PurchaseDTO createdPurchase = createPurchase(token, purchase);
+            createdPurchases.add(createdPurchase);
+        }
+        return createdPurchases;
+    }
+
     public PurchaseDTO createPurchase(long token, PurchaseDTO purchase) {
         purchase.setStatus("PENDING");
         purchase.setId(purchaseCounter);

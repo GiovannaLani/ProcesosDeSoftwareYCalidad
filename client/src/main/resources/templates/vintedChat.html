@@ -602,7 +602,6 @@
         });
     });
 	</script>
-
 <script>
     function previewImage(event) {
         var output = document.getElementById('imagePreview');
@@ -623,7 +622,6 @@
         }
     }
 </script>
-
 <script th:inline="javascript">
 	let stompClient = null;
 	let currentChatRoomId = null;
@@ -631,7 +629,6 @@
 
 	let userId = /*[[${loggedUserId}]]*/ '${loggedUserId}';
 	let userToken = /*[[${token}]]*/ '${token}';
-	
 
 	function connect(chatRoomId) {
 		currentChatRoomId = chatRoomId;
@@ -663,8 +660,6 @@
 			chatRoomId: currentChatRoomId,
 			timestamp: new Date().toISOString()
 		}));
-		
-
 
 		input.value = "";
 	}
@@ -676,6 +671,72 @@
 		}
 	});
 
+	function showMessage(message) {
+		if (!message.content) return;
+
+		const key = `${message.senderId}_${message.timestamp}`;
+		if (renderedMessages.has(key)) return;
+		renderedMessages.add(key);
+
+		const chatContainer = document.getElementById('chatMessages');
+		const isOwnMessage = Number(message.senderId) === Number(userId);
+
+		if (isOwnMessage) {
+			const container = document.createElement("div");
+			container.className = "conversation-message-container-user";
+
+			setTimeout(() => {
+				container.innerHTML = `
+					<div class="conversation-message conversation-message__intro">
+						<div class="web_ui__Bubble__bubble-user">
+							<div class="web_ui__Bubble__narrow">
+								<div class="web_ui__Bubble__content"></div>
+								<div class="u-flexbox u-align-items-center">
+									<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__body-user web_ui__Text__left">${message.content}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				`;
+				chatContainer.appendChild(container);
+				
+				scrollToBottom();
+			}, 10);
+		}else {
+			fetch(`/chatrooms/otherUser/${message.senderId}?token=${userToken}`).then(response => {
+				if (!response.ok) throw new Error("Error al obtener el usuario");
+				return response.json();
+			}).then(user => {
+				const profileImageUrl = user.profileImage
+					? `http://localhost:8080/users/profile/imagen/${user.profileImage}`
+					: "/images/icons/profile-default.png";
+
+				const container = document.createElement("div");
+				container.className = "conversation-message-container";
+				container.innerHTML = `
+					<div class="u-ui-margin-right-regular">
+						<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
+							<img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
+						</div>
+					</div>
+					<div class="conversation-message conversation-message__intro">
+						<div class="web_ui__Bubble__bubble">
+							<div class="web_ui__Bubble__narrow">
+								<div class="web_ui__Bubble__content"></div>
+								<div class="u-flexbox u-align-items-center">
+									<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${message.content}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				`;
+				chatContainer.appendChild(container);
+				scrollToBottom();
+			})
+			.catch(err => console.error("Error al cargar usuario:", err));
+		}
+	}
+
 	function scrollToBottom() {
 		const scrollContainer = document.getElementById("chatMessagesContainer");
 		requestAnimationFrame(() => {
@@ -683,7 +744,7 @@
 		});
 	}
 	
-	/* function loadChat(chatRoomId) {
+	function loadChat(chatRoomId) {
 		const chatRoomElement = document.querySelector(`[onclick*="loadChat(${chatRoomId})"]`);
 
 		document.getElementById("chatName").style.display = "flex";
@@ -710,7 +771,6 @@
 			document.getElementById("item-button-id").style.display = "flex";
 		}
 
-		console.log("Sending offer with data:", offerData);
 		const itemId = chatRoomElement.getAttribute("data-item-id");
 		const itemIdInput = document.getElementById("buyFormItemId");
 		itemIdInput.value = itemId;
@@ -811,12 +871,7 @@
 		if (!stompClient || !stompClient.connected) {
 			connect(chatRoomId);
 		}
-
-		const offerButton = document.querySelector('.web_ui__Button__primary');
-			if (offerButton) {
-				offerButton.onclick = openOfferModal;
-			}
-	} */
+	}
 	
 	function getTokenFromURL() {
 		const params = new URLSearchParams(window.location.search);
@@ -825,684 +880,7 @@
 	
 </script>
 
-<!-- Pop up oferta -->
-<div id="offerModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="close">&times;</span>
-            <h2>Hacer una oferta</h2>
-        </div>
-        <div class="modal-body">
-            <div class="item-details">
-                <img id="modalItemImage" src="" alt="Item Image" class="modal-item-image">
-                <div class="item-info">
-                    <h3 id="modalItemName"></h3>
-                    <p>Precio del artículo: <span id="modalItemPrice"></span> €</p>
-                </div>
-            </div>
-            <div class="offer-form">
-                <label for="offerPrice">Ofrece un precio</label>
-                <input type="number" id="offerPrice" step="0.01" min="0">
-                
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button id="submitOfferBtn" class="button-green">Hacer una oferta</button>
-        </div>
-    </div>
-</div>
 
-<script>
-
-let currentItemId = null;
-let currentItemName = null;
-let currentItemImage = null;
-let currentItemPrice = null;
-
-
-const offerModal = document.getElementById('offerModal');
-const closeModalBtn = document.querySelector('.close');
-const offerPriceInput = document.getElementById('offerPrice');
-const offerPriceWithProtection = document.getElementById('offerPriceWithProtection');
-const submitOfferBtn = document.getElementById('submitOfferBtn');
-
-// listeners botones
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const offerButton = document.querySelector('.web_ui__Button__primary');
-    if (offerButton) {
-        offerButton.addEventListener('click', openOfferModal);
-    }
-    closeModalBtn.addEventListener('click', closeOfferModal);
-    
-    window.addEventListener('click', function(event) {
-        if (event.target === offerModal) {
-            closeOfferModal();
-        }
-    });
-    
-    
-    submitOfferBtn.addEventListener('click', submitOffer);
-});
-
-//modal = pop-up
-//abre el pop-up de la oferta
-function openOfferModal() {
-    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
-    
-    currentItemId = parseInt(chatRoomElement.getAttribute("data-item-id"));
-    currentItemName = chatRoomElement.getAttribute("data-item-name");
-    currentItemImage = chatRoomElement.getAttribute("data-item-img");
-    currentItemPrice = parseFloat(chatRoomElement.getAttribute("data-item-price"));
-    
-    document.getElementById('modalItemImage').src = currentItemImage; 
-    document.getElementById('modalItemName').textContent = currentItemName;
-    document.getElementById('modalItemPrice').textContent = currentItemPrice.toFixed(2);
-    
-
-    offerModal.style.display = 'block';
-}
-
-function closeOfferModal() {
-    offerModal.style.display = 'none';
-}
-
-function submitOffer() {
-	const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
-	const otherUserId = chatRoomElement ? chatRoomElement.getAttribute("data-other-user-id") : null;
-
-	if (!currentChatRoomId || !userId || !currentItemId || !otherUserId) {
-		console.error("Missing required values:", { 
-		price,
-		senderId,
-        receiverId,
-        itemId,
-        chatRoomId
-		});
-		alert('Falta información para enviar la oferta. Vuelve a intentarlo.');
-		return;
-	}
-
-	const offerPrice = parseFloat(offerPriceInput.value);
-    
-    if (isNaN(offerPrice) || offerPrice <= 0) {
-        alert('Por favor, introduce un precio válido');
-        return;
-    }
-    
-    const offerData = {
-        price: offerPrice,
-		status: "PENDING",
-		senderId: userId,
-        receiverId: parseInt(otherUserId),
-        chatRoomId: currentChatRoomId,
-        itemId: currentItemId,
-    };
-    console.log("Sending offer with data:", offerData);
-
-	fetch(`/chatrooms/offers/create?token=${userToken}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(offerData),
-	})
-	.then(response => {
-		if (response.status === 404) {
-			throw new Error('Endpoint no encontrado. Verifica la URL del servidor.');
-		}
-		if (response.status !== 200) {
-			throw new Error(`Error al enviar la oferta: ${response.status} ${response.statusText}`);
-		}
-	})
-	.catch(error => {
-		console.error('Error:', error);
-		alert('No se pudo enviar la oferta. ' + error.message);
-	});
-}
-
-
-function showMessage(message) {
-    if (!message) return;
-    
-    const chatContainer = document.getElementById('chatMessages');
-    
-    if (message.type === 'OFFER') {
-        fetch(`/offers/${message.content}`)
-            .then(response => response.json())
-            .then(offer => {
-                const isOfferSender = Number(offer.senderId) === Number(userId);
-                const container = document.createElement("div");
-                
-				//usuario que envía la oferta
-                if (isOfferSender) {
-                    container.className = "conversation-message-container-user";
-                    container.innerHTML = `
-                        <div class="conversation-message conversation-message__intro">
-                            <div class="web_ui__Bubble__bubble-user">
-                                <div class="web_ui__Bubble__narrow">
-                                    <div class="web_ui__Bubble__content"></div>
-                                    <div class="offer-container-sender">
-                                        <div class="offer-header">
-                                            <span class="offer-price">${offer.offerPrice.toFixed(2)} €</span>
-                                            <span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
-                                        </div>
-                                        <div class="offer-status">${getOfferStatusText(offer.status)}</div>
-                                        <div class="offer-timestamp">menos de un minuto</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // usuario que recibe la oferta
-                    container.className = "conversation-message-container";
-                    const canRespond = offer.status === "PENDING";
-                    
-                    container.innerHTML = `
-                        <div class="u-ui-margin-right-regular">
-                            <div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
-                                <img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
-                            </div>
-                        </div>
-                        <div class="conversation-message conversation-message__intro">
-                            <div class="web_ui__Bubble__bubble">
-                                <div class="web_ui__Bubble__narrow">
-                                    <div class="web_ui__Bubble__content"></div>
-                                    <div class="offer-container-receiver">
-                                        <div class="offer-header">
-                                            <span class="offer-price">${offer.offerPrice.toFixed(2)} €</span>
-                                            <span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
-                                        </div>
-                                        <div class="offer-status">${getOfferStatusText(offer.status)}</div>
-                                        ${canRespond ? `
-                                            <div class="offer-buttons">
-                                                <button class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.offerId}, 'ACCEPTED')">Aceptar</button>
-                                                <div class="offer-buttons-row">
-                                                    <button class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__default web_ui__Button__primary" style="width: 48%;" onclick="respondToOffer(${offer.offerId}, 'REJECTED')">Rechazar</button>
-                                                </div>
-                                            </div>
-                                        ` : ''}
-                                        <div class="offer-timestamp">menos de un minuto</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                chatContainer.appendChild(container);
-                scrollToBottom();
-            })
-            .catch(err => console.error("Error al cargar oferta:", err));
-    } else {
-        if (!message.content) return;
-
-        const key = `${message.senderId}_${message.timestamp}`;
-        if (renderedMessages.has(key)) return;
-        renderedMessages.add(key);
-
-        const isOwnMessage = Number(message.senderId) === Number(userId);
-
-        if (isOwnMessage) {
-            const container = document.createElement("div");
-            container.className = "conversation-message-container-user";
-
-            setTimeout(() => {
-                container.innerHTML = `
-                    <div class="conversation-message conversation-message__intro">
-                        <div class="web_ui__Bubble__bubble-user">
-                            <div class="web_ui__Bubble__narrow">
-                                <div class="web_ui__Bubble__content"></div>
-                                <div class="u-flexbox u-align-items-center">
-                                    <span class="web_ui__Text__text web_ui__Text__body web_ui__Text__body-user web_ui__Text__left">${message.content}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatContainer.appendChild(container);
-                
-                scrollToBottom();
-            }, 10);
-        } else {
-            fetch(`/chatrooms/otherUser/${message.senderId}?token=${userToken}`).then(response => {
-                if (!response.ok) throw new Error("Error al obtener el usuario");
-                return response.json();
-            }).then(user => {
-                const profileImageUrl = user.profileImage
-                    ? `http://localhost:8080/users/profile/imagen/${user.profileImage}`
-                    : "/images/icons/profile-default.png";
-
-                const container = document.createElement("div");
-                container.className = "conversation-message-container";
-                container.innerHTML = `
-                    <div class="u-ui-margin-right-regular">
-                        <div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
-                            <img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
-                        </div>
-                    </div>
-                    <div class="conversation-message conversation-message__intro">
-                        <div class="web_ui__Bubble__bubble">
-                            <div class="web_ui__Bubble__narrow">
-                                <div class="web_ui__Bubble__content"></div>
-                                <div class="u-flexbox u-align-items-center">
-                                    <span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${message.content}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatContainer.appendChild(container);
-                scrollToBottom();
-            })
-            .catch(err => console.error("Error al cargar usuario:", err));
-        }
-    }
-}
-
-function getOfferStatusText(status) {
-    switch(status) {
-        case 'PENDING':
-            return 'Pendiente';
-        case 'ACCEPTED':
-            return 'Oferta aceptada';
-        case 'REJECTED':
-            return 'Oferta rechazada';
-        default:
-            return '';
-    }
-}
-
-function respondToOffer(offerId, status) {
-    
-    const url = status === 'ACCEPTED' ? `/offers/${offerId}/accept` : `/offers/${offerId}/reject`;
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al responder a la oferta');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Actualizar el mensaje de oferta en el chat
-        updateOfferMessage(offerId, status);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('No se pudo responder a la oferta. Inténtalo de nuevo.');
-    });
-}
-
-function loadChat(chatRoomId) {
-    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${chatRoomId})"]`);
-
-		document.getElementById("chatName").style.display = "flex";
-		const token = chatRoomElement.getAttribute("token");
-		const recieverName = chatRoomElement.getAttribute("data-receiver-name");
-		const otherUserId = chatRoomElement.getAttribute("data-other-user-id");
-		
-		const link = document.getElementById("chatReceiverName");
-		link.href = `/userProfile/${otherUserId}?token=${getTokenFromURL()}`;
-		document.getElementById("chatReceiverName").textContent = recieverName;
-		
-		document.getElementById("itemMessage").style.display = "flex";
-		const itemName = chatRoomElement.getAttribute("data-item-name");
-		const itemImg = chatRoomElement.getAttribute("data-item-img");
-		const itemPrice = chatRoomElement.getAttribute("data-item-price");
-		
-		document.getElementById("heroItemName").textContent = itemName;
-		document.getElementById("heroItemPrice").textContent = itemPrice +" €";
-		document.getElementById("heroItemImage").src = itemImg;
-		
-		const userId = chatRoomElement.getAttribute("data-user-id");
-		const sellerId = chatRoomElement.getAttribute("data-seller-id");
-		if (userId !== sellerId) {
-			document.getElementById("item-button-id").style.display = "flex";
-		}
-
-		const itemId = chatRoomElement.getAttribute("data-item-id");
-		const itemIdInput = document.getElementById("buyFormItemId");
-		itemIdInput.value = itemId;
-		
-		document.getElementById("chatMessagesContainer").style.display = "flex";
-		document.getElementById("chatSendMessages").style.display = "flex";
-
-		const dividers = document.getElementsByClassName("displayDivider");
-		for (let i = 0; i < dividers.length; i++) {
-			dividers[i].style.display = "flex";
-		}
-
-		currentChatRoomId = chatRoomId;
-		let profileImageUrl = null;
-
-		fetch(`/chatrooms/${chatRoomId}/messages`).then(response => response.json()).then(messages => {
-
-			const chatContainer = document.getElementById("chatMessages");
-			chatContainer.innerHTML = "";
-
-			fetch(`/chatrooms/otherUser/${otherUserId}?token=${token}`).then(response => {
-				if (!response.ok) throw new Error("Error al obtener el usuario");
-				return response.json();
-			}).then(user => {
-				profileImageUrl = user.profileImage? `http://localhost:8080/users/profile/imagen/${user.profileImage}`: "/images/icons/profile-default.png";
-
-				const headerContainer = document.createElement("div");
-				headerContainer.className = "conversation-message-container";
-				headerContainer.innerHTML = `
-				<div class="u-ui-margin-right-regular">
-					<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
-					<img role="img" alt="" id="chat_profile_image" class="web_ui__Image__content" src="${profileImageUrl}">
-					</div>
-				</div>
-				<div class="conversation-message conversation-message__intro">
-					<div class="web_ui__Bubble__bubble">
-					<div class="web_ui__Bubble__narrow">
-						<div class="web_ui__Bubble__content"></div>
-						<h2 class="web_ui__Text__text web_ui__Text__title web_ui__Text__left"><strong>Hola, soy ${user.username}</strong></h2>
-						<div class="web_ui__Spacer__small web_ui__Spacer__horizontal"></div>
-						<div class="u-flexbox u-align-items-center">
-						<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${user.name} ${user.surname}</span>
-						</div>
-					</div>
-					</div>
-				</div>
-				`;
-				chatContainer.appendChild(headerContainer);
-
-				messages.forEach(msg => {
-					const isOwnMessage = Number(msg.senderId) === Number(userId);
-					if (isOwnMessage) {
-						const container = document.createElement("div");
-						container.className = "conversation-message-container-user";
-						container.innerHTML = `
-						<div class="conversation-message conversation-message__intro">
-							<div class="web_ui__Bubble__bubble-user">
-							<div class="web_ui__Bubble__narrow">
-								<div class="web_ui__Bubble__content"></div>
-								<div class="u-flexbox u-align-items-center">
-								<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__body-user web_ui__Text__left">${msg.content || ''}</span>
-								</div>
-							</div>
-							</div>
-						</div>
-						`;
-						chatContainer.appendChild(container);
-					} else {
-						const container = document.createElement("div");
-						container.className = "conversation-message-container";
-						container.innerHTML = `
-						<div class="u-ui-margin-right-regular">
-							<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
-							<img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
-							</div>
-						</div>
-						<div class="conversation-message conversation-message__intro">
-							<div class="web_ui__Bubble__bubble">
-							<div class="web_ui__Bubble__narrow">
-								<div class="web_ui__Bubble__content"></div>
-								<div class="u-flexbox u-align-items-center">
-								<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${msg.content || ''}</span>
-								</div>
-							</div>
-							</div>
-						</div>
-						`;
-						chatContainer.appendChild(container);
-						requestAnimationFrame(() => {
-							const scrollContainer = document.getElementById("chatMessagesContainer");
-							scrollContainer.scrollTop = scrollContainer.scrollHeight;
-						});
-					}
-				});
-			}).catch(err => console.error("Error al actualizar usuario:", err));
-		});
-
-		if (!stompClient || !stompClient.connected) {
-			connect(chatRoomId);
-		}
-	
-    
-   
-
-    
-    
-}
-
-</script>
-
-
-
-
-<style>
-
-/*Provisional*/
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 20px;
-  border-radius: 8px;
-  width: 450px;
-  max-width: 90%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: left;
-  margin-bottom: 20px;
-}
-
-.close {
-  color: #aaa;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: #000;
-}
-
-.item-details {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.modal-item-image {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-right: 15px;
-}
-
-.item-info {
-  flex: 1;
-}
-
-.offer-form {
-  margin-bottom: 20px;
-}
-
-.offer-form input {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.price-with-protection {
-  margin-top: 8px;
-  color: #666;
-  font-size: 14px;
-}
-
-.modal-footer {
-  text-align: center;
-}
-
-.offer-message {
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 10px 0;
-}
-
-.offer-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.offer-price {
-  font-weight: bold;
-  font-size: 18px;
-  color: #09b1ba;
-}
-
-.offer-original {
-  text-decoration: line-through;
-  color: #666;
-  margin-left: 10px;
-}
-
-.offer-status {
-  text-align: center;
-  margin: 10px 0;
-}
-
-.offer-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.button-accept {
-  background-color: #09b1ba;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.button-reject {
-  background-color: white;
-  color: #09b1ba;
-  border: 1px solid #09b1ba;
-  padding: 8px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 48%;
-}
-
-.button-counter {
-  background-color: white;
-  color: #09b1ba;
-  border: 1px solid #09b1ba;
-  padding: 8px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 48%;
-}
-
-.offer-timestamp {
-  text-align: center;
-  color: #666;
-  font-size: 12px;
-  margin-top: 8px;
-}
-
-
-.offer-container-sender,
-.offer-container-receiver {
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 5px 0;
-  min-width: 200px;
-}
-
-.offer-container-sender {
-  background-color: #e8f5e9; 
-}
-
-.offer-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.offer-price {
-  font-weight: bold;
-  font-size: 18px;
-  color: #09b1ba;
-}
-
-.offer-original {
-  text-decoration: line-through;
-  color: #666;
-  margin-left: 10px;
-  font-size: 14px;
-}
-
-.offer-status {
-  text-align: center;
-  margin: 8px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.offer-buttons {
-  margin-top: 10px;
-}
-
-.offer-buttons button {
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.offer-buttons-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.offer-timestamp {
-  text-align: center;
-  color: #999;
-  font-size: 12px;
-  margin-top: 8px;
-}
-
-</style>
 </body>
 
 </html>

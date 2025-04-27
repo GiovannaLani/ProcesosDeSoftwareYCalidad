@@ -70,39 +70,38 @@
 					<div
 						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
-							<form action="/catalog" method="get">
+							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" class=" web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
-													  </select>
-													  
-																</div>
+													</select>
+												</div>
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
-												<div class="u-flexbox u-align-items-center"><span
-														class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2"
-														style="width:16px"><svg viewBox="0 0 16 16" width="16"
-															height="16" aria-hidden="true">
-															<path
-																d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z">
-															</path>
-														</svg></span></div>
-											</div><input id="search_text" placeholder="Busca artículos"
-												data-testid="search-text--input" class="web_ui__InputBar__value"
-												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
-												name="search_text" value="">
+												<div class="u-flexbox u-align-items-center">
+													<span class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2" style="width:16px">
+														<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z"></path>
+														</svg>
+													</span>
+												</div>
+											</div>
+											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
+												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
+												aria-labelledby="search-item" name="username" required>
 										</div>
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
+								<input type="hidden" name="token" th:value="${token}">
 							</form>
 						</div>
 					</div>
@@ -269,10 +268,11 @@
                                 </div>
                             </div>
 
-							<a th:if="${!cartItems.isEmpty()}" th:href="@{/createPurchase/{itemId}(itemId=${cartItems[0].id}, token=${token})}" 
+							<a th:if="${not #lists.isEmpty(cartItems)}"
+							th:href="@{/createMultiplePurchase(token=${token}, itemIds=${#strings.listJoin(cartItems.![id], ',')})}"
 							class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							 Proceed to Checkout
-							</a>
+							Proceed to Checkout
+							</a>						 
 					</div>
 				</div>
 			</div>
@@ -495,6 +495,37 @@
     });
 	</script>
 
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const searchForm = document.getElementById("search-form");
+		const searchType = document.getElementById("search-type");
+		const searchText = document.getElementById("search_text");
+	
+		function updateFormBeforeSubmit() {
+			if (searchType.value === "miembros") {
+				searchForm.action = "/searchUser";
+				searchText.name = "username"; 
+			} else {
+				searchForm.action = "/search";
+				searchText.name = "search_text";
+			}
+		}
+	
+		searchType.addEventListener("change", function () {
+			updateFormBeforeSubmit();
+		});
+	
+		searchForm.addEventListener("submit", function (event) {
+			const text = searchText.value.trim();
+			if (!text) {
+				event.preventDefault();
+				alert("Por favor, introduce un término de búsqueda.");
+				return;
+			}
+			updateFormBeforeSubmit();
+		});
+	});
+	</script>
 </body>
 
 </html>

@@ -15,12 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.spq.vinted.dto.ClothesDTO;
-import com.spq.vinted.dto.ElectronicsDTO;
-import com.spq.vinted.dto.EntertainmentDTO;
-import com.spq.vinted.dto.HomeDTO;
-import com.spq.vinted.dto.ItemDTO;
-import com.spq.vinted.dto.PetDTO;
 import com.spq.vinted.model.Category;
 import com.spq.vinted.model.Clothes;
 import com.spq.vinted.model.Electronics;
@@ -44,7 +38,7 @@ public class ItemService {
 
 
     
-    static ItemRepository itemRepository;
+    ItemRepository itemRepository;
     
     public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
@@ -89,7 +83,8 @@ public class ItemService {
     public User getItemOwner(long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
         return item.getSeller();
-    }    
+    }
+    
 
     public List<Entertainment> getItemsforEntertainment(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Entertainment).map(item -> (Entertainment) item).collect(Collectors.toList());
@@ -221,97 +216,13 @@ public class ItemService {
         System.out.println("Item borrado correctamente.");
     }
     
-    public static ItemDTO getDTOById(Long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found with id: " + itemId));
-        return convertToDTO(item);
-    }
-
-    public static ItemDTO convertToDTO(Item item) {
-        ItemDTO itemDTO;
-        
-        if (item instanceof Clothes) {
-            Clothes clothesItem = (Clothes) item;
-            ClothesDTO clothesDTO = new ClothesDTO();
-            clothesDTO.setSize(clothesItem.getSize());
-            clothesDTO.setCategory(clothesItem.getCategory());
-            clothesDTO.setClothesType(clothesItem.getClothesType());
-            clothesDTO.setId(clothesItem.getId());
-            clothesDTO.setTitle(clothesItem.getTitle());
-            clothesDTO.setDescription(clothesItem.getDescription());
-            clothesDTO.setPrice(clothesItem.getPrice());
-            clothesDTO.setSellerId(clothesItem.getSeller().getId());
-            clothesDTO.setImages(clothesItem.getImages());
-            
-            itemDTO = clothesDTO;
-        } else if (item instanceof Electronics) {
-            Electronics electronicsItem = (Electronics) item;
-            ElectronicsDTO electronicsDTO = new ElectronicsDTO();
-
-            electronicsDTO.setElectronicsType(electronicsItem.getElectronicsType());
-            electronicsDTO.setId(electronicsItem.getId());
-            electronicsDTO.setTitle(electronicsItem.getTitle());
-            electronicsDTO.setDescription(electronicsItem.getDescription());
-            electronicsDTO.setPrice(electronicsItem.getPrice());
-            electronicsDTO.setSellerId(electronicsItem.getSeller().getId());
-            electronicsDTO.setImages(electronicsItem.getImages());
-
-            itemDTO = electronicsDTO;
-        } else if (item instanceof Pet) {
-            Pet petItem = (Pet) item;
-            PetDTO petDTO = new PetDTO();
-
-            petDTO.setSpecies(petItem.getSpecies());
-            petDTO.setId(petItem.getId());
-            petDTO.setTitle(petItem.getTitle());
-            petDTO.setDescription(petItem.getDescription());
-            petDTO.setPrice(petItem.getPrice());
-            petDTO.setSellerId(petItem.getSeller().getId());
-            petDTO.setImages(petItem.getImages());
-
-            itemDTO = petDTO;
-        } else if (item instanceof Entertainment) {
-            Entertainment entertainmentItem = (Entertainment) item;
-            EntertainmentDTO entertainmentDTO = new EntertainmentDTO();
-
-
-            entertainmentDTO.setEntertainmentType(entertainmentItem.getEntertainmentType());
-            entertainmentDTO.setId(entertainmentItem.getId());
-            entertainmentDTO.setTitle(entertainmentItem.getTitle());
-            entertainmentDTO.setDescription(entertainmentItem.getDescription());
-            entertainmentDTO.setPrice(entertainmentItem.getPrice());
-            entertainmentDTO.setSellerId(entertainmentItem.getSeller().getId());
-            entertainmentDTO.setImages(entertainmentItem.getImages());
-            itemDTO = entertainmentDTO;
-        } else if (item instanceof Home) {
-            Home homeItem = (Home) item;
-            HomeDTO homeDTO = new HomeDTO();
-
-            homeDTO.setHomeType(homeItem.getHomeType());
-            homeDTO.setId(homeItem.getId());
-            homeDTO.setTitle(homeItem.getTitle());
-            homeDTO.setDescription(homeItem.getDescription());
-            homeDTO.setPrice(homeItem.getPrice());
-            homeDTO.setSellerId(homeItem.getSeller().getId());
-            homeDTO.setImages(homeItem.getImages());
-
-            itemDTO = homeDTO;
-        } else {
-            throw new IllegalArgumentException("Tipo de item desconocido: " + item.getClass().getName());
-        }
-
-        itemDTO.setId(item.getId());
-        itemDTO.setTitle(item.getTitle());
-        itemDTO.setDescription(item.getDescription());
-        itemDTO.setPrice(item.getPrice());
-        itemDTO.setSellerId(item.getSeller().getId());
-        
-        // Si tienes imágenes, configúralas
-        if (item.getImages() != null) {
-            itemDTO.setImages(item.getImages());
-        }
-        
-        return itemDTO;
-    
+    public List<Item> searchItems(Long token, String query) {
+        if (query == null || query.isBlank()) return getItems(token);
+        List<Item> items = itemRepository.findAll().stream()
+                .filter(item -> item.getTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        System.out.println("2"+items);
+        return items;
     }
 }
 
