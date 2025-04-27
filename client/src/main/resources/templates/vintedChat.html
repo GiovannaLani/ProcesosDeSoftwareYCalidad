@@ -254,7 +254,7 @@
 										</div>
 										<div class="web_ui__Cell__subtitle web_ui__Cell__narrow-cell" >
 											<h3 class="web_ui__Text__text web_ui__Text__subtitle web_ui__Text__left">
-												hace 1 mes
+												
 											</h3>
 										</div>
 									</div>
@@ -663,8 +663,6 @@
 			chatRoomId: currentChatRoomId,
 			timestamp: new Date().toISOString()
 		}));
-		
-
 
 		input.value = "";
 	}
@@ -821,31 +819,19 @@ function submitOffer() {
 			throw new Error(`Error al enviar la oferta: ${response.status} ${response.statusText}`);
 		}
 
-		return new Promise(resolve => setTimeout(resolve, 500));
+		return response.json();
 	})
-	.then(() => {
-		
-		return fetch(`/offers/item/${currentItemId}/offers?token=${userToken}`);
-	})
-	.then(response => response.json())
-	.then(data => {
-		const offers = Array.isArray(data) ? data : [];
-		const latestOffer = offers.find(offer => offer.senderId === parseInt(userId));
-		
-		if (latestOffer) {
-			stompClient.send("/app/chat.send", {}, JSON.stringify({
-				content: latestOffer.id.toString(),
-				senderId: userId,
-				chatRoomId: currentChatRoomId,
-				timestamp: new Date().toISOString(),
-				type: 'OFFER'
-			}));
-		}
-		
-		closeOfferModal();
-	})
-		
-	.then(() => {
+	.then(createdOffer => {
+		console.log('Oferta creada:', createdOffer);
+
+		stompClient.send("/app/chat.send", {}, JSON.stringify({
+			content: createdOffer.id.toString(), // 👈 Usamos directamente el ID de la oferta creada
+			senderId: userId,
+			chatRoomId: currentChatRoomId,
+			timestamp: new Date().toISOString(),
+			type: 'OFFER'
+		}));
+
 		closeOfferModal();
 	})
 	.catch(error => {
@@ -861,7 +847,7 @@ function showMessage(message) {
     const chatContainer = document.getElementById('chatMessages');
     
     if (message.type === 'OFFER') {
-        fetch(`/offers/${message.content}`)
+        fetch(`/chatrooms/offers/${message.content}`)
             .then(response => response.json())
             .then(offer => {
                 const isOfferSender = Number(offer.senderId) === Number(userId);
@@ -875,13 +861,12 @@ function showMessage(message) {
                             <div class="web_ui__Bubble__bubble-user">
                                 <div class="web_ui__Bubble__narrow">
                                     <div class="web_ui__Bubble__content"></div>
-                                    <div class="offer-container-sender">
+                                    <div class="offer-container-sender" data-offer-id="${offer.id}">
                                         <div class="offer-header">
-                                            <span class="offer-price">${offer.offerPrice.toFixed(2)} €</span>
+                                            <span class="offer-price">${offer.price.toFixed(2)} €</span>
                                             <span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
                                         </div>
                                         <div class="offer-status">${getOfferStatusText(offer.status)}</div>
-                                        <div class="offer-timestamp">menos de un minuto</div>
                                     </div>
                                 </div>
                             </div>
@@ -902,21 +887,18 @@ function showMessage(message) {
                             <div class="web_ui__Bubble__bubble">
                                 <div class="web_ui__Bubble__narrow">
                                     <div class="web_ui__Bubble__content"></div>
-                                    <div class="offer-container-receiver">
+                                    <div class="offer-container-receiver" data-offer-id="${offer.id}">
                                         <div class="offer-header">
-                                            <span class="offer-price">${offer.offerPrice.toFixed(2)} €</span>
+                                            <span class="offer-price">${offer.price.toFixed(2)} €</span>
                                             <span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
                                         </div>
                                         <div class="offer-status">${getOfferStatusText(offer.status)}</div>
                                         ${canRespond ? `
                                             <div class="offer-buttons">
-                                                <button class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.offerId}, 'ACCEPTED')">Aceptar</button>
-                                                <div class="offer-buttons-row">
-                                                    <button class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__default web_ui__Button__primary" style="width: 48%;" onclick="respondToOffer(${offer.offerId}, 'REJECTED')">Rechazar</button>
-                                                </div>
+                                                <button class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.id}, 'ACCEPTED')">Aceptar</button>
+                                                    <button class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.id}, 'REJECTED')">Rechazar</button>
                                             </div>
                                         ` : ''}
-                                        <div class="offer-timestamp">menos de un minuto</div>
                                     </div>
                                 </div>
                             </div>
@@ -1009,7 +991,7 @@ function getOfferStatusText(status) {
 
 function respondToOffer(offerId, status) {
     
-    const url = status === 'ACCEPTED' ? `/offers/${offerId}/accept` : `/offers/${offerId}/reject`;
+    const url = status === 'ACCEPTED' ? `/chatrooms/offers/${offerId}/accept` : `/chatrooms/offers/${offerId}/reject`;
     
     fetch(url, {
         method: 'POST',
@@ -1018,155 +1000,265 @@ function respondToOffer(offerId, status) {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al responder a la oferta');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Actualizar el mensaje de oferta en el chat
-        updateOfferMessage(offerId, status);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('No se pudo responder a la oferta. Inténtalo de nuevo.');
-    });
-}
-
-function loadChat(chatRoomId) {
-    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${chatRoomId})"]`);
-
-		document.getElementById("chatName").style.display = "flex";
-		const token = chatRoomElement.getAttribute("token");
-		const recieverName = chatRoomElement.getAttribute("data-receiver-name");
-		const otherUserId = chatRoomElement.getAttribute("data-other-user-id");
-		
-		const link = document.getElementById("chatReceiverName");
-		link.href = `/userProfile/${otherUserId}?token=${getTokenFromURL()}`;
-		document.getElementById("chatReceiverName").textContent = recieverName;
-		
-		document.getElementById("itemMessage").style.display = "flex";
-		const itemName = chatRoomElement.getAttribute("data-item-name");
-		const itemImg = chatRoomElement.getAttribute("data-item-img");
-		const itemPrice = chatRoomElement.getAttribute("data-item-price");
-		
-		document.getElementById("heroItemName").textContent = itemName;
-		document.getElementById("heroItemPrice").textContent = itemPrice +" €";
-		document.getElementById("heroItemImage").src = itemImg;
-		
-		const userId = chatRoomElement.getAttribute("data-user-id");
-		const sellerId = chatRoomElement.getAttribute("data-seller-id");
-		if (userId !== sellerId) {
-			document.getElementById("item-button-id").style.display = "flex";
+		if (!response.ok) {
+			throw new Error('Error al responder a la oferta');
 		}
-
-		const itemId = chatRoomElement.getAttribute("data-item-id");
-		const itemIdInput = document.getElementById("buyFormItemId");
-		itemIdInput.value = itemId;
-		
-		document.getElementById("chatMessagesContainer").style.display = "flex";
-		document.getElementById("chatSendMessages").style.display = "flex";
-
-		const dividers = document.getElementsByClassName("displayDivider");
-		for (let i = 0; i < dividers.length; i++) {
-			dividers[i].style.display = "flex";
+		return response.text(); 
+	})
+	.then(text => {
+		if (text) {
+			const data = JSON.parse(text);
+			console.log('Respuesta:', data);
+		} else {
+			console.log('Respuesta vacía');
 		}
+		updateOfferMessage(offerId, status);
+	})
+	.catch(error => {
+		console.error('Error en el fetch:', error);
+	});
 
-		currentChatRoomId = chatRoomId;
-		let profileImageUrl = null;
+	}
+	function updateOfferMessage(offerId, status) {
+		const chatContainer = document.getElementById('chatMessages');
 
-		fetch(`/chatrooms/${chatRoomId}/messages`).then(response => response.json()).then(messages => {
+		const childrenArray = Array.from(chatContainer.children);
 
-			const chatContainer = document.getElementById("chatMessages");
-			chatContainer.innerHTML = "";
+		const offerMessage = childrenArray.find(child => {
+			const offerContainerSender = child.querySelector('.offer-container-sender');
+			const offerContainerReceiver = child.querySelector('.offer-container-receiver');
 
-			fetch(`/chatrooms/otherUser/${otherUserId}?token=${token}`).then(response => {
-				if (!response.ok) throw new Error("Error al obtener el usuario");
-				return response.json();
-			}).then(user => {
-				profileImageUrl = user.profileImage? `http://localhost:8080/users/profile/imagen/${user.profileImage}`: "/images/icons/profile-default.png";
+			const offerContainer = offerContainerSender || offerContainerReceiver;
 
-				const headerContainer = document.createElement("div");
-				headerContainer.className = "conversation-message-container";
-				headerContainer.innerHTML = `
-				<div class="u-ui-margin-right-regular">
-					<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
+			if (offerContainer) {
+				return offerContainer.dataset.offerId == offerId;
+			}
+			return false;
+		});
+
+		if (offerMessage) {
+			const statusText = getOfferStatusText(status);
+			const statusElement = offerMessage.querySelector('.offer-status');
+
+			if (statusElement) {
+				statusElement.textContent = statusText;
+			}
+
+			if (status === 'ACCEPTED' || status === 'REJECTED') {
+				const buttons = offerMessage.querySelector('.offer-buttons');
+
+				if (buttons) {
+					buttons.style.display = 'none';
+				}
+			}
+		} else {
+			console.warn('No se encontró ningún mensaje de oferta con el ID:', offerId);
+		}
+	}
+	async function loadChat(chatRoomId) {
+	const chatRoomElement = document.querySelector(`[onclick*="loadChat(${chatRoomId})"]`);
+
+	document.getElementById("chatName").style.display = "flex";
+	const token = chatRoomElement.getAttribute("token");
+	const recieverName = chatRoomElement.getAttribute("data-receiver-name");
+	const otherUserId = chatRoomElement.getAttribute("data-other-user-id");
+
+	const link = document.getElementById("chatReceiverName");
+	link.href = `/userProfile/${otherUserId}?token=${getTokenFromURL()}`;
+	document.getElementById("chatReceiverName").textContent = recieverName;
+
+	document.getElementById("itemMessage").style.display = "flex";
+	const itemName = chatRoomElement.getAttribute("data-item-name");
+	const itemImg = chatRoomElement.getAttribute("data-item-img");
+	const itemPrice = chatRoomElement.getAttribute("data-item-price");
+
+	document.getElementById("heroItemName").textContent = itemName;
+	document.getElementById("heroItemPrice").textContent = itemPrice + " €";
+	document.getElementById("heroItemImage").src = itemImg;
+
+	const userId = chatRoomElement.getAttribute("data-user-id");
+	const sellerId = chatRoomElement.getAttribute("data-seller-id");
+	if (userId !== sellerId) {
+		document.getElementById("item-button-id").style.display = "flex";
+	}
+
+	const itemId = chatRoomElement.getAttribute("data-item-id");
+	const itemIdInput = document.getElementById("buyFormItemId");
+	itemIdInput.value = itemId;
+
+	document.getElementById("chatMessagesContainer").style.display = "flex";
+	document.getElementById("chatSendMessages").style.display = "flex";
+
+	const dividers = document.getElementsByClassName("displayDivider");
+	for (let i = 0; i < dividers.length; i++) {
+		dividers[i].style.display = "flex";
+	}
+
+	currentChatRoomId = chatRoomId;
+	let profileImageUrl = null;
+
+	try {
+		const messagesResponse = await fetch(`/chatrooms/${chatRoomId}/messages`);
+		const messages = await messagesResponse.json();
+
+		const chatContainer = document.getElementById("chatMessages");
+		chatContainer.innerHTML = "";
+
+		const userResponse = await fetch(`/chatrooms/otherUser/${otherUserId}?token=${token}`);
+		if (!userResponse.ok) throw new Error("Error al obtener el usuario");
+
+		const user = await userResponse.json();
+		profileImageUrl = user.profileImage ? `http://localhost:8080/users/profile/imagen/${user.profileImage}` : "/images/icons/profile-default.png";
+
+		const headerContainer = document.createElement("div");
+		headerContainer.className = "conversation-message-container";
+		headerContainer.innerHTML = `
+			<div class="u-ui-margin-right-regular">
+				<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
 					<img role="img" alt="" id="chat_profile_image" class="web_ui__Image__content" src="${profileImageUrl}">
-					</div>
 				</div>
-				<div class="conversation-message conversation-message__intro">
-					<div class="web_ui__Bubble__bubble">
+			</div>
+			<div class="conversation-message conversation-message__intro">
+				<div class="web_ui__Bubble__bubble">
 					<div class="web_ui__Bubble__narrow">
 						<div class="web_ui__Bubble__content"></div>
 						<h2 class="web_ui__Text__text web_ui__Text__title web_ui__Text__left"><strong>Hola, soy ${user.username}</strong></h2>
 						<div class="web_ui__Spacer__small web_ui__Spacer__horizontal"></div>
 						<div class="u-flexbox u-align-items-center">
-						<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${user.name} ${user.surname}</span>
+							<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${user.name} ${user.surname}</span>
 						</div>
 					</div>
-					</div>
 				</div>
-				`;
-				chatContainer.appendChild(headerContainer);
+			</div>
+		`;
+		chatContainer.appendChild(headerContainer);
 
-				messages.forEach(msg => {
-					const isOwnMessage = Number(msg.senderId) === Number(userId);
-					if (isOwnMessage) {
+		// Aquí vamos a preparar todo
+		const messageElements = await Promise.all(messages.map(async msg => {
+			if (msg.type === 'OFFER') {
+				try {
+					const offerResponse = await fetch(`/chatrooms/offers/${msg.content}`);
+					const offer = await offerResponse.json();
+					const isOfferSender = Number(offer.senderId) === Number(userId);
+
+					if (isOfferSender) {
+						const canBuy = offer.status === "ACCEPTED";
 						const container = document.createElement("div");
 						container.className = "conversation-message-container-user";
 						container.innerHTML = `
-						<div class="conversation-message conversation-message__intro">
-							<div class="web_ui__Bubble__bubble-user">
-							<div class="web_ui__Bubble__narrow">
-								<div class="web_ui__Bubble__content"></div>
-								<div class="u-flexbox u-align-items-center">
-								<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__body-user web_ui__Text__left">${msg.content || ''}</span>
+							<div class="conversation-message conversation-message__intro">
+								<div class="web_ui__Bubble__bubble-user">
+									<div class="web_ui__Bubble__narrow">
+										<div class="web_ui__Bubble__content"></div>
+										<div class="offer-container-sender" data-offer-id="${offer.id}">
+											<div class="offer-header">
+												<span class="offer-price">${offer.price.toFixed(2)} €</span>
+												<span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
+											</div>
+											<div class="offer-status">${getOfferStatusText(offer.status)}</div>
+											${canBuy ? `
+												<div class="offer-buttons">
+													<a href="/createPurchase/${itemId}?token=${token}&offerId=${offer.id}"
+														class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+															Comprar
+														</a>
+												
+												</div>
+											` : ''}
+										</div>
+									</div>
 								</div>
 							</div>
-							</div>
-						</div>
 						`;
-						chatContainer.appendChild(container);
+						return container;
 					} else {
+						const canRespond = offer.status === "PENDING";
 						const container = document.createElement("div");
 						container.className = "conversation-message-container";
 						container.innerHTML = `
-						<div class="u-ui-margin-right-regular">
-							<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
-							<img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
+							<div class="u-ui-margin-right-regular">
+								<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
+									<img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
+								</div>
 							</div>
-						</div>
-						<div class="conversation-message conversation-message__intro">
-							<div class="web_ui__Bubble__bubble">
+							<div class="conversation-message conversation-message__intro">
+								<div class="web_ui__Bubble__bubble">
+									<div class="web_ui__Bubble__narrow">
+										<div class="web_ui__Bubble__content"></div>
+										<div class="offer-container-receiver" data-offer-id="${offer.id}">
+											<div class="offer-header">
+												<span class="offer-price">${offer.price.toFixed(2)} €</span>
+												<span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
+											</div>
+											<div class="offer-status">${getOfferStatusText(offer.status)}</div>
+											${canRespond ? `
+												<div class="offer-buttons">
+													<button class="web_ui__Button__button web_ui__Button__filled web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.id}, 'ACCEPTED')">Aceptar</button>
+													<button class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__default web_ui__Button__primary" onclick="respondToOffer(${offer.id}, 'REJECTED')">Rechazar</button>
+												</div>
+											` : ''}
+										</div>
+									</div>
+								</div>
+							</div>
+						`;
+						return container;
+					}
+				} catch (err) {
+					console.error("Error al cargar oferta:", err);
+				}
+			} else {
+				const isOwnMessage = Number(msg.senderId) === Number(userId);
+				const container = document.createElement("div");
+				container.className = isOwnMessage ? "conversation-message-container-user" : "conversation-message-container";
+
+				container.innerHTML = isOwnMessage ? `
+					<div class="conversation-message conversation-message__intro">
+						<div class="web_ui__Bubble__bubble-user">
 							<div class="web_ui__Bubble__narrow">
 								<div class="web_ui__Bubble__content"></div>
 								<div class="u-flexbox u-align-items-center">
-								<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${msg.content || ''}</span>
+									<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__body-user web_ui__Text__left">${msg.content || ''}</span>
 								</div>
 							</div>
+						</div>
+					</div>
+				` : `
+					<div class="u-ui-margin-right-regular">
+						<div class="web_ui__Image__image web_ui__Image__medium web_ui__Image__circle web_ui__Image__scaled web_ui__Image__cover">
+							<img role="img" alt="" class="web_ui__Image__content" src="${profileImageUrl}">
+						</div>
+					</div>
+					<div class="conversation-message conversation-message__intro">
+						<div class="web_ui__Bubble__bubble">
+							<div class="web_ui__Bubble__narrow">
+								<div class="web_ui__Bubble__content"></div>
+								<div class="u-flexbox u-align-items-center">
+									<span class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">${msg.content || ''}</span>
+								</div>
 							</div>
 						</div>
-						`;
-						chatContainer.appendChild(container);
-						requestAnimationFrame(() => {
-							const scrollContainer = document.getElementById("chatMessagesContainer");
-							scrollContainer.scrollTop = scrollContainer.scrollHeight;
-						});
-					}
-				});
-			}).catch(err => console.error("Error al actualizar usuario:", err));
+					</div>
+				`;
+				return container;
+			}
+		}));
+
+		// Ahora añadimos todo en orden
+		messageElements.forEach(element => {
+			if (element) chatContainer.appendChild(element);
 		});
 
-		if (!stompClient || !stompClient.connected) {
-			connect(chatRoomId);
-		}
-	
-    
-   
+		scrollToBottom();
+	} catch (err) {
+		console.error("Error cargando chat:", err);
+	}
 
-    
-    
+	if (!stompClient || !stompClient.connected) {
+		connect(chatRoomId);
+	}
 }
+
 
 </script>
 
@@ -1287,6 +1379,7 @@ function loadChat(chatRoomId) {
 
 .offer-buttons {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   margin-top: 10px;
 }

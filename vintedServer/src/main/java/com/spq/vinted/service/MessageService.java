@@ -1,7 +1,6 @@
 package com.spq.vinted.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +14,10 @@ import com.spq.vinted.model.ChatRoom;
 import com.spq.vinted.model.Message;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.ChatRoomRepository;
-import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.repository.MessageRepository;
+import com.spq.vinted.repository.OfferRepository;
 import com.spq.vinted.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class MessageService {
@@ -38,6 +36,9 @@ public class MessageService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private OfferRepository offerRepository;
 
 
     public void sendMessage(long token, long chatRoomId, String content) {
@@ -68,7 +69,13 @@ public class MessageService {
         message.setSender(sender);
         message.setContent(chatMessage.getContent());
         message.setTimestamp(LocalDateTime.now());
-
+        if(chatMessage.getType()!=null && chatMessage.getType().equals("OFFER"))
+        {
+            message.setOffer(offerRepository.findById(Long.parseLong(chatMessage.getContent())).orElseThrow(() -> new RuntimeException("Offer not found")));
+        }else
+        {
+            message.setOffer(null);
+        }
         return messageRepository.save(message);
     }
 

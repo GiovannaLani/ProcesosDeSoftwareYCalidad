@@ -552,13 +552,13 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public void createOffer(OfferCreator offer, long token) {
+    public Offer createOffer(OfferCreator offer, long token) {
         String url = apiBaseUrl + "/offers/create?token=" + token;
-		restTemplate.postForObject(url, offer, OfferCreator.class);
+		return restTemplate.postForObject(url, offer, Offer.class);
     }
     
     @Override
-    public Offer getOffer(Long id) {
+    public Offer getOfferById(Long id) {
         String url = apiBaseUrl + "/offers/" + id;
 		return restTemplate.getForObject(url, Offer.class);
     }
@@ -571,13 +571,13 @@ public class ServiceProxy implements IVintedServiceProxy {
 
 	@Override
     public Offer acceptOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/accept";
+        String url = apiBaseUrl + "/offers/" + id + "/accept";
         return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
     }
     
     @Override
     public Offer rejectOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/reject";
+        String url = apiBaseUrl + "/offers/" + id + "/reject";
         return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
     }
 

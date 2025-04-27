@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.spq.vinted.dto.ItemDTO;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -16,6 +18,7 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.InheritanceType;
 
 @Entity
@@ -46,6 +49,9 @@ public abstract class Item {
     @ManyToMany(mappedBy = "cartItems", fetch = FetchType.EAGER)
     private List<User> usersWithItemInCart = new ArrayList<>();
     
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRooms = new ArrayList<>();
+
     public Item() {
     }
     

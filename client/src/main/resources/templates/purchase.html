@@ -221,8 +221,9 @@
 							 style="max-width: 300px; max-height: 300px;">
 					</div>
 					<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-					<p class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
-						
+					<p th:if="${offer == null}" class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
+					<p th:if="${offer != null}" class="txt-center">Precio: <span th:text="${offer.price}"></span> €</p>
+	
 					<form th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
 						<h4 class="mtext-105 cl2 txt-center p-b-30">
 							Confirmar Compra
@@ -270,6 +271,7 @@
 							</div>
 						</div>
 						<input type="hidden" name="token" th:value="${token}">
+						<input type="hidden" name="offerId" th:value="${offer != null ? offer.id : ''}">
 						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
 							Confirmar compra
 						</button>
