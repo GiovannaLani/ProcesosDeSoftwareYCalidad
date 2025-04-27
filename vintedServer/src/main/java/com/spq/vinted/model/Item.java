@@ -58,6 +58,9 @@ public abstract class Item {
 
     @ManyToMany(mappedBy = "cartItems", fetch = FetchType.EAGER)
     private List<User> usersWithItemInCart = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "wishlistItems", fetch = FetchType.EAGER)
+    private List<User> usersWithItemInWishlist = new ArrayList<>();
     
     public Item() {
     }
@@ -123,6 +126,15 @@ public abstract class Item {
     public void setUsersWithItemInCart(List<User> usersWithItemInCart) {
         this.usersWithItemInCart = usersWithItemInCart;
     }
+
+    public List<User> getUsersWithItemInWishlist() {
+        return usersWithItemInWishlist;
+    }
+    
+    public void setUsersWithItemInWishlist(List<User> usersWithItemInWishlist) {
+        this.usersWithItemInWishlist = usersWithItemInWishlist;
+    }
+
     public abstract ItemDTO toDTO();
 
     @Override

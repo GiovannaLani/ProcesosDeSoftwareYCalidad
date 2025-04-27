@@ -121,10 +121,11 @@
 							</a>
 						</div>
 
-						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
-							data-notify="0">
-							<i class="zmdi zmdi-favorite-outline"></i>
-						</a>
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" th:data-notify="${wishlistSize}">
+							<a th:href="@{/wishlist(token=${token})}" class="cart-link">
+								<i class="zmdi zmdi-favorite-outline"></i>
+							</a>
+						</div>
 						<div th:if="${token}" class="user-menu-container">
 							<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-menu-toggle">
 								<i class="zmdi zmdi-account"></i>
@@ -397,13 +398,6 @@
 								<span class="stext-105 cl3" th:text="${item.price + ' €'}">
 									16.64€
 								</span>
-							</div>
-			
-							<div class="block2-txt-child2 flex-r p-t-3">
-								<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-									<img class="icon-heart1 dis-block trans-04" th:src="@{/images/icons/icon-heart-01.png}" alt="ICON">
-									<img class="icon-heart2 dis-block trans-04 ab-t-l" th:src="@{/images/icons/icon-heart-02.png}" alt="ICON">
-								</a>
 							</div>
 						</div>
 					</div>
