@@ -70,4 +70,6 @@ public interface IVintedServiceProxy {
 	public List<Offer> getOffersByItem(Long itemId, Long token);
 	public String addRating(Rating rating, Long token);
 	public List<Rating> getRatingsForUser(long userId);
+	public Offer acceptOffer(Long id);
+	public Offer rejectOffer(Long id);
 }
