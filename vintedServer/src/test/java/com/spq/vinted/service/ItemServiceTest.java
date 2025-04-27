@@ -1,14 +1,22 @@
 package com.spq.vinted.service;
 import com.spq.vinted.dto.ClothesDTO;
+import com.spq.vinted.dto.ElectronicsDTO;
+import com.spq.vinted.dto.EntertainmentDTO;
 import com.spq.vinted.dto.HomeDTO;
 import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.PetDTO;
 import com.spq.vinted.model.Clothes;
+import com.spq.vinted.model.ClothesSize;
+import com.spq.vinted.model.ClothesType;
 import com.spq.vinted.model.Electronics;
+import com.spq.vinted.model.ElectronicsType;
 import com.spq.vinted.model.Entertainment;
+import com.spq.vinted.model.EntertainmentType;
 import com.spq.vinted.model.Home;
+import com.spq.vinted.model.HomeType;
 import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Pet;
+import com.spq.vinted.model.Species;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.repository.UserRepository;
@@ -23,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,13 +42,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.reset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -184,27 +197,117 @@ class ItemServiceTest {
 
     @Test
     void testAddItemToCart() {
-
-        User user = new User();
-        user.setId(123L);
-        user.setCartItems(new ArrayList<>()); 
-
-        Item item = new Clothes();
-        item.setId(456L);
-        item.setUsersWithItemInCart(new ArrayList<>());
-
-        when(userService.getUserByToken(123L)).thenReturn(user);
-        when(itemRepository.findById(456L)).thenReturn(Optional.of(item));
-        when(userRepository.findById(String.valueOf(user.getId()))).thenReturn(Optional.of(user));
-
+        User userSuccess = new User();
+        userSuccess.setId(123L);
+        userSuccess.setCartItems(new ArrayList<>());
+    
+        Item itemSuccess = new Clothes();
+        itemSuccess.setId(456L);
+        itemSuccess.setUsersWithItemInCart(new ArrayList<>());
+    
+        when(userService.getUserByToken(123L)).thenReturn(userSuccess);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(itemSuccess));
+        when(userRepository.findById("123")).thenReturn(Optional.of(userSuccess));
+    
         itemService.addItemToCart(123L, 456L);
+    
+        assertTrue(userSuccess.getCartItems().contains(itemSuccess));
+        assertTrue(itemSuccess.getUsersWithItemInCart().contains(userSuccess));
+        verify(userRepository, times(1)).save(userSuccess);
+        verify(itemRepository, times(1)).save(itemSuccess);
+    
+        reset(userRepository, itemRepository, userService); // Limpiar mocks para siguientes casos
+    
+        // ---------- Caso: Usuario no encontrado por token ----------
+        when(userService.getUserByToken(999L)).thenReturn(null);
+    
+        RuntimeException exUserToken = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToCart(999L, 456L);
+        });
+        assertEquals("Usuario no encontrado", exUserToken.getMessage());
+    
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
+    
+        reset(userRepository, itemRepository, userService);
+    
+        // ---------- Caso: Item no encontrado ----------
+        User userItemNotFound = new User();
+        userItemNotFound.setId(123L);
+    
+        when(userService.getUserByToken(123L)).thenReturn(userItemNotFound);
+        when(itemRepository.findById(789L)).thenReturn(Optional.empty());
+    
+        RuntimeException exItem = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToCart(123L, 789L);
+        });
+        assertEquals("Artículo no encontrado", exItem.getMessage());
+    
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
+    
+        reset(userRepository, itemRepository, userService);
+    
+        // ---------- Caso: Usuario no encontrado en repository ----------
+        User userRepoNotFound = new User();
+        userRepoNotFound.setId(123L);
+    
+        when(userService.getUserByToken(123L)).thenReturn(userRepoNotFound);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(new Clothes()));
+        when(userRepository.findById("123")).thenReturn(Optional.empty());
+    
+        RuntimeException exRepoUser = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToCart(123L, 456L);
+        });
+        assertEquals("Usuario no encontrado", exRepoUser.getMessage());
+    
+        verify(userRepository, never()).save(any());
+    
+        reset(userRepository, itemRepository, userService);
+    
+    
+        // ---------- Caso: Item ya en carrito ----------
+        User userItemAlreadyInCart = new User();
+        userItemAlreadyInCart.setId(123L);
+        userItemAlreadyInCart.setCartItems(new ArrayList<>());
+    
+        Item itemAlreadyInCart = new Clothes();
+        itemAlreadyInCart.setId(456L);
+        itemAlreadyInCart.setUsersWithItemInCart(new ArrayList<>());
+    
+        userItemAlreadyInCart.getCartItems().add(itemAlreadyInCart);
+        itemAlreadyInCart.getUsersWithItemInCart().add(userItemAlreadyInCart);
+    
+        when(userService.getUserByToken(123L)).thenReturn(userItemAlreadyInCart);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(itemAlreadyInCart));
+        when(userRepository.findById("123")).thenReturn(Optional.of(userItemAlreadyInCart));
+    
+        itemService.addItemToCart(123L, 456L);
+    
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
 
-        assertTrue(user.getCartItems().contains(item), "El item debería estar en el carrito del usuario");
-        assertTrue(item.getUsersWithItemInCart().contains(user), "El usuario debería estar en la lista de usuarios del item");
-
-        verify(userRepository, times(1)).save(user);
-        verify(itemRepository, times(1)).save(item);
-
+        // ---------- Caso: Carrito nulo ----------
+        // User userNullCart = new User();
+        // userNullCart.setId(123L);
+        // userNullCart.setCartItems(null);
+    
+        // Item itemNullCart = new Clothes();
+        // itemNullCart.setId(456L);
+        // itemNullCart.setUsersWithItemInCart(new ArrayList<>());
+    
+        // when(userService.getUserByToken(123L)).thenReturn(userNullCart);
+        // when(itemRepository.findById(456L)).thenReturn(Optional.of(itemNullCart));
+        // when(userRepository.findById("123")).thenReturn(Optional.of(userNullCart));
+    
+        // itemService.addItemToCart(123L, 456L);
+    
+        // assertNotNull(userNullCart.getCartItems());
+        // assertTrue(userNullCart.getCartItems().contains(itemNullCart));
+        // verify(userRepository, times(1)).save(userNullCart);
+    
+        // reset(userRepository, itemRepository, userService);
+    
     }
 
     @Test
@@ -620,4 +723,145 @@ class ItemServiceTest {
             itemService.uploadItemImages(999L, List.of(file1));
         });
     }
+
+    @Test
+    void testGetDTOById() {
+    
+        User mockSeller = new User();
+        mockSeller.setId(100L); 
+    
+        Item mockItem = new Clothes();
+        mockItem.setId(1L);
+        mockItem.setTitle("Camiseta");
+        mockItem.setSeller(mockSeller); 
+    
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(mockItem));
+
+        ItemDTO result = ItemService.getDTOById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Camiseta", result.getTitle());
+        verify(itemRepository, times(1)).findById(1L);
+
+        when(itemRepository.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            ItemService.getDTOById(999L);
+        });
+
+        assertEquals("Item not found with id: 999", exception.getMessage());
+        verify(itemRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    void testConvertToDTO(){
+        User seller = new User();
+        seller.setId(100L);
+        
+        Clothes clothes = new Clothes();
+        clothes.setId(1L);
+        clothes.setTitle("Camiseta");
+        clothes.setDescription("Camiseta de algodón");
+        clothes.setPrice(19.99f);
+        clothes.setSeller(seller);
+        clothes.setSize(ClothesSize.M);
+        clothes.setCategory(Category.WOMAN);
+        clothes.setClothesType(ClothesType.TSHIRT);
+        clothes.setImages(Arrays.asList("img1.jpg", "img2.jpg"));
+
+        ItemDTO result = ItemService.convertToDTO(clothes);
+
+        // Verificación
+        assertTrue(result instanceof ClothesDTO);
+        ClothesDTO clothesDTO = (ClothesDTO) result;
+        
+        assertEquals(1L, clothesDTO.getId());
+        assertEquals("Camiseta", clothesDTO.getTitle());
+        assertEquals("Camiseta de algodón", clothesDTO.getDescription());
+        assertEquals(19.99f, clothesDTO.getPrice());
+        assertEquals(100L, clothesDTO.getSellerId());
+        assertEquals(ClothesSize.M, clothesDTO.getSize());
+        assertEquals(Category.WOMAN, clothesDTO.getCategory());
+        assertEquals(ClothesType.TSHIRT, clothesDTO.getClothesType());
+        assertEquals(2, clothesDTO.getImages().size());
+
+
+        Electronics electronics = new Electronics();
+        electronics.setId(2L);
+        electronics.setTitle("Smartphone");
+        electronics.setDescription("Último modelo");
+        electronics.setPrice(599.99f);
+        electronics.setSeller(seller);
+        electronics.setElectronicsType(ElectronicsType.DEVICE);
+        electronics.setImages(Arrays.asList("phone1.jpg"));
+
+        ItemDTO result1 = ItemService.convertToDTO(electronics);
+
+        assertTrue(result1 instanceof ElectronicsDTO);
+        ElectronicsDTO electronicsDTO = (ElectronicsDTO) result1;
+        
+        assertEquals(2L, electronicsDTO.getId());
+        assertEquals(ElectronicsType.DEVICE, electronicsDTO.getElectronicsType());
+        assertEquals(1, electronicsDTO.getImages().size());
+
+
+        Pet pet = new Pet();
+        pet.setId(3L);
+        pet.setSpecies(Species.DOG);
+        pet.setTitle("Cachorro Labrador");
+        pet.setPrice(300.0f);
+        pet.setSeller(seller);
+
+        ItemDTO result2 = ItemService.convertToDTO(pet);
+
+        assertTrue(result2 instanceof PetDTO);
+        assertEquals(Species.DOG, ((PetDTO) result2).getSpecies());
+
+        Home home = new Home();
+        home.setHomeType(HomeType.FURNITURE);
+        home.setSeller(seller);
+
+        ItemDTO result3 = ItemService.convertToDTO(home);
+
+        assertInstanceOf(HomeDTO.class, result3);
+        assertEquals(HomeType.FURNITURE, ((HomeDTO) result3).getHomeType());
+
+
+        Entertainment entertainment = new Entertainment();
+        entertainment.setEntertainmentType(EntertainmentType.BOOK);
+        entertainment.setSeller(seller);
+
+        ItemDTO result4 = ItemService.convertToDTO(entertainment);
+
+        assertInstanceOf(EntertainmentDTO.class, result4);
+        assertEquals(EntertainmentType.BOOK, ((EntertainmentDTO) result4).getEntertainmentType());
+
+
+        class UnknownItem extends Item {
+            @Override
+            public ItemDTO toDTO() {
+                throw new UnsupportedOperationException();
+            }
+        }
+        
+        UnknownItem unknownItem = new UnknownItem();
+    
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ItemService.convertToDTO(unknownItem)
+        );
+    
+        assertTrue(ex.getMessage().contains("Tipo de item desconocido"));
+
+
+        Clothes clothes1 = new Clothes();
+        clothes1.setSeller(null);
+
+        assertThrows(NullPointerException.class,
+            () -> ItemService.convertToDTO(clothes1));
+
+        
+    }
+
 }

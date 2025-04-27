@@ -673,18 +673,6 @@ public class ServiceProxy implements IVintedServiceProxy {
         String url = apiBaseUrl + "/offers/" + id + "/status?status=" + status;
         return restTemplate.postForObject(url, null, Map.class);
     }
-
-    @Override
-    public Offer acceptOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/accept";
-        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
-    }
-
-    @Override
-    public Offer rejectOffer(Long id) {
-        String url = apiBaseUrl + "/api/offers/" + id + "/reject";
-        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
-    }
 	
 	@Override
 		public List<Offer> getOffersByItem(Long itemId, Long token) {
