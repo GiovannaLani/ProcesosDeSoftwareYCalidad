@@ -71,7 +71,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-
+ 
 	@Override
 	public Long login(String email, String password) {
 		Login login = new Login(email, password);
