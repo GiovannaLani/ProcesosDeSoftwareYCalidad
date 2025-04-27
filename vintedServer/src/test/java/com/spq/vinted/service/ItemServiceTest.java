@@ -216,9 +216,8 @@ class ItemServiceTest {
         verify(userRepository, times(1)).save(userSuccess);
         verify(itemRepository, times(1)).save(itemSuccess);
     
-        reset(userRepository, itemRepository, userService); // Limpiar mocks para siguientes casos
+        reset(userRepository, itemRepository, userService);
     
-        // ---------- Caso: Usuario no encontrado por token ----------
         when(userService.getUserByToken(999L)).thenReturn(null);
     
         RuntimeException exUserToken = assertThrows(RuntimeException.class, () -> {
@@ -231,7 +230,6 @@ class ItemServiceTest {
     
         reset(userRepository, itemRepository, userService);
     
-        // ---------- Caso: Item no encontrado ----------
         User userItemNotFound = new User();
         userItemNotFound.setId(123L);
     
@@ -248,7 +246,6 @@ class ItemServiceTest {
     
         reset(userRepository, itemRepository, userService);
     
-        // ---------- Caso: Usuario no encontrado en repository ----------
         User userRepoNotFound = new User();
         userRepoNotFound.setId(123L);
     
@@ -266,7 +263,6 @@ class ItemServiceTest {
         reset(userRepository, itemRepository, userService);
     
     
-        // ---------- Caso: Item ya en carrito ----------
         User userItemAlreadyInCart = new User();
         userItemAlreadyInCart.setId(123L);
         userItemAlreadyInCart.setCartItems(new ArrayList<>());
@@ -311,6 +307,94 @@ class ItemServiceTest {
     }
 
     @Test
+    void testAddItemToWishlist() {
+        User userSuccess = new User();
+        userSuccess.setId(123L);
+        userSuccess.setWishlistItems(new ArrayList<>());
+
+        Item itemSuccess = new Clothes();
+        itemSuccess.setId(456L);
+        itemSuccess.setUsersWithItemInWishlist(new ArrayList<>());
+
+        when(userService.getUserByToken(123L)).thenReturn(userSuccess);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(itemSuccess));
+        when(userRepository.findById("123")).thenReturn(Optional.of(userSuccess));
+
+        itemService.addItemToWishlist(123L, 456L);
+
+        assertTrue(userSuccess.getWishlistItems().contains(itemSuccess));
+        assertTrue(itemSuccess.getUsersWithItemInWishlist().contains(userSuccess));
+        verify(userRepository, times(1)).save(userSuccess);
+        verify(itemRepository, times(1)).save(itemSuccess);
+
+        reset(userRepository, itemRepository, userService);
+
+        when(userService.getUserByToken(999L)).thenReturn(null);
+
+        RuntimeException exUserToken = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToWishlist(999L, 456L);
+        });
+        assertEquals("Usuario no encontrado", exUserToken.getMessage());
+
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
+
+        reset(userRepository, itemRepository, userService);
+
+        User userItemNotFound = new User();
+        userItemNotFound.setId(123L);
+
+        when(userService.getUserByToken(123L)).thenReturn(userItemNotFound);
+        when(itemRepository.findById(789L)).thenReturn(Optional.empty());
+
+        RuntimeException exItem = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToWishlist(123L, 789L);
+        });
+        assertEquals("Artículo no encontrado", exItem.getMessage());
+
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
+
+        reset(userRepository, itemRepository, userService);
+
+        User userRepoNotFound = new User();
+        userRepoNotFound.setId(123L);
+
+        when(userService.getUserByToken(123L)).thenReturn(userRepoNotFound);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(new Clothes()));
+        when(userRepository.findById("123")).thenReturn(Optional.empty());
+
+        RuntimeException exRepoUser = assertThrows(RuntimeException.class, () -> {
+            itemService.addItemToWishlist(123L, 456L);
+        });
+        assertEquals("Usuario no encontrado", exRepoUser.getMessage());
+
+        verify(userRepository, never()).save(any());
+
+        reset(userRepository, itemRepository, userService);
+
+        User userItemAlreadyInWishlist = new User();
+        userItemAlreadyInWishlist.setId(123L);
+        userItemAlreadyInWishlist.setWishlistItems(new ArrayList<>());
+
+        Item itemAlreadyInWishlist = new Clothes();
+        itemAlreadyInWishlist.setId(456L);
+        itemAlreadyInWishlist.setUsersWithItemInWishlist(new ArrayList<>());
+
+        userItemAlreadyInWishlist.getWishlistItems().add(itemAlreadyInWishlist);
+        itemAlreadyInWishlist.getUsersWithItemInWishlist().add(userItemAlreadyInWishlist);
+
+        when(userService.getUserByToken(123L)).thenReturn(userItemAlreadyInWishlist);
+        when(itemRepository.findById(456L)).thenReturn(Optional.of(itemAlreadyInWishlist));
+        when(userRepository.findById("123")).thenReturn(Optional.of(userItemAlreadyInWishlist));
+
+        itemService.addItemToWishlist(123L, 456L);
+
+        verify(userRepository, never()).save(any());
+        verify(itemRepository, never()).save(any());
+    }
+
+    @Test
     void testGetCartItems() {
         User user = new User();
         user.setId(123L);
@@ -346,6 +430,45 @@ class ItemServiceTest {
             itemService.getCartItems(456L);
         });
     
+        assertEquals("Usuario no encontrado", exception.getMessage());
+    }
+
+    @Test
+    void testGetWishlistItems() {
+        User user = new User();
+        user.setId(123L);
+        user.setWishlistItems(new ArrayList<>());
+
+        Item item1 = new Clothes();
+        item1.setId(1L);
+        item1.setTitle("Clothes Item 1");
+        item1.setDescription("Description 1");
+        item1.setPrice(15.0f);
+
+        Item item2 = new Electronics();
+        item2.setId(2L);
+        item2.setTitle("Electronics Item 1");
+        item2.setDescription("Description 2");
+        item2.setPrice(50.0f);
+
+        user.getWishlistItems().add(item1);
+        user.getWishlistItems().add(item2);
+
+        when(userService.getUserByToken(123L)).thenReturn(user);
+        when(userRepository.findById(String.valueOf(123L))).thenReturn(Optional.of(user));
+
+        List<Item> result = itemService.getWishlistItems(123L);
+
+        assertEquals(2, result.size(), "La wishlist debería contener 2 ítems");
+        assertEquals("Clothes Item 1", result.get(0).getTitle());
+        assertEquals("Electronics Item 1", result.get(1).getTitle());
+
+        when(userService.getUserByToken(456L)).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            itemService.getWishlistItems(456L);
+        });
+
         assertEquals("Usuario no encontrado", exception.getMessage());
     }
 
@@ -551,6 +674,62 @@ class ItemServiceTest {
             itemService.removeItemFromCart(123L, 999L);
         });
         assertEquals("Artículo no encontrado en el carrito", itemNotFoundException.getMessage());
+    }
+
+    @Test
+    void testRemoveItemFromWishlist() {
+        User user = new User();
+        user.setId(123L);
+        user.setWishlistItems(new ArrayList<>());
+
+        Item item1 = new Clothes();
+        item1.setId(456L);
+        item1.setUsersWithItemInWishlist(new ArrayList<>());
+
+        Item item2 = new Electronics();
+        item2.setId(789L);
+        item2.setUsersWithItemInWishlist(new ArrayList<>());
+
+        user.getWishlistItems().add(item1);
+        user.getWishlistItems().add(item2);
+        item1.getUsersWithItemInWishlist().add(user);
+        item2.getUsersWithItemInWishlist().add(user);
+
+        when(userService.getUserByToken(123L)).thenReturn(user);
+        when(userRepository.findById("123")).thenReturn(Optional.of(user));
+
+        itemService.removeItemFromWishlist(123L, 456L);
+
+        assertFalse(user.getWishlistItems().contains(item1), "El item1 debería haberse eliminado de la wishlist");
+        assertTrue(user.getWishlistItems().contains(item2), "El item2 debería permanecer en la wishlist");
+        assertFalse(item1.getUsersWithItemInWishlist().contains(user), "El usuario debería haberse eliminado de la lista del item1");
+        assertTrue(item2.getUsersWithItemInWishlist().contains(user), "El usuario debería permanecer en la lista del item2");
+
+        verify(userRepository, times(1)).save(user);
+        verify(itemRepository, times(1)).save(item1);
+
+        when(userService.getUserByToken(999L)).thenReturn(null);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            itemService.removeItemFromWishlist(999L, 456L);
+        });
+        assertEquals("Usuario no encontrado", exception.getMessage());
+
+        User emptyWishlistUser = new User();
+        emptyWishlistUser.setId(555L);
+        emptyWishlistUser.setWishlistItems(new ArrayList<>());
+        when(userService.getUserByToken(555L)).thenReturn(emptyWishlistUser);
+        when(userRepository.findById("555")).thenReturn(Optional.of(emptyWishlistUser));
+        RuntimeException emptyWishlistException = assertThrows(RuntimeException.class, () -> {
+            itemService.removeItemFromWishlist(555L, 456L);
+        });
+        assertEquals("La wishlist está vacía.", emptyWishlistException.getMessage());
+
+        when(userService.getUserByToken(123L)).thenReturn(user);
+        when(userRepository.findById("123")).thenReturn(Optional.of(user));
+        RuntimeException itemNotFoundException = assertThrows(RuntimeException.class, () -> {
+            itemService.removeItemFromWishlist(123L, 999L);
+        });
+        assertEquals("Artículo no encontrado en la wishlist", itemNotFoundException.getMessage());
     }
 
     @Test

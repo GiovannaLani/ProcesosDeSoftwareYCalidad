@@ -275,14 +275,12 @@ public class ItemService {
             throw new RuntimeException("Item not found");
         }
 
-        // Eliminar el item del carrito de todos los usuarios
         for (User u : item.getUsersWithItemInCart()) {
             u.getCartItems().remove(item);
             userRepository.save(u);
         }
         item.getUsersWithItemInCart().clear();
 
-        // Eliminar el item de la wishlist de todos los usuarios
         for (User u : item.getUsersWithItemInWishlist()) {
             u.getWishlistItems().remove(item);
             userRepository.save(u);
