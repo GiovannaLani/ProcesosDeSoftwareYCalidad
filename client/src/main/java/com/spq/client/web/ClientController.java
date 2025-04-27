@@ -750,7 +750,7 @@ public class ClientController {
 			e.printStackTrace();
 		}
 		System.out.println("REDIRECT" + redirectUrl);
-		return "redirect:" + redirectUrl + "?token=" + token;
+		return "redirect:" + redirectUrl;
 	}
 
 	@PostMapping("/userProfile/{id}/unfollow")
@@ -771,7 +771,7 @@ public class ClientController {
 			e.printStackTrace();
 		}
 
-		return "redirect:" + redirectUrl + "?token=" + token;
+		return "redirect:" + redirectUrl;
 	}
 
 	@GetMapping("/userProfile/{id}/followers")
@@ -906,9 +906,8 @@ public class ClientController {
 			// Obtiene los seguidores y seguidos del usuario
 			List<User> followers = vintedService.getFollowers(userId);
 			List<User> following = vintedService.getFollowing(userId);
-			System.out.println("Followers: " + followers + "ID: " + userId);
 			
-			model.addAttribute("isFollowing", following.contains(user));
+			model.addAttribute("isFollowing", vintedService.getFollowing(this.userId).contains(user));
 			// System.out.println("Is Following: " + following.contains(user));
 			// Agrega los seguidores y seguidos al modelo
 			model.addAttribute("followers", followers);

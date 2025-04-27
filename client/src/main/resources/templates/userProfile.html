@@ -270,7 +270,7 @@
 										<div th:unless="${isMyProfile}" class="u-flexbox">
 											<form th:action="${isFollowing} ? @{/userProfile/{id}/unfollow(id=${user.id})} : @{/userProfile/{id}/follow(id=${user.id})}" method="post">
 												<input type="hidden" name="token" th:value="${token}" />
-												<input type="hidden" name="redirectUrl" th:value="${currentUrl}" />
+												<input type="hidden" name="redirectUrl" th:value="@{/userProfile/{id}(id=${user.id}, token=${token})}" />
 												<button type="submit" 
 														th:classappend="${isFollowing ? 'btn-red' : 'btn-green'}" 
 														class="web_ui__Button__button web_ui__Button__outlined web_ui__Button__medium web_ui__Button__muted web_ui__Button__inline web_ui__Button__truncated web_ui__Button__icon-left">
