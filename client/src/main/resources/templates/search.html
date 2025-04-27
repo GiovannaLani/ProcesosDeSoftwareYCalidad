@@ -110,9 +110,7 @@
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
-							<a th:href="@{/vintedChat(token=${token})}" class="cart-link">
-								<i class="lnr lnr-envelope"></i>
-							</a>
+							<i class="lnr lnr-envelope"></i>
 						</div>
 
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" th:data-notify="${cartSize}">
@@ -152,56 +150,6 @@
 							</button>
 						</form>
 					</div>
-				</nav>
-			</div>
-
-			<div class="wrap-menu-desktop">
-				<nav class="limiter-menu-desktop container">
-
-
-					<!-- Menu desktop -->
-					<div class="menu-desktop">
-						<ul class="main-menu">
-							<li>
-								<a th:href="@{/allItems(token=${token})}">Todos los productos</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/WOMAN(token=${token})}">Mujer</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/MAN(token=${token})}">Hombre</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/GIRL(token=${token})}">Niñas</a>
-							</li>
-
-							<li>
-								<a th:href="@{/clothes/BOY(token=${token})}">Niños</a>
-							</li>
-
-							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
-							</li>
-
-							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
-							</li>
-							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
-							</li>
-							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
-							</li>
-						</ul>
-					</div>
-
 				</nav>
 			</div>
 		</div>
@@ -286,7 +234,7 @@
 							
 									products.forEach(product => container.appendChild(product));
 							
-									// (Opcional) Marcar activo
+		
 									document.querySelectorAll('#sortBySelect a').forEach(a => a.classList.remove('filter-link-active'));
 									this.classList.add('filter-link-active');
 								});
@@ -341,7 +289,6 @@
 								link.addEventListener('click', function(e) {
 									e.preventDefault();
 							
-					
 									const minPrice = parseFloat(this.getAttribute('data-min'));
 									const maxPrice = parseFloat(this.getAttribute('data-max'));
 							
@@ -354,19 +301,19 @@
 										const price = parseFloat(priceElement.textContent.replace('€', '').replace('$', '').trim());
 							
 										if (price >= minPrice && price <= maxPrice) {
-											product.style.display = ''; 
+											product.style.display = '';
 										} else {
 											product.style.display = 'none';
 										}
 									});
 							
-
 									document.querySelectorAll('#priceFilter a').forEach(a => a.classList.remove('filter-link-active'));
 									this.classList.add('filter-link-active');
 								});
 							});
-						</script>
+							</script>
 
+						
 					</div>
 				</div>
 			</div>
@@ -628,40 +575,37 @@
         });
     });
 	</script>
-
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const searchForm = document.getElementById("search-form");
-		const searchType = document.getElementById("search-type");
-		const searchText = document.getElementById("search_text");
-	
-		function updateFormBeforeSubmit() {
-			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
-				searchText.name = "username"; 
-			} else {
-				searchForm.action = "/search";
-				searchText.name = "search_text";
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const searchForm = document.getElementById("search-form");
+			const searchType = document.getElementById("search-type");
+			const searchText = document.getElementById("search_text");
+		
+			function updateFormBeforeSubmit() {
+				if (searchType.value === "miembros") {
+					searchForm.action = "/searchUser";
+					searchText.name = "username"; 
+				} else {
+					searchForm.action = "/search";
+					searchText.name = "search_text";
+				}
 			}
-		}
-	
-		searchType.addEventListener("change", function () {
-			updateFormBeforeSubmit();
+		
+			searchType.addEventListener("change", function () {
+				updateFormBeforeSubmit();
+			});
+		
+			searchForm.addEventListener("submit", function (event) {
+				const text = searchText.value.trim();
+				if (!text) {
+					event.preventDefault();
+					alert("Por favor, introduce un término de búsqueda.");
+					return;
+				}
+				updateFormBeforeSubmit();
+			});
 		});
-	
-		searchForm.addEventListener("submit", function (event) {
-			const text = searchText.value.trim();
-			if (!text) {
-				event.preventDefault();
-				alert("Por favor, introduce un término de búsqueda.");
-				return;
-			}
-			updateFormBeforeSubmit();
-		});
-	});
-	</script>
-	
-	
+		</script>
 </body>
 
 </html>
