@@ -121,10 +121,11 @@
 							</a>
 						</div>
 
-						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
-							data-notify="0">
-							<i class="zmdi zmdi-favorite-outline"></i>
-						</a>
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" th:data-notify="${wishlistSize}">
+							<a th:href="@{/wishlist(token=${token})}" class="cart-link">
+								<i class="zmdi zmdi-favorite-outline"></i>
+							</a>
+						</div>
 						<div th:if="${token}" class="user-menu-container">
 							<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 user-menu-toggle">
 								<i class="zmdi zmdi-account"></i>
@@ -216,17 +217,17 @@
 					<div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
 						<div class="m-l-25 m-r--38 m-lr-0-xl">
 							<div class="wrap-table-shopping-cart">
-								<div th:if="${cartItems.isEmpty()}">
-									<p>El carrito está vacío.</p>
+								<div th:if="${wishlistItems.isEmpty()}">
+									<p>La lista de favoritos está vacía.</p>
 								</div>
-								<div th:if="${!cartItems.isEmpty()}">
+								<div th:if="${!wishlistItems.isEmpty()}">
 									<table class="table-shopping-cart">
 										<tr class="table_head">
 											<th class="column-1">Product</th>
 											<th class="column-2"></th>
 											<th class="column-3">Price</th>
 										</tr>
-										<tr th:each="item : ${cartItems}" class="table_row">
+										<tr th:each="item : ${wishlistItems}" class="table_row">
 											<td class="column-1">
 												<div class="how-itemcart1">
 													<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" alt="IMG">
@@ -235,7 +236,7 @@
 											<td class="column-2" th:text="${item.title ?: 'Sin título'}">Nombre del producto</td>
 											<td class="column-3" th:text="${item.price ?: 0.0}">Precio</td>
 											<td class="column-4">
-												<form th:action="@{/shoppingCart/remove(redirectUrl=${currentUrl})}" method="post" class="m-r-20">
+												<form th:action="@{/wishlist/remove(redirectUrl=${currentUrl})}" method="post" class="m-r-20">
 													<input type="hidden" name="token" th:value="${token}" />
 													<input type="hidden" name="itemId" th:value="${item.id ?: 0}" />
 													<button type="submit" class="btn btn-danger">Eliminar</button>
@@ -247,34 +248,6 @@
 							</div>
 						</div>
 					</div>
-
-				<div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
-					<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
-						<h4 class="mtext-109 cl2 p-b-30">
-							Cart Totals
-						</h4>
-
-						<div class="flex-w flex-t bor12 p-b-13">
-
-                            <div class="flex-w flex-t p-t-27 p-b-33 align-total">
-                                <div class="size-208" style="width: 100%;">
-                                    <span class="mtext-101 cl2">
-                                        Total:
-                                    </span>
-                                </div>
-                                <div class="size-209">
-                                    <span class="mtext-110 cl2" th:text="${totalPrice}">
-                                    </span>
-                                </div>
-                            </div>
-
-							<a th:if="${not #lists.isEmpty(cartItems)}"
-							th:href="@{/createMultiplePurchase(token=${token}, itemIds=${#strings.listJoin(cartItems.![id], ',')})}"
-							class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							Proceed to Checkout
-							</a>						 
-					</div>
-				</div>
 			</div>
 	</section>
 	<!-- Footer -->

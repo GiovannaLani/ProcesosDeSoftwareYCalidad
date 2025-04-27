@@ -915,11 +915,10 @@ public class ClientController {
 
 	@PostMapping("/shoppingCart/remove")
 	public String removeItemFromCart(
-		@RequestParam("token") Long token,
+			@RequestParam("token") Long token,
 			@RequestParam("itemId") Long itemId,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			RedirectAttributes redirectAttributes) {
-				System.out.println("REMOVE : " + redirectUrl);
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
@@ -928,7 +927,6 @@ public class ClientController {
 			return "redirect:" + redirectUrl;
 		}
 		try {
-			System.out.println("REDIRECT" + redirectUrl);
 			vintedService.removeItemFromCart(token, itemId);
 			redirectAttributes.addFlashAttribute("successMessage", "Artículo eliminado del carrito.");
 		} catch (RuntimeException e) {
