@@ -32,17 +32,15 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ItemService {
-    @Autowired
     private UserService userService;
     private final UserRepository userRepository;
 
-
-    
     ItemRepository itemRepository;
     
-    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository, UserService userService) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Item> getItems(Long token) {
