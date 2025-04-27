@@ -16,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
+import com.spq.client.data.Offer;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
@@ -542,9 +543,11 @@ public class ClientController {
 	public String showPurchasePage(
 			@PathVariable Long itemId,
 			@RequestParam("token") Long token,
+			@RequestParam(value = "offerId", required = false) Long offerId,
 			Model model,
 			RedirectAttributes redirectAttributes) {
 				try {
+
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
@@ -556,7 +559,10 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
 				return "redirect:/login";
 			}
-	
+			if(offerId != null) {
+				Offer offer = vintedService.getOfferById(offerId);
+				model.addAttribute("offer", offer);
+			}
 			model.addAttribute("item", item);
 			model.addAttribute("buyerId", buyerId);
 			model.addAttribute("token", token);
@@ -608,40 +614,44 @@ public class ClientController {
 	public String createPurchase(
 		@PathVariable Long itemId,
 			@RequestParam("token") Long token,
+			@RequestParam(value = "offerId", required = false) Long offerId,
 			@RequestParam("paymentMethod") String paymentMethod,
 			RedirectAttributes redirectAttributes) {
 		try {
 			Long buyerId = vintedService.getUserIdFromToken(token);
 			if (buyerId == null) {
+				System.out.println("purchase el token es null");
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
 				return "redirect:/login";
 			}
 	
 			Item item = vintedService.getItemById(itemId);
 			if (item == null) {
+				System.out.println("purchase el item es null");
 				redirectAttributes.addFlashAttribute("errorMessage", "El artículo no existe.");
 				return "redirect:/login";
 			}
 	
 			User seller = vintedService.getSeller(item);
 			if (seller == null) {
+				System.out.println("purchase el seller es null");
 				redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor.");
 				return "redirect:/login";
 			}
-	
+			
 			Purchase purchase = new Purchase(
 					null,
 					itemId,
 					vintedService.getUser(buyerId, token).username(),
 					seller.username(),
-					item.getPrice(),
+					(offerId != null ? vintedService.getOfferById(offerId).price().floatValue() : item.getPrice()),
 					paymentMethod,
 					"PENDING"
 					);
+					
+			Purchase createdPurchase = vintedService.createPurchase(token, purchase);
 	
-					Purchase createdPurchase = vintedService.createPurchase(token, purchase);
-	
-					redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
+			redirectAttributes.addFlashAttribute("successMessage", "Compra iniciada. Procede con el pago.");
 			return "redirect:/processPayment/" + createdPurchase.id() + "?token=" + token;
 			
 		} catch (Exception e) {
@@ -1056,6 +1066,7 @@ public class ClientController {
 
 		return "redirect:" + redirectUrl;
 	}
+	
 
 	@PostMapping("/rateUser")
 	public String rateUser(

@@ -388,6 +388,9 @@ public class ItemController {
             itemService.deleteItem(token, itemId);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+
             if ("Item not found".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if ("Not authorized".equals(e.getMessage())) {

@@ -25,14 +25,15 @@ public class ChatMessageDTOTest {
         long chatRoomId = 1L;
         long senderId = 100L;
         LocalDateTime timestamp = LocalDateTime.now();
+        String type = "OFFER";
 
-        ChatMessageDTO chatMessageDTO = new ChatMessageDTO(content, chatRoomId, senderId, timestamp);
+        ChatMessageDTO chatMessageDTO = new ChatMessageDTO(content, chatRoomId, senderId, timestamp,"OFFER");
 
         assertEquals(content, chatMessageDTO.getContent());
         assertEquals(chatRoomId, chatMessageDTO.getChatRoomId());
         assertEquals(senderId, chatMessageDTO.getSenderId());
         assertEquals(timestamp, chatMessageDTO.getTimestamp());
-        assertNull(chatMessageDTO.getType());
+        assertEquals(type, chatMessageDTO.getType());
         assertNull(chatMessageDTO.getOffer());
     }
 

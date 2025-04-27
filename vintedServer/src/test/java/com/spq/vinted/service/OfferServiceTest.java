@@ -76,9 +76,10 @@ class OfferServiceTest {
         when(itemRepository.findById(3L)).thenReturn(Optional.of(item));
         when(chatRepository.findById(4L)).thenReturn(Optional.of(chat));
 
-        Boolean result = offerService.createOffer(1L, 2L, 3L, 4L, 100.0);
-
-        assertTrue(result);
+        Offer result = offerService.createOffer(1L, 2L, 3L, 4L, 100.0);
+        
+        assertNotNull(result);
+        assertEquals(sender, result.getSender());   
         verify(offerRepository).save(any(Offer.class));
     }
 

@@ -102,5 +102,8 @@ class ItemTest {
 
         anotherItem.setId(999L);
         assertNotEquals(item, anotherItem, "Los ítems no deberían ser iguales si tienen IDs diferentes");
+
+        anotherItem = null;
+        assertNotEquals(item, anotherItem, "El ítem no debería ser igual a null");
     }
 }
