@@ -67,53 +67,7 @@ public class OfferService {
     }
     
 
-    public Offer acceptOffer(Long offerId, Long token) throws Exception {
-        Offer offer = offerRepository.findById(offerId)
-                .orElseThrow();
-        
-        if (!offer.getReceiver().getId().equals(token)) {
-            throw new Exception("This offer is no longer pending");
-        }
-        
-        if (offer.getStatus() != Offer.OfferStatus.PENDING) {
-            throw new Exception("This offer is no longer pending");
-        }
-        
-        offer.setStatus(Offer.OfferStatus.ACCEPTED);
-        offerRepository.save(offer);
 
-        Message offerMessage = messageRepository.findByOfferId(offerId);
-        if (offerMessage != null) {
-            messageService.saveAndSendMessage(offerMessage);
-        }
-        
-        return offer;
-    }
-    
-
-   
-    public Offer rejectOffer(Long offerId, Long token) throws Exception {
-        Offer offer = offerRepository.findById(offerId)
-                .orElseThrow();
-        
-        if (!offer.getReceiver().getId().equals(token)) {
-            throw new Exception("Only the receiver can reject the offer");
-        }
-        
-        if (offer.getStatus() != Offer.OfferStatus.PENDING) {
-            throw new Exception("This offer is no longer pending");
-        }
-        
-        offer.setStatus(Offer.OfferStatus.REJECTED);
-        offerRepository.save(offer);
-
-        Message offerMessage = messageRepository.findByOfferId(offerId);
-        if (offerMessage != null) {
-            messageService.saveAndSendMessage(offerMessage);
-        }
-        
-        return offer;
-    }
 
     public List<Offer> getOffersByItem(Long itemId, Long token) {
         User user = userService.getUserByToken(token);
