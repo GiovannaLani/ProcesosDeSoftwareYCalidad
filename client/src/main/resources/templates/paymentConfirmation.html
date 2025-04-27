@@ -68,38 +68,39 @@
 					<div
 						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
-							<form id="search-form" method="get" class="search-form">
+							<form action="/catalog" method="get">
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" class=" web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
-													</select>
-												</div>
+													  </select>
+													  
+																</div>
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
-												<div class="u-flexbox u-align-items-center">
-													<span class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2" style="width:16px">
-														<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z"></path>
-														</svg>
-													</span>
-												</div>
-											</div>
-											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
-												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
-												aria-labelledby="search-item" name="username" required>
+												<div class="u-flexbox u-align-items-center"><span
+														class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2"
+														style="width:16px"><svg viewBox="0 0 16 16" width="16"
+															height="16" aria-hidden="true">
+															<path
+																d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z">
+															</path>
+														</svg></span></div>
+											</div><input id="search_text" placeholder="Busca artículos"
+												data-testid="search-text--input" class="web_ui__InputBar__value"
+												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
+												name="search_text" value="">
 										</div>
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
-								<input type="hidden" name="token" th:value="${token}">
 							</form>
 						</div>
 					</div>
@@ -212,35 +213,31 @@
 			<div class="flex-w flex-tr flex-login">
 				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
 					<h4 class="mtext-105 cl2 txt-center p-b-30">
-						Revisión de pagos
+						Revisión de pago
 					</h4>
-					<p class="txt-center">Gracias por tus compras. Aquí están los detalles de tus transacciones:</p>
+					<p class="txt-center">Gracias por tu compra. Aquí están los detalles de tu transacción:</p>
 					<ul class="p-l-20 p-t-20">
-						<div th:each="purchase : ${purchases}">
-							<li><strong>ID de la compra:</strong> <span th:text="${purchase.id}"></span></li>
-							<li><strong>Artículo:</strong> <span th:text="${purchase.itemId}"></span></li>
-							<li><strong>Comprador:</strong> <span th:text="${purchase.buyerUsername}"></span></li>
-							<li><strong>Vendedor:</strong> <span th:text="${purchase.sellerUsername}"></span></li>
-							<li><strong>Precio:</strong> <span th:text="${purchase.price}"></span> €</li>
-							<li><strong>Método de pago:</strong> <span th:text="${purchase.paymentMethod}"></span></li>
-							<li><strong>Estado:</strong> <span th:text="${purchase.status}"></span></li>
-							<hr>
-						</div>
+						<li><strong>ID de la compra:</strong> <span th:text="${purchase.id}"></span></li>
+						<li><strong>Artículo:</strong> <span th:text="${purchase.itemId}"></span></li>
+						<li><strong>Comprador:</strong> <span th:text="${purchase.buyerUsername}"></span></li>
+						<li><strong>Vendedor:</strong> <span th:text="${purchase.sellerUsername}"></span></li>
+						<li><strong>Precio:</strong> <span th:text="${purchase.price}"></span> €</li>
+						<li><strong>Método de pago:</strong> <span th:text="${purchase.paymentMethod}"></span></li>
+						<li><strong>Estado:</strong> <span th:text="${purchase.status}"></span></li>
 					</ul>
-	
-					<form th:action="@{/processMultiplePayment}" method="post">
+					
+					<form th:action="@{/processPayment/{purchaseId}(purchaseId=${purchase.id})}" method="post">
 						<input type="hidden" name="token" th:value="${token}" />
-						<input type="hidden" name="purchaseIds" th:value="${purchaseIds}" />
 	
 						<div class="p-t-20">
 							<label for="paymentMethod">Selecciona el método de pago:</label>
 							<select name="paymentMethod" id="paymentMethod" class="form-control" onchange="togglePaymentFields(this.value)">
-								<option value="credit_card">Tarjeta de Crédito</option>
-								<option value="paypal">PayPal</option>
-								<option value="bank_transfer">Transferencia Bancaria</option>
+								<option value="credit_card" th:selected="${purchase.paymentMethod == 'credit_card'}">Tarjeta de Crédito</option>
+								<option value="paypal" th:selected="${purchase.paymentMethod == 'paypal'}">PayPal</option>
+								<option value="bank_transfer" th:selected="${purchase.paymentMethod == 'bank_transfer'}">Transferencia Bancaria</option>
 							</select>
 						</div>
-	
+
 						<div id="creditCardFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
@@ -255,14 +252,14 @@
 								<input type="text" id="cardCVC" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
 							</div>
 						</div>
-	
+
 						<div id="paypalFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
 								<input type="email" id="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
 							</div>
 						</div>
-	
+
 						<div id="bankTransferFields" style="display: none;">
 							<div class="m-b-20">
 								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
@@ -276,7 +273,7 @@
 	
 						<div class="txt-center p-t-20">
 							<button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-								Procesar Pagos
+								Procesar Pago
 							</button>
 						</div>
 					</form>
@@ -541,38 +538,6 @@
 				document.getElementById("bankTransferFields").style.display = "block";
 			}
 		}
-	</script>
-
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const searchForm = document.getElementById("search-form");
-		const searchType = document.getElementById("search-type");
-		const searchText = document.getElementById("search_text");
-	
-		function updateFormBeforeSubmit() {
-			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
-				searchText.name = "username"; 
-			} else {
-				searchForm.action = "/search";
-				searchText.name = "search_text";
-			}
-		}
-	
-		searchType.addEventListener("change", function () {
-			updateFormBeforeSubmit();
-		});
-	
-		searchForm.addEventListener("submit", function (event) {
-			const text = searchText.value.trim();
-			if (!text) {
-				event.preventDefault();
-				alert("Por favor, introduce un término de búsqueda.");
-				return;
-			}
-			updateFormBeforeSubmit();
-		});
-	});
 	</script>
 
 </body>

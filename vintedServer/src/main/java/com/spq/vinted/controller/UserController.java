@@ -2,11 +2,8 @@ package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.EditUserDTO;
 import com.spq.vinted.dto.LoginDTO;
-import com.spq.vinted.dto.RatingDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
-import com.spq.vinted.model.Item;
-import com.spq.vinted.model.Rating;
 import com.spq.vinted.model.User;
 import com.spq.vinted.service.UserService;
 
@@ -15,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -166,7 +162,6 @@ public class UserController {
 			return ResponseEntity.notFound().build();
 		}
 	}
-	
 	@GetMapping("/userId")
     public ResponseEntity<Long> getUserIdFromToken(@RequestParam("token") Long token) {
         try {
@@ -180,70 +175,5 @@ public class UserController {
                     .body(null);
         }
     }
-
-	@GetMapping("/search")
-	public ResponseEntity<UserDTO> searchUser(
-			@RequestParam("username") String username,
-			@RequestParam("token") Long token) {
-		try {
-			UserDTO user = userService.getUserByUsername(username, token).toDTO();
-			if (user != null) {
-				return ResponseEntity.ok(user);
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
-	}
-
-    @GetMapping("/{userId}/items")
-    public ResponseEntity<List<Item>> getUserItems(
-            @PathVariable Long userId,
-            @RequestParam("token") Long token) {
-        try {
-            List<Item> items = userService.getUserItems(userId, token);
-            return ResponseEntity.ok(items);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-	@PostMapping("/rate")
-	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
-		try {
-			System.out.println("cosasverdes " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
-			User ratedUser = userService.getUserById(rating.getRatedUserId());
-			User ratingUser = userService.getUserById(rating.getRatingUserId());
-			System.out.println(ratedUser.getId() + " " + ratingUser.getId() + " " + rating.getScore() + " " + rating.getComment());
-	
-			if (ratedUser == null || ratingUser == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
-			}
-			
-			RatingDTO ratingDTO = new RatingDTO(
-				ratedUser.getId(),
-				ratingUser.getId(),
-				rating.getScore(),
-				rating.getComment()
-			);
-	
-			userService.addRating(ratingDTO);
-			return ResponseEntity.ok("Rating added successfully");
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Error adding rating: " + e.getMessage());
-		}
-	}
-
-	@GetMapping("/{userId}/ratings")
-	public ResponseEntity<List<RatingDTO>> getUserRatings(@PathVariable long userId) {
-		try {
-			List<RatingDTO> ratings = userService.getRatingsForUser(userId);
-			return ResponseEntity.ok(ratings);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(null);
-		}
-	}
 
 }

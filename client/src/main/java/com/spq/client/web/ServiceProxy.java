@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -15,17 +16,17 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.http.ResponseEntity;
 
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
+import com.spq.client.data.Offer;
+import com.spq.client.data.OfferCreator;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
-import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
@@ -41,8 +42,7 @@ import com.spq.client.data.EntertainmentType;
 import com.spq.client.data.Home;
 import com.spq.client.data.HomeType;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.Collections;
+
 import java.util.List;
 
 @Service
@@ -216,30 +216,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Purchase> createPurchases(long token, List<Purchase> purchases) {
-		try {
-			String url = apiBaseUrl + "/purchases/multipleCreate?token=" + token;
-	
-			ResponseEntity<List<Purchase>> response = restTemplate.exchange(
-					url,
-					HttpMethod.POST,
-					new HttpEntity<>(purchases),
-					new ParameterizedTypeReference<List<Purchase>>() {}
-			);
-	
-			return response.getBody();
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			switch (e.getStatusCode().value()) {
-				case 400 -> throw new RuntimeException("Invalid purchase request");
-				case 404 -> throw new RuntimeException("One or more items not found");
-				case 409 -> throw new RuntimeException("Purchase conflict, one or more items already sold");
-				default -> throw new RuntimeException("Failed to create purchases: " + e.getStatusText());
-			}
-		}
-	}
-
-	@Override
 	public boolean processPayment(long purchaseId, String paymentMethod, long token) {
 		String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
 		try {
@@ -253,30 +229,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 				case 404 -> throw new RuntimeException("Purchase not found");
 				case 409 -> throw new RuntimeException("Payment conflict, already paid");
 				default -> throw new RuntimeException("Failed to process payment: " + e.getStatusText());
-			}
-		}
-	}
-
-	@Override
-	public boolean processPayments(List<Long> purchaseIds, String paymentMethod, long token) {
-		String url = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/purchases/payMultiple")
-				.queryParam("token", token)
-				.queryParam("paymentMethod", paymentMethod)
-				.queryParam("purchaseIds", purchaseIds.toArray())
-				.toUriString();
-	
-		try {
-			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
-			System.out.println("Server response: " + response);
-	
-			return "success".equalsIgnoreCase(response.get("status"));
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			switch (e.getStatusCode().value()) {
-				case 400 -> throw new RuntimeException("Invalid payment request");
-				case 404 -> throw new RuntimeException("One or more purchases not found");
-				case 409 -> throw new RuntimeException("Payment conflict, already paid for one or more purchases");
-				default -> throw new RuntimeException("Failed to process payments: " + e.getStatusText());
 			}
 		}
 	}
@@ -560,28 +512,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-    public List<Item> searchItems(Long token, String search) {
-        String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
-        try {
-            Item[] items = restTemplate.getForObject(url, Item[].class);
-            return Arrays.asList(items);
-        } catch (HttpStatusCodeException e) {
-            System.out.println("Error response: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Failed to fetch items: " + e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("An unexpected error occurred while fetching items.", e);
-        }
-    }
-	
-	public User getUserByUsername(String username, Long token) {
-		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
-		try {
-			return restTemplate.getForObject(url, User.class);
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return null;
-		}
-	}
 	public void createChatRoom(long buyerId, long sellerId, long itemId) {
 		ChatRoom chatRoomRequest = new ChatRoom(itemId, buyerId, sellerId);
 
@@ -597,17 +527,6 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public List<Item> getUserItems(Long userId, Long token) {
-		String url = apiBaseUrl + "/users/" + userId + "/items?token=" + token;
-		try {
-			Item[] items = restTemplate.getForObject(url, Item[].class);
-			return Arrays.asList(items);
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return Collections.emptyList();
-		}
-	}
-
 	public List<ChatRoomInfo> getChatRoomsForUser(long userId) {
 		try {
 			String url = apiBaseUrl + "/chatrooms/user/" + userId;
@@ -631,28 +550,40 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	@Override
-	public String addRating(Rating rating, Long token) {
-		String url = apiBaseUrl + "/users/rate?token=" + token;
-		try {
-			restTemplate.postForObject(url, rating, Void.class);
-			return "Rating added successfully";
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return "Error adding rating: " + e.getResponseBodyAsString();
-		}
-	}
 
 	@Override
-	public List<Rating> getRatingsForUser(long userId) {
-		String url = apiBaseUrl + "/users/" + userId + "/ratings";
-		try {
-			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Rating>>() {}).getBody();
-		} catch (HttpStatusCodeException e) {
-			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return Collections.emptyList();
-		}
-	}
+    public void createOffer(OfferCreator offer, long token) {
+        String url = apiBaseUrl + "/offers/create?token=" + token;
+		restTemplate.postForObject(url, offer, OfferCreator.class);
+    }
+    
+    @Override
+    public Offer getOffer(Long id) {
+        String url = apiBaseUrl + "/offers/" + id;
+		return restTemplate.getForObject(url, Offer.class);
+    }
+    
+    @Override
+    public Map<String, Offer> updateOfferStatus(Long id, String status) {
+        String url = apiBaseUrl + "/offers/" + id + "/status?status=" + status;
+        return restTemplate.postForObject(url, null, Map.class);
+    }
 
+	@Override
+    public Offer acceptOffer(Long id) {
+        String url = apiBaseUrl + "/api/offers/" + id + "/accept";
+        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
+    }
+    
+    @Override
+    public Offer rejectOffer(Long id) {
+        String url = apiBaseUrl + "/api/offers/" + id + "/reject";
+        return restTemplate.exchange(url, HttpMethod.PUT, null, Offer.class).getBody();
+    }
+
+	@Override
+	public List<Offer> getOffersByItem(Long itemId, Long token) {
+		String url = apiBaseUrl + "/offers/item/" + itemId + "?token=" + token;
+		return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Offer>>() {}).getBody();
+	}
 }
-
