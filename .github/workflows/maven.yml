@@ -46,9 +46,7 @@ jobs:
     # Espera a que el servicio de MySQL esté listo
     - name: Wait for MySQL to be ready
       run: |
-        apt-get update
-        apt-get install -y wait-for-it
-        wait-for-it mysql:3306 --timeout=60 --strict -- echo "MySQL is ready"
+        docker exec mysql mysqladmin --user=root --password=root --host=localhost --wait=30 ping
 
     # Ejecuta un script para crear la base de datos (si aún no existe)
     - name: Initialize Database
