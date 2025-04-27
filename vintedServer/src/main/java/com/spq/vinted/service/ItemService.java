@@ -38,17 +38,18 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ItemService {
-    @Autowired
     private UserService userService;
     private final UserRepository userRepository;
 
 
     
     static ItemRepository itemRepository;
+    //ItemRepository itemRepository;
     
-    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository, UserService userService) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Item> getItems(Long token) {
@@ -311,7 +312,15 @@ public class ItemService {
         }
         
         return itemDTO;
+    }
     
+    public List<Item> searchItems(Long token, String query) {
+        if (query == null || query.isBlank()) return getItems(token);
+        List<Item> items = itemRepository.findAll().stream()
+                .filter(item -> item.getTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        System.out.println("2"+items);
+        return items;
     }
 }
 

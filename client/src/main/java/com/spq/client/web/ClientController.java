@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -18,14 +19,18 @@ import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
+import com.spq.client.data.Rating;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
 import com.spq.client.data.User;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.spq.client.data.Signup;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -363,19 +368,13 @@ public class ClientController {
 			@PathVariable("id") Long id,
 			@RequestParam(value = "token") Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
-			Model model) {
+			Model model,
+			RedirectAttributes redirectAttributes) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-	
-		model.addAttribute("user", vintedService.getUser(id, token));
 		model.addAttribute("redirectUrl", redirectUrl);
-		List<Item> items = vintedService.getUserItems(id);
-    	model.addAttribute("items", items);
-		boolean isMyProfile = (id.equals(userId));
-		model.addAttribute("isMyProfile", isMyProfile);
-	
-		return "userProfile";
+		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 	
 	@PostMapping("/editUser")
@@ -542,6 +541,41 @@ public class ClientController {
 	}
 	
 	
+
+	@GetMapping("/createMultiplePurchase")
+	public String showPurchasePage(
+			@RequestParam("itemIds") List<Long> itemIds,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión para comprar.");
+				return "redirect:/login";
+			}
+	
+			List<Item> items = new ArrayList<>();
+			for (Long itemId : itemIds) {
+				Item item = vintedService.getItemById(itemId);
+				if (item == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Uno o más artículos no existen.");
+					return "redirect:/allItems";
+				}
+				items.add(item);
+			}
+	
+			model.addAttribute("items", items);
+			model.addAttribute("buyerId", buyerId);
+			model.addAttribute("token", token);
+			System.out.println("Token: " + token);
+			return "purchase";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al mostrar la compra.");
+			return "redirect:/allItems";  
+		}
+	}
+		
 	@PostMapping("/createPurchase/{itemId}")
 	public String createPurchase(
 		@PathVariable Long itemId,
@@ -593,6 +627,60 @@ public class ClientController {
 		}
 	}
 
+	@PostMapping("/createMultiplePurchase")
+	public String createPurchase(
+			@RequestParam("token") Long token,
+			@RequestParam("itemIds") List<Long> itemIds,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			Long buyerId = vintedService.getUserIdFromToken(token);
+			if (buyerId == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no autenticado.");
+				return "redirect:/login";
+			}
+	
+			List<Purchase> purchases = new ArrayList<>();
+			for (Long itemId : itemIds) {
+				Item item = vintedService.getItemById(itemId);
+				if (item == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Uno o más artículos no existen.");
+					return "redirect:/login";
+				}
+	
+				User seller = vintedService.getSeller(item);
+				if (seller == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "No se encontró el vendedor de un artículo.");
+					return "redirect:/login";
+				}
+	
+				Purchase purchase = new Purchase(
+						null,
+						itemId,
+						vintedService.getUser(buyerId, token).username(),
+						seller.username(),
+						item.getPrice(),
+						paymentMethod,
+						"PENDING"
+				);
+				purchases.add(purchase);
+			}
+	
+			List<Purchase> createdPurchases = vintedService.createPurchases(token, purchases);
+	
+			redirectAttributes.addFlashAttribute("successMessage", "Compras iniciadas. Procede con el pago.");
+			return "redirect:/processMultiplePayment?purchaseIds=" + createdPurchases.stream()
+					.map(p -> p.id().toString())
+					.collect(Collectors.joining(",")) + "&token=" + token;
+	
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear las compras.");
+			e.printStackTrace();
+			return "redirect:/login";
+		}
+	}	
+
 	@GetMapping("/processPayment/{purchaseId}")
 	public String showPaymentConfirmation(
 			@PathVariable Long purchaseId,
@@ -618,6 +706,42 @@ public class ClientController {
 		}
 	}
 
+	@GetMapping("/processMultiplePayment")
+	public String showPaymentConfirmation(
+			@RequestParam("purchaseIds") List<Long> purchaseIds,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			System.out.println("Token: " + token);
+			System.out.println("Purchase IDs: " + purchaseIds);
+	
+			List<Purchase> purchases = new ArrayList<>();
+			for (Long purchaseId : purchaseIds) {
+				Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+				if (purchase == null) {
+					redirectAttributes.addFlashAttribute("errorMessage", "Una o más compras no fueron encontradas.");
+					return "redirect:/login";
+				}
+				purchases.add(purchase);
+			}
+	
+			String purchaseIdsString = purchaseIds.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining(","));
+	
+			model.addAttribute("purchases", purchases);
+			model.addAttribute("purchaseIds", purchaseIdsString);
+			model.addAttribute("token", token);
+	
+			return "paymentConfirmation";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar la confirmación de pago.");
+			e.printStackTrace();
+			return "redirect:/login";
+		}
+	}
+
 	@PostMapping("/processPayment/{purchaseId}")
 	public String processPayment(
 		@PathVariable Long purchaseId,
@@ -626,7 +750,6 @@ public class ClientController {
 			RedirectAttributes redirectAttributes,
 			Model model) {
 		try {
-			System.out.println(token);
 			Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 			if (purchase == null) {
 				redirectAttributes.addFlashAttribute("errorMessage", "Compra no encontrada.");
@@ -656,6 +779,50 @@ public class ClientController {
 			e.printStackTrace();
 		}
 		return "redirect:/allItems";
+	}
+
+	@PostMapping("/processMultiplePayment")
+	public String processPayments(
+			@RequestParam("purchaseIds") String purchaseIds,
+			@RequestParam("token") Long token,
+			@RequestParam("paymentMethod") String paymentMethod,
+			RedirectAttributes redirectAttributes) {
+		try {
+			List<Long> purchaseIdList = Arrays.stream(purchaseIds.split(","))
+					.map(Long::valueOf)
+					.collect(Collectors.toList());
+		
+			boolean allPaymentsSuccessful = true;
+	
+			for (Long purchaseId : purchaseIdList) {
+				boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
+				if (paymentSuccess) {
+					try {
+						Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
+						if (purchase != null) {
+							vintedService.deleteItem(token, purchase.itemId());
+						}
+					} catch (RuntimeException e) {
+						redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado, pero no se pudo eliminar un artículo.");
+						e.printStackTrace();
+					}
+				} else {
+					allPaymentsSuccessful = false;
+				}
+			}
+	
+			if (allPaymentsSuccessful) {
+				redirectAttributes.addFlashAttribute("successMessage", "Todos los pagos se procesaron con éxito y los artículos fueron eliminados.");
+			} else {
+				redirectAttributes.addFlashAttribute("warningMessage", "Algunos pagos no se pudieron procesar.");
+			}
+	
+			return "redirect:/allItems";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar los pagos: " + e.getMessage());
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
 	}
 
 	@DeleteMapping("/deletePurchase/{purchaseId}")
@@ -724,6 +891,48 @@ public class ClientController {
 		return "redirect:" + redirectUrl + "?token=" + token;
 	}
 
+	@GetMapping("/search")
+    public String searchItems(
+            @RequestParam("search_text") String search,
+            @RequestParam("token") Long token,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            List<Item> items = vintedService.searchItems(token, search);
+            if (items != null && !items.isEmpty()) {
+                model.addAttribute("items", items);
+                return "search";
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
+                return "redirect:/allItems";
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
+            e.printStackTrace();
+            return "redirect:/allItems";
+        }
+    }
+	@GetMapping("/searchUser")
+	public String searchUser(
+			@RequestParam("username") String username,
+			@RequestParam("token") Long token,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUserByUsername(username, token);
+			if (user != null) {
+				return loadUserProfile(user.id(), token, model, redirectAttributes);
+			} else {
+				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+				return "redirect:/allItems";
+			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+	
 	@GetMapping("/vintedChat")
 	public String showVintedChat(
 			@RequestParam(value="token", required = false) Long token,
@@ -778,5 +987,64 @@ public class ClientController {
 		return "redirect:" + redirectUrl;
 	}
 	
+
+	@PostMapping("/rateUser")
+	public String rateUser(
+			@RequestParam("ratedUserId") Long ratedUserId,
+			@RequestParam("ratingUserId") Long ratingUserId,
+			@RequestParam("score") int score,
+			@RequestParam(value = "comment", required = false) String comment,
+			@RequestParam("token") Long token,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+		try {
+			Rating rating = new Rating(0L, ratedUserId, ratingUserId, score, comment);
+			String response = vintedService.addRating(rating, token);
+			redirectAttributes.addFlashAttribute("successMessage", response);
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al enviar la valoración.");
+			e.printStackTrace();
+		}
+		return loadUserProfile(ratedUserId, token, model, redirectAttributes);
+	}
+
+	@GetMapping("/user/{userId}/ratings")
+	public String getUserRatings(
+			@PathVariable long userId,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+			return "userProfile";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al obtener las valoraciones.");
+			e.printStackTrace();
+			return "redirect:/userProfile/" + userId;
+		}
+	}
+
+	private String loadUserProfile(Long userId, Long token, Model model, RedirectAttributes redirectAttributes) {
+		try {
+			User user = vintedService.getUser(userId, token);
+			model.addAttribute("user", user);
+	
+			List<Item> items = vintedService.getUserItems(userId);
+			model.addAttribute("items", items);
+	
+			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			model.addAttribute("ratings", ratings);
+	
+			boolean isMyProfile = userId.equals(this.userId);
+			model.addAttribute("isMyProfile", isMyProfile);
+	
+			return "userProfile";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar el perfil del usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+
 }
 

@@ -72,6 +72,7 @@ public class User {
         this.surname = surname;
         this.cartItems = new ArrayList<>();
     }
+
     public Long getId() {
         return id;
     }
