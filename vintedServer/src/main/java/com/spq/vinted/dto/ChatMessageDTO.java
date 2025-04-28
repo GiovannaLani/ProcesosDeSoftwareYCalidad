@@ -2,20 +2,24 @@ package com.spq.vinted.dto;
 
 import java.time.LocalDateTime;
 
-public class ChatMessage {
+public class ChatMessageDTO {
     private String content;
     private long chatRoomId;
     private long senderId;
     private LocalDateTime timestamp;
 
-    public ChatMessage() {
+    private String type; 
+    private OfferDTO offer; 
+
+    public ChatMessageDTO() {
     }
 
-    public ChatMessage(String content, long chatRoomId, long senderId, LocalDateTime timestamp) {
+    public ChatMessageDTO(String content, long chatRoomId, long senderId, LocalDateTime timestamp, String type) {
         this.content = content;
         this.chatRoomId = chatRoomId;
         this.senderId = senderId;
         this.timestamp = timestamp;
+        this.type = type;
     }
     public String getContent() {
         return content;
@@ -41,4 +45,19 @@ public class ChatMessage {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+    public OfferDTO getOffer() {
+        return offer;
+    }
+    public void setOffer(OfferDTO offer) {
+        this.offer = offer;
+    }
+  
+    
 }

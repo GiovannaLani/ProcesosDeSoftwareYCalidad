@@ -6,5 +6,6 @@ public record ChatMessage (
     String content,
     long chatRoomId,
     long senderId,
-    LocalDateTime timestamp
+    LocalDateTime timestamp,
+    String type
 ){}

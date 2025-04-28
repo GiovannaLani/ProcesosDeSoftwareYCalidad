@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Message {
 
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +32,15 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+
+    public enum MessageType {
+        OFFER, TEXT
+    }
+
+    @ManyToOne  
+    @JoinColumn(name = "offer_id")
+    private Offer offer;
+
     public Message() {
     }
 
@@ -39,6 +49,14 @@ public class Message {
         this.sender = sender;
         this.content = content;
         this.timestamp = LocalDateTime.now();
+    }
+
+    public Message(ChatRoom chatRoom, User sender, String content, Offer offer) {
+        this.chatRoom = chatRoom;
+        this.sender = sender;
+        this.content = content;
+        this.timestamp = LocalDateTime.now();
+        this.offer = offer;
     }
 
     public Long getId() {
@@ -71,4 +89,29 @@ public class Message {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+    public Offer getOffer() {
+        return offer;
+    }
+    public void setOffer(Offer offer) {
+        this.offer = offer;
+    }
+
+    
+    public MessageType getType() {
+        if (offer != null) {
+            return MessageType.OFFER;
+        } else {
+            return MessageType.TEXT;
+        }
+    }
+
+    public void setType(MessageType type) {
+        if (type == MessageType.OFFER) {
+            this.offer = new Offer(); // Initialize offer if needed
+        } else {
+            this.offer = null;
+        }
+    }
+
 }

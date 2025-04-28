@@ -4,17 +4,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.spq.vinted.dto.ChatMessage;
+import com.spq.vinted.dto.ChatMessageDTO;
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.OfferDTO;
 import com.spq.vinted.model.ChatRoom;
-import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Message;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.ChatRoomRepository;
-import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.repository.MessageRepository;
+import com.spq.vinted.repository.OfferRepository;
 import com.spq.vinted.repository.UserRepository;
+
 
 @Service
 public class MessageService {
@@ -32,11 +35,14 @@ public class MessageService {
     private UserRepository userRepository;
 
     @Autowired
-    private ItemRepository itemRepository;
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private OfferRepository offerRepository;
+
 
     public void sendMessage(long token, long chatRoomId, String content) {
         User sender = userService.getUserByToken(token);
-
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new RuntimeException("ChatRoom not found"));
 
         Message message = new Message();
@@ -53,7 +59,7 @@ public class MessageService {
         return messageRepository.findByChatRoomOrderByTimestampAsc(chatRoom);
     }
 
-    public Message saveMessage(ChatMessage chatMessage) {
+    public Message saveMessage(ChatMessageDTO chatMessage) {
         User sender = userRepository.findById(String.valueOf(chatMessage.getSenderId())).orElseThrow(() -> new RuntimeException("Sender not found"));
         
         ChatRoom chatRoom = chatRoomRepository.findById(chatMessage.getChatRoomId()).orElseThrow(() -> new RuntimeException("ChatRoom not found"));
@@ -63,7 +69,47 @@ public class MessageService {
         message.setSender(sender);
         message.setContent(chatMessage.getContent());
         message.setTimestamp(LocalDateTime.now());
-
+        if(chatMessage.getType()!=null && chatMessage.getType().equals("OFFER"))
+        {
+            message.setOffer(offerRepository.findById(Long.parseLong(chatMessage.getContent())).orElseThrow(() -> new RuntimeException("Offer not found")));
+        }else
+        {
+            message.setOffer(null);
+        }
         return messageRepository.save(message);
+    }
+
+    public Message saveAndSendMessage(Message message) {
+        Message savedMessage = messageRepository.save(message);
+        
+        ChatMessageDTO messageDTO = convertToDTO(savedMessage);
+        
+        messagingTemplate.convertAndSend("/topic/chat/" + message.getChatRoom().getId(), messageDTO);
+        
+        return savedMessage;
+    }
+    
+    private ChatMessageDTO convertToDTO(Message message) {
+        ChatMessageDTO dto = new ChatMessageDTO();
+        dto.setSenderId(message.getSender().getId());
+        dto.setContent(message.getContent());
+        dto.setTimestamp(message.getTimestamp());
+        
+        if (message.getType() == Message.MessageType.OFFER && message.getOffer() != null) {
+            OfferDTO offerDTO = new OfferDTO();
+            offerDTO.setPrice(message.getOffer().getPrice());
+            offerDTO.setStatus(message.getOffer().getStatus().toString());
+            offerDTO.setSenderId(message.getOffer().getSender().getId());
+            offerDTO.setReceiverId(message.getOffer().getReceiver().getId());
+            
+            ItemDTO itemDTO = ItemService.getDTOById(message.getOffer().getItem().getId());
+            offerDTO.setItemId(itemDTO.getId()); 
+            
+
+            dto.setOffer(offerDTO);
+        }
+
+        return dto;
+
     }
 }

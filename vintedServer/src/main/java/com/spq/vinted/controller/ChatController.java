@@ -6,7 +6,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import com.spq.vinted.dto.ChatMessage;
+import com.spq.vinted.dto.ChatMessageDTO;
 import com.spq.vinted.service.MessageService;
 
 @Controller
@@ -19,7 +19,11 @@ public class ChatController {
     private MessageService messageService;
 
     @MessageMapping("/chat.send")
-    public void sendMessage(@Payload ChatMessage message) {
+    public void sendMessage(@Payload ChatMessageDTO message) {
+        
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
         
         String destination = "/topic/chat/" + message.getChatRoomId();;
         

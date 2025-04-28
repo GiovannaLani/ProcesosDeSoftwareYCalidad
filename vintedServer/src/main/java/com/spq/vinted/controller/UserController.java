@@ -86,7 +86,10 @@ public class UserController {
 			userService.deleteUser(token);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			if (e.getMessage().equals("User not found")) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -98,6 +101,11 @@ public class UserController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		try {
+			// Validar parámetros requeridos
+			if (name == null || name.trim().isEmpty() || surname == null || surname.trim().isEmpty()) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+			
 			userService.editUser(token, name, surname, description, profileImage);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (RuntimeException e) {
@@ -108,6 +116,7 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 	@PutMapping("/editUserData")
 	public ResponseEntity<Void> updateUserData(
 			@RequestParam("token") long token,
@@ -248,9 +257,9 @@ public class UserController {
 			@RequestParam("username") String username,
 			@RequestParam("token") Long token) {
 		try {
-			UserDTO user = userService.getUserByUsername(username, token).toDTO();
+			User user = userService.getUserByUsername(username, token);
 			if (user != null) {
-				return ResponseEntity.ok(user);
+				return ResponseEntity.ok(user.toDTO());
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 			}
@@ -274,11 +283,14 @@ public class UserController {
 	@PostMapping("/rate")
 	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
 		try {
-			System.out.println("cosasverdes " + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + " " + rating.getComment());
+			// Validar que los IDs no sean nulos
+			if (rating.getRatedUserId() == null || rating.getRatingUserId() == null) {
+				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+			}
+			
 			User ratedUser = userService.getUserById(rating.getRatedUserId());
 			User ratingUser = userService.getUserById(rating.getRatingUserId());
-			System.out.println(ratedUser.getId() + " " + ratingUser.getId() + " " + rating.getScore() + " " + rating.getComment());
-	
+			
 			if (ratedUser == null || ratingUser == null) {
 				return ResponseEntity.badRequest().body("Rated user or rating user not found");
 			}
@@ -289,7 +301,7 @@ public class UserController {
 				rating.getScore(),
 				rating.getComment()
 			);
-	
+
 			userService.addRating(ratingDTO);
 			return ResponseEntity.ok("Rating added successfully");
 		} catch (Exception e) {
