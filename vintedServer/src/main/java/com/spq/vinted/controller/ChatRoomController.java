@@ -24,12 +24,22 @@ public class ChatRoomController {
     private MessageService messageService;
 
     @PostMapping
-    public ResponseEntity<ChatRoom> createChatRoom(
+    public ResponseEntity<ChatRoomInfoDTO> createChatRoom(
             @RequestBody ChatRoomDTO chatRoomDTO) {
 
         ChatRoom chatRoom = chatRoomService.getOrCreateChatRoom(chatRoomDTO.getBuyerId(), chatRoomDTO.getSellerId(), chatRoomDTO.getItemId());
-
-        return ResponseEntity.ok(chatRoom);
+        ChatRoomInfoDTO chatRoomInfoDTO = new ChatRoomInfoDTO(
+            chatRoom.getId(),
+            chatRoom.getBuyer().getId(),
+            chatRoom.getBuyer().getUsername(),
+            chatRoom.getSeller().getId(),
+            chatRoom.getSeller().getUsername(),
+            chatRoom.getItem().getId(),
+            chatRoom.getItem().getTitle(),
+            chatRoom.getItem().getImages().get(0),
+            chatRoom.getItem().getPrice()
+        );
+        return ResponseEntity.ok(chatRoomInfoDTO);
     }
 
     @GetMapping("/user/{userId}")
