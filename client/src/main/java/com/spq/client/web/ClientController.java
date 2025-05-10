@@ -643,12 +643,16 @@ public class ClientController {
 				return "redirect:/login";
 			}
 			
+			
+			float basePrice = (offerId != null ? vintedService.getOfferById(offerId).price().floatValue() : item.getPrice());
+			float finalPrice = basePrice * 1.15f;
+			
 			Purchase purchase = new Purchase(
 					null,
 					itemId,
 					vintedService.getUser(buyerId, token).username(),
 					seller.username(),
-					(offerId != null ? vintedService.getOfferById(offerId).price().floatValue() : item.getPrice()),
+					finalPrice, 
 					paymentMethod,
 					"PENDING"
 					);
@@ -693,12 +697,15 @@ public class ClientController {
 					return "redirect:/login";
 				}
 	
+               
+                float finalPrice = item.getPrice() * 1.15f;
+
 				Purchase purchase = new Purchase(
 						null,
 						itemId,
 						vintedService.getUser(buyerId, token).username(),
 						seller.username(),
-						item.getPrice(),
+						finalPrice, 
 						paymentMethod,
 						"PENDING"
 				);
@@ -1217,4 +1224,3 @@ public class ClientController {
 	}
 
 }
-
