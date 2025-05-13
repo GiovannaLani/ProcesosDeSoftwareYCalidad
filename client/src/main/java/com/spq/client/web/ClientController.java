@@ -1020,34 +1020,40 @@ public class ClientController {
 		return "redirect:" + redirectUrl;
 	}
 
-	@GetMapping("/userProfile/{id}/followers")
-	public String getFollowers(
+	@GetMapping("/userList/followers/{id}")
+	public String showFollowersList(
 			@PathVariable("id") Long userId,
 			@RequestParam("token") Long token,
 			Model model) {
 		try {
+			User user = vintedService.getUser(userId, token);
 			List<User> followers = vintedService.getFollowers(userId);
-			model.addAttribute("followers", followers);
-			return "userProfile"; 
-		} catch (RuntimeException e) {
+			model.addAttribute("users", followers);
+			model.addAttribute("user", user);
+			model.addAttribute("listType", "Seguidores");
+			model.addAttribute("loggedUserId", this.userId);
+			return "userList";
+		} catch (Exception e) {
 			model.addAttribute("errorMessage", "Error al cargar los seguidores.");
-			e.printStackTrace();
 			return "error";
 		}
 	}
 
-	@GetMapping("/userProfile/{id}/following")
-	public String getFollowing(
+	@GetMapping("/userList/following/{id}")
+	public String showFollowingList(
 			@PathVariable("id") Long userId,
 			@RequestParam("token") Long token,
 			Model model) {
 		try {
+			User user = vintedService.getUser(userId, token);
 			List<User> following = vintedService.getFollowing(userId);
-			model.addAttribute("following", following);
-			return "userProfile"; 
-		} catch (RuntimeException e) {
+			model.addAttribute("users", following);
+			model.addAttribute("user", user);
+			model.addAttribute("listType", "Siguiendo");
+			model.addAttribute("loggedUserId", this.userId);
+			return "userList";
+		} catch (Exception e) {
 			model.addAttribute("errorMessage", "Error al cargar los usuarios seguidos.");
-			e.printStackTrace();
 			return "error";
 		}
 	}

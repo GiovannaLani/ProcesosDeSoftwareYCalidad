@@ -374,7 +374,7 @@
 														<div class="web_ui__Cell__body">
 															<div class="u-flexbox u-flex-wrap">
 																<div class="u-flexbox">
-																	<a href="/member/general/followers/261147319" th:text="${followersCount}">0</a>
+																	<a th:href="@{/userList/followers/{id}(id=${user.id}, token=${token})}" th:text="${followersCount}">0</a>
 																	<div class="web_ui__Spacer__small web_ui__Spacer__vertical">
 																	</div>
 																	Seguidores
@@ -383,10 +383,10 @@
 																	</div>
 																</div>
 																<div class="u-flexbox">
-																	<a href="/member/general/following/261147319" th:text="${followingCount}">0</a>
+																	<a th:href="@{/userList/following/{id}(id=${user.id}, token=${token})}" th:text="${followingCount}">0</a>
 																	<div class="web_ui__Spacer__small web_ui__Spacer__vertical">
 																	</div>
-																	siguiendo
+																	Siguiendo
 																</div>
 															</div>
 														</div>
