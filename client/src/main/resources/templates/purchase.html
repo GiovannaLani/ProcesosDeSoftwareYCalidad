@@ -47,6 +47,45 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/util.css}" />
     <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
+
+    <style>
+        /* Estilos para los gastos de gestión */
+        .total-summary {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e6e6e6;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .summary-row.total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-bottom: none;
+            border-top: 2px solid #e0e0e0;
+            font-size: 1.1em;
+        }
+        
+        .highlight-fees {
+            color: #e65540;
+            font-weight: 500;
+        }
+        
+        .item-box {
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body class="animsition">
 
@@ -218,13 +257,30 @@
 					<h4 class="mtext-105 cl2 txt-center p-b-30">
 						Comprar Artículos
 					</h4>
+					
+					<!-- CASO: COMPRA CON OFERTA -->
 					<div th:if="${offer != null}" class="txt-center p-b-30">
 						<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" 
 							 alt="Imagen del artículo" 
 							 style="max-width: 300px; max-height: 300px;">
 					</div>
-					<p th:if="${offer != null}" class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-					<p th:if="${offer != null}" class="txt-center">Precio: <span th:text="${offer.price}"></span> €</p>
+					
+					<!-- Información de la oferta con gastos de gestión -->
+					<div th:if="${offer != null}" class="total-summary">
+						<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
+						<div class="summary-row">
+							<span>Precio del artículo:</span>
+							<span th:text="${offer.price}"></span> €
+						</div>
+						<div class="summary-row highlight-fees">
+							<span>Gastos de gestión:</span>
+							<span th:text="${#numbers.formatDecimal(offer.price * 0.15, 1, 2)}"></span> €
+						</div>
+						<div class="summary-row total">
+							<strong>Total a pagar:</strong>
+							<strong th:text="${#numbers.formatDecimal(offer.price * 1.15, 1, 2)}"></strong> €
+						</div>
+					</div>
 	
 					<form th:if="${offer != null}" th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
 						<h4 class="mtext-105 cl2 txt-center p-b-30">
@@ -282,6 +338,8 @@
 							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
 						</div>
 					</form>
+					
+					<!-- CASO: COMPRA MÚLTIPLE -->
 					<form th:if="${offer == null}" th:action="@{/createMultiplePurchase}" method="POST">
 						<div th:each="item : ${items}" class="item-box p-b-30">
 							<h5 class="mtext-105 cl2 txt-center">
@@ -293,8 +351,40 @@
 									 style="max-width: 200px; max-height: 200px;">
 							</div>
 							<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-							<p class="txt-center">Precio: <span th:text="${item.price}"></span> €</p>
+							
+							<!-- Precio con gastos de gestión para cada item -->
+							<div class="price-summary">
+								<div class="summary-row">
+									<span>Precio del artículo:</span>
+									<span th:text="${#numbers.formatDecimal(item.price, 1, 2)}"></span> €
+								</div>
+								<div class="summary-row highlight-fees">
+									<span>Gastos de gestión:</span>
+									<span th:text="${#numbers.formatDecimal(item.price * 0.15, 1, 2)}"></span> €
+								</div>
+								<div class="summary-row total">
+									<strong>Total:</strong>
+									<strong th:text="${#numbers.formatDecimal(item.price * 1.15, 1, 2)}"></strong> €
+								</div>
+							</div>
 							<input type="hidden" name="itemIds" th:value="${item.id}">
+						</div>
+						
+						<!-- Resumen total para compras múltiples -->
+						<div class="total-summary" th:if="${items != null and items.size() > 1}">
+							<h5 class="mtext-105 cl2 p-b-10">Resumen del pedido</h5>
+							<div class="summary-row">
+								<span>Subtotal:</span>
+								<span th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]), 1, 2)}"></span> €
+							</div>
+							<div class="summary-row highlight-fees">
+								<span>Gastos de gestión:</span>
+								<span th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]) * 0.15, 1, 2)}"></span> €
+							</div>
+							<div class="summary-row total">
+								<strong>Total:</strong>
+								<strong th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]) * 1.15, 1, 2)}"></strong> €
+							</div>
 						</div>
 						
 						<h4 class="mtext-105 cl2 txt-center p-b-30">Confirmar Compra</h4>
@@ -342,7 +432,6 @@
 						</div>
 	
 						<input type="hidden" name="token" th:value="${token}">
-						<input type="hidden" name="offerId" th:value="${offer != null ? offer.id : ''}">
 						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
 							Confirmar compra
 						</button>
