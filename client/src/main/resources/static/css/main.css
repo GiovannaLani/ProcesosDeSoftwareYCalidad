@@ -4279,3 +4279,14 @@ a{
   background-color: darkred;
   border-color: darkred;
 }
+
+.pagination-container {
+    display: flex;            
+    align-items: center;      
+    gap: 15px;                
+    justify-content: center;
+}
+
+.pagination-container form {
+    margin: 0;               
+}

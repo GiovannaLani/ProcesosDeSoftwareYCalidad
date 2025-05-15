@@ -17,12 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
 
+
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
@@ -87,15 +89,53 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 	@Override
-	public List<Item> getItems(Long token) {
+	public PaginatedResponse<Item> getItems(Long token, int page, String type) {
 		try {
-			if (token == null) {
-				return restTemplate.exchange(apiBaseUrl + "/items/items", HttpMethod.GET, null, 
-						new ParameterizedTypeReference<List<Item>>() {}).getBody();
-			} else {
-				return restTemplate.exchange(apiBaseUrl + "/items/items?token=" + token, HttpMethod.GET, null, 
-						new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			String url = apiBaseUrl + "/items/items?page=" + page;
+
+			if (token != null) {
+				url += "&token=" + token;
 			}
+			if (type != null) {
+				url += "&type=" + type;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
+	}
+
+	public PaginatedResponse<Item> getClothesByCategory(Long token, int page, Category category)
+	{
+		try {
+			String url = apiBaseUrl + "/items/clothes/"+category+"?page=" + page;
+
+			if (token != null) {
+				url += "&token=" + token;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
 		}
@@ -629,19 +669,36 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
-    public List<Item> searchItems(Long token, String search) {
-        String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
-        try {
-            Item[] items = restTemplate.getForObject(url, Item[].class);
-            return Arrays.asList(items);
-        } catch (HttpStatusCodeException e) {
-            System.out.println("Error response: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Failed to fetch items: " + e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("An unexpected error occurred while fetching items.", e);
-        }
+    public PaginatedResponse<Item> searchItems(Long token, String search, int page, String type) {
+		try {
+			String url = apiBaseUrl + "/items/search?page=" + page;
+			if (search != null) {
+				url += "&search_text=" + search;
+			}
+			if (token != null) {
+				url += "&token=" + token;
+			}
+			if (type != null) {
+				url += "&type=" + type;
+			}
+			System.out.println("Generated URL: " + url);
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
     }
-	
+
 	public User getUserByUsername(String username, Long token) {
 		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
 		try {

@@ -75,7 +75,7 @@
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
 													</select>
@@ -103,6 +103,9 @@
 									</div>
 								</div>
 								<input type="hidden" name="token" th:value="${token}">
+								<input type="hidden" name="type" th:value="${type}">
+								<input type="hidden" name="page" th:value="${0}">
+								<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							</form>
 						</div>
 					</div>
@@ -168,7 +171,7 @@
 							</li>
 
 							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
+								<a th:href="@{/allItems(token=${token}, type='Clothes')}">Ropa</a>
 							</li>
 
 							<li>
@@ -188,17 +191,17 @@
 							</li>
 
 							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
+								<a th:href="@{/allItems(token=${token}, type='Home')}">Hogar</a>
 							</li>
 
 							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
+								<a th:href="@{/allItems(token=${token}, type='Electronics')}">Electrónica</a>
 							</li>
 							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
+								<a th:href="@{/allItems(token=${token}, type='Entertainment')}">Entretenimiento</a>
 							</li>
 							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
+								<a th:href="@{/allItems(token=${token}, type='Pet')}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -405,6 +408,24 @@
 			</div>
 
 		</div>
+		<div th:if="${items != null and !items.isEmpty()}" class="pagination-container">
+			<form th:if="${page > 0}" th:action="@{/allItems(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page - 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<button class="button-green">Anterior</button>
+			</form>
+
+			<span class="page-info">Página <span th:text="${page + 1}">1</span> de <span th:text="${totalPages}">1</span></span>
+
+			<form th:if="${page < totalPages - 1}" th:action="@{/allItems(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page + 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<button class="button-green">Siguiente</button>
+			</form>
+		</div>
+
 	</section>
 
 

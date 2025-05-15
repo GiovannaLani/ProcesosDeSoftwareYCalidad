@@ -33,6 +33,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -93,7 +97,7 @@ class ItemServiceTest {
 
         when(itemRepository.findAll()).thenReturn(items);
 
-        List<Item> result = itemService.getItems(null);
+        List<Item> result = itemService.getAllItems(null);
 
         assertEquals(2, result.size());
         assertEquals("Item 1", result.get(0).getTitle());
@@ -118,7 +122,7 @@ class ItemServiceTest {
 
         when(itemRepository.findAll()).thenReturn(itemsToken);
 
-        List<Item> resultWithToken = itemService.getItems(12345L);
+        List<Item> resultWithToken = itemService.getAllItems(12345L);
 
         assertEquals(2, resultWithToken.size());
         assertEquals("Item 3", resultWithToken.get(0).getTitle());
@@ -127,7 +131,7 @@ class ItemServiceTest {
         when(userService.getUserByToken(23456L)).thenThrow(new RuntimeException("User not found"));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-        itemService.getItems(23456L);
+        itemService.getAllItems(23456L);
         });
 
         assertEquals("Failed to fetch items: User not found", exception.getMessage());
@@ -1042,5 +1046,181 @@ class ItemServiceTest {
 
         
     }
+    @Test
+    void testSearchItems_NoQuery_NoType() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        Clothes clothes = new Clothes();
+        clothes.setId(1L);
+        clothes.setTitle("Test Clothes");
+
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+        when(itemRepository.findAll(pageable)).thenReturn(itemPage);
+
+        Page<Item> result = itemService.searchItems(null, null, page, null);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Clothes", result.getContent().get(0).getTitle());
+
+        result = itemService.searchItems(null, "", page, "");
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Clothes", result.getContent().get(0).getTitle());
+    }
+
+    @Test
+    void testSearchItems_WithQuery() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        String query = "shirt";
+
+        Clothes clothes = new Clothes();
+        clothes.setId(1L);
+        clothes.setTitle("Test Shirt");
+
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+        when(itemRepository.searchByQuery(query, pageable)).thenReturn(itemPage);
+
+        Page<Item> result = itemService.searchItems(null, query, page, null);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Shirt", result.getContent().get(0).getTitle());
+    }
+
+    @Test
+    void testSearchItems_WithQueryAndType_Duplicate() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        String query = "laptop";
+        String type = "Electronics";
+
+        Electronics electronics = new Electronics();
+        electronics.setId(1L);
+        electronics.setTitle("Gaming Laptop");
+
+        List<Item> items = List.of(electronics);
+        Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+        when(itemRepository.searchByTypeAndQuery(Electronics.class, query, pageable)).thenReturn(itemPage);
+
+        Page<Item> result = itemService.searchItems(null, query, page, type);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Gaming Laptop", result.getContent().get(0).getTitle());
+    }
+
+    @Test
+    void testSearchItems_WithQueryAndType() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        String query = "laptop";
+        String type = "Electronics";
+
+        Electronics electronics = new Electronics();
+        electronics.setId(1L);
+        electronics.setTitle("Gaming Laptop");
+
+        List<Item> items = List.of(electronics);
+        Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+        when(itemRepository.searchByTypeAndQuery(Electronics.class, query, pageable)).thenReturn(itemPage);
+
+        Page<Item> result = itemService.searchItems(null, query, page, type);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Gaming Laptop", result.getContent().get(0).getTitle());
+    }
+    @Test
+void testGetItems_NoToken_NoType() {
+    int page = 0;
+    Pageable pageable = PageRequest.of(page, 28);
+
+    Clothes clothes = new Clothes();
+    clothes.setId(1L);
+    clothes.setTitle("Test Clothes");
+
+    List<Item> items = List.of(clothes);
+    Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+    when(itemRepository.findAll(pageable)).thenReturn(itemPage);
+
+    Page<Item> result = itemService.getItems(null, page, null);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals("Test Clothes", result.getContent().get(0).getTitle());
+}
+@Test
+void testGetItems_WithToken_NoType() {
+    int page = 0;
+    long token = 12345L;
+    Pageable pageable = PageRequest.of(page, 28);
+    Long userId = 1L;
+
+    User user = new User();
+    user.setId(userId);
+    when(userService.getUserByToken(token)).thenReturn(user);
+
+    Clothes clothes = new Clothes();
+    clothes.setId(1L);
+    clothes.setTitle("Test Clothes");
+
+    List<Item> items = List.of(clothes);
+    Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+    when(itemRepository.findBySellerIdNot(userId, pageable)).thenReturn(itemPage);
+
+    Page<Item> result = itemService.getItems(token, page, null);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals("Test Clothes", result.getContent().get(0).getTitle());
+}
+@Test
+void testGetItems_WithType() {
+    int page = 0;
+    String type = "Electronics";
+    Pageable pageable = PageRequest.of(page, 28);
+
+    Electronics electronics = new Electronics();
+    electronics.setId(1L);
+    electronics.setTitle("Smartphone");
+
+    List<Item> items = List.of(electronics);
+    Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+    when(itemRepository.findByType(Electronics.class, pageable)).thenReturn(itemPage);
+
+    Page<Item> result = itemService.getItems(null, page, type);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals("Smartphone", result.getContent().get(0).getTitle());
+}
+@Test
+void testGetItems_WithTokenAndType() {
+    int page = 0;
+    long token = 12345L;
+    String type = "Home";
+    Pageable pageable = PageRequest.of(page, 28);
+    Long userId = 1L;
+
+    User userWithId = new User();
+    userWithId.setId(userId);
+    when(userService.getUserByToken(token)).thenReturn(userWithId);
+
+    Home homeItem = new Home();
+    homeItem.setId(1L);
+    homeItem.setTitle("Sofa");
+
+    List<Item> items = List.of(homeItem);
+    Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+    when(itemRepository.findBySellerIdNotAndType(userId, Home.class, pageable)).thenReturn(itemPage);
+
+    Page<Item> result = itemService.getItems(token, page, type);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals("Sofa", result.getContent().get(0).getTitle());
+}
 
 }

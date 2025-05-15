@@ -1,6 +1,5 @@
 package com.spq.client.web;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.client.data.Signup;
@@ -10,15 +9,16 @@ import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
-import com.spq.client.data.ChatRoom;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
+
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,8 @@ import java.util.Map;
 public interface IVintedServiceProxy {
     public void createUser(Signup user);
 	public Long login(String email, String password);
-	public List<Item> getItems(Long token);
+	public PaginatedResponse<Item> getItems(Long token,int page, String type);
+	public PaginatedResponse<Item> getClothesByCategory(Long token, int page, Category category);
 	public Item getItemById(Long id);
 	public List<Clothes> getClothes(long token);
 	public List<Clothes> getClothesByCategory(Category category, long token);
@@ -62,7 +63,7 @@ public interface IVintedServiceProxy {
 	public void unfollowUser(Long token, Long targetUserId);
 	public List<User> getFollowers(Long targetUserId);
 	public List<User> getFollowing(Long targetUserId);
-	public List<Item> searchItems(Long token, String search);
+	public PaginatedResponse<Item> searchItems(Long token, String search, int page, String type);
 	public User getUserByUsername(String username, Long token);
 	public List<Item> getUserItems(Long userId, Long token);
 	public void createChatRoom(long buyerId, long sellerId, long itemId);

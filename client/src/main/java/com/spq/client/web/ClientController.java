@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.data.domain.Page;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
@@ -181,13 +183,19 @@ public class ClientController {
 	@GetMapping("/allItems")
 	public String getItems(
 			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "page", defaultValue = "0",required = false) int page,
+			@RequestParam(value = "type", required = false) String type,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
-			List<Item> items = vintedService.getItems(token); 
-			model.addAttribute("items", items);
-	
+			PaginatedResponse itemPage = vintedService.getItems(token, page, type);
+			model.addAttribute("items", itemPage.content());
+			model.addAttribute("page", itemPage.page());
+			model.addAttribute("totalPages", itemPage.totalPages());
+			model.addAttribute("type", type);
+			
 			return "product";
+			
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -243,17 +251,16 @@ public class ClientController {
 	@GetMapping("/clothes/{category}")
 	public String getClothesByCategory(
 		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "page", defaultValue = "0",required = false) int page,
 		@PathVariable Category category,
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
-			try {
-		List<Clothes> clothesCategory = null;
-		if(token == null) {
-			clothesCategory = vintedService.getClothesByCategory(category, -1);
-		}else {
-			clothesCategory = vintedService.getClothesByCategory(category, token);
-		}
-		model.addAttribute("items", clothesCategory);
+	try {
+		PaginatedResponse itemPage = vintedService.getClothesByCategory(token, page, category);
+		model.addAttribute("items", itemPage.content());
+		model.addAttribute("page", itemPage.page());
+		model.addAttribute("totalPages", itemPage.totalPages());
+		model.addAttribute("type", "Clothes");
 		return "product";
     } catch (RuntimeException e) {
         System.err.println("Ha ocurrido un error: " + e.getMessage());
@@ -1054,23 +1061,26 @@ public class ClientController {
 
 	@GetMapping("/search")
     public String searchItems(
-            @RequestParam("search_text") String search,
-            @RequestParam("token") Long token,
+            @RequestParam(value = "search_text", required = false) String search,
+            @RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+			@RequestParam(value = "type", required = false) String type,
             Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            List<Item> items = vintedService.searchItems(token, search);
-            if (items != null && !items.isEmpty()) {
-                model.addAttribute("items", items);
-                return "search";
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
-                return "redirect:/allItems";
-            }
+            PaginatedResponse<Item> items = vintedService.searchItems(token, search, page, type);
+			model.addAttribute("items", items.content());
+			model.addAttribute("page", items.page());
+			model.addAttribute("totalPages", items.totalPages());
+			model.addAttribute("search_text", search);
+			if(type != null) {
+				model.addAttribute("type", type);
+			}
+			return "search";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
             e.printStackTrace();
-            return "redirect:/allItems";
+            return "search";
         }
     }
 	@GetMapping("/searchUser")
