@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -240,6 +243,16 @@ public class UserService {
 						rating.getComment()
 				))
 				.collect(Collectors.toList());
+	}
+	public Page<User> searchUsers(Long token, String query, int page) {
+		Pageable pageable = PageRequest.of(page, 28);
+		String searchQuery = (query != null) ? query.trim().toLowerCase() : "";
+
+		if (searchQuery.isBlank()) {
+			return userRepository.findAll(pageable);
+		}
+
+		return userRepository.searchByQuery(searchQuery, pageable);
 	}
 
 }

@@ -389,14 +389,16 @@ public class ClientController {
 	@GetMapping("/userProfile/{id}")
 	public String showUserProfile(
 			@PathVariable("id") Long id,
-			@RequestParam(value = "token") Long token,
+			@RequestParam(value = "token", required = false) Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-
+		if (token == null) {
+			return "redirect:/login";
+		}
 		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 	
@@ -1105,11 +1107,32 @@ public class ClientController {
 		try {
 			User user = vintedService.getUserByUsername(username, token);
 			if (user != null) {
-				return loadUserProfile(user.id(), token, model, redirectAttributes);
+				return "searchUser";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
 				return "redirect:/allItems";
 			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+	@GetMapping("/searchUsers")
+	public String searchUsers(
+			@RequestParam(value = "username", required = false) String username,
+			@RequestParam(value = "token", required = false) Long token,
+        	@RequestParam(value = "page", defaultValue = "0") int page,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			PaginatedResponse<User> users = vintedService.searchUsers(token, username, page);
+			model.addAttribute("users", users.content());
+			model.addAttribute("page", users.page());
+			model.addAttribute("totalPages", users.totalPages());
+			model.addAttribute("search_text", username);
+
+			return "searchUser";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
 			e.printStackTrace();

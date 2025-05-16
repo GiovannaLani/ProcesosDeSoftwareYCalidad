@@ -33,6 +33,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.vinted.dto.RatingDTO;
@@ -633,4 +637,80 @@ public class UserServiceTest {
         assertEquals(4, result.get(1).getScore());
         assertEquals("Buen usuario", result.get(1).getComment());
     }
+    @Test
+    void testSearchUsers_EmptyQuery() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
+
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
+
+        Page<User> result = userService.searchUsers(null, "", page);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("testuser", result.getContent().get(0).getUsername());
+    }
+
+    @Test
+    void testSearchUsers_WithQuery() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        String query = "testuser";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
+
+        when(userRepository.searchByQuery(query.toLowerCase(), pageable)).thenReturn(userPage);
+
+        Page<User> result = userService.searchUsers(null, query, page);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("testuser", result.getContent().get(0).getUsername());
+    }
+
+    @Test
+    void testSearchUsers_NullQuery() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("defaultuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
+
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
+
+        Page<User> result = userService.searchUsers(null, null, page);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("defaultuser", result.getContent().get(0).getUsername());
+    }
+
+    @Test
+    void testSearchUsers_NoResults() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
+        String query = "nonexistent";
+
+        Page<User> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(userRepository.searchByQuery(query.toLowerCase(), pageable)).thenReturn(emptyPage);
+
+        Page<User> result = userService.searchUsers(null, query, page);
+
+        assertTrue(result.isEmpty());
+    }
+
 }

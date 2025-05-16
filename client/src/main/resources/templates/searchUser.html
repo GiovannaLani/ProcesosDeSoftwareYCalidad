@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Compra</title>
+    <title>User Profile</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" th:href="@{/images/icons/favicon.png}" />
@@ -27,7 +28,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/css-hamburgers/hamburgers.min.css}" />
 
     <!-- Animsition -->
-    <!--<link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />-->
+    <link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/select2/select2.min.css}" />
@@ -46,10 +47,9 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/util.css}" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
-    
-   
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
 </head>
+
 <body class="animsition">
 
 	<!-- Header -->
@@ -157,6 +157,7 @@
 								Vender ahora
 							</button>
 						</form>
+						
 					</div>
 				</nav>
 			</div>
@@ -214,137 +215,62 @@
 
 	</header>
 
-    <!-- Main Content -->
+<!-- Product -->
 	<section class="bg0 p-t-104 p-b-116">
 		<div class="container">
-			<div class="flex-w flex-tr flex-login">
-				<div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<h4 class="mtext-105 cl2 txt-center p-b-30">
-						Revisión de pagos
-					</h4>
-					<p class="txt-center">Gracias por tus compras. Aquí están los detalles de tus transacciones:</p>
-					
-					<!-- Detalles de las compras con gastos de gestión -->
-					<div class="total-summary">
-						<div th:each="purchase : ${purchases}">
-							<h5 class="mtext-104 cl2 p-b-10">Compra #<span th:text="${purchase.id}"></span></h5>
-							<div class="summary-row">
-								<span>Artículo ID:</span>
-								<span th:text="${purchase.itemId}"></span>
-							</div>
-							<div class="summary-row">
-								<span>Comprador:</span>
-								<span th:text="${purchase.buyerUsername}"></span>
-							</div>
-							<div class="summary-row">
-								<span>Vendedor:</span>
-								<span th:text="${purchase.sellerUsername}"></span>
-							</div>
-							<div class="summary-row">
-								<span>Precio del artículo:</span>
-								<span th:text="${#numbers.formatDecimal(purchase.price / 1.05, 1, 2)}"></span> €
-							</div>
-							<div class="summary-row highlight-fees">
-								<span>Gastos de gestión:</span>
-								<span th:text="${#numbers.formatDecimal(purchase.price / 1.15 * 0.15, 1, 2)}"></span> €
-							</div>
-							<div class="summary-row total">
-								<strong>Total:</strong>
-								<strong th:text="${#numbers.formatDecimal(purchase.price, 1, 2)}"></strong> €
-							</div>
-							<div class="summary-row">
-								<span>Método de pago:</span>
-								<span th:text="${purchase.paymentMethod}"></span>
-							</div>
-							<div class="summary-row">
-								<span>Estado:</span>
-								<span th:text="${purchase.status}"></span>
-							</div>
-							<hr th:if="${!purchaseStat.last}">
-						</div>
-					</div>
-
-					<!-- Resumen global de todas las compras -->
-					<div class="total-summary" th:if="${not #lists.isEmpty(purchases) and purchases.size() > 1}">
-						<h5 class="mtext-105 cl2 p-b-10">Resumen total del pedido</h5>
-						<div class="summary-row">
-							<span>Subtotal:</span>
-							<span th:text="${#numbers.formatDecimal(#aggregates.sum(purchases.![price]) / 1.05, 1, 2)}"></span> €
-						</div>
-						<div class="summary-row highlight-fees">
-							<span>Gastos de gestión:</span>
-							<span th:text="${#numbers.formatDecimal(#aggregates.sum(purchases.![price]) / 1.15 * 0.15, 1, 2)}"></span> €
-						</div>
-						<div class="summary-row total">
-							<strong>Total:</strong>
-							<strong th:text="${#numbers.formatDecimal(#aggregates.sum(purchases.![price]), 1, 2)}"></strong> €
-						</div>
-					</div>
 	
-					<form th:action="@{/processMultiplePayment}" method="post">
-						<input type="hidden" name="token" th:value="${token}" />
-						<input type="hidden" name="purchaseIds" th:value="${purchaseIds}" />
-	
-						<div class="p-t-20">
-							<label for="paymentMethod">Selecciona el método de pago:</label>
-							<select name="paymentMethod" id="paymentMethod" class="form-control" onchange="togglePaymentFields(this.value)">
-								<option value="credit_card">Tarjeta de Crédito</option>
-								<option value="paypal">PayPal</option>
-								<option value="bank_transfer">Transferencia Bancaria</option>
-							</select>
-						</div>
-	
-						<div id="creditCardFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
-								<input type="text" id="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
+			<div th:if="${users == null or users.isEmpty()}" class="row isotope-grid" style="justify-content: center;">
+				<p class="stext-107 cl7 size-201 errorMessage txt-center"
+					style="text-align: center; display: block; width: 100%;">
+					No hay usuarios
+				 </p>
+			</div>
+			<div class="m-t-20 row isotope-grid">
+				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women" th:each="user : ${users}">
+					<!-- Block2 -->
+					<div class="block2">
+						<div class="web_ui__Cell__cell web_ui__Cell__tight" role="presentation">
+							<div class="web_ui__Cell__image">
+								<div class="u-flexbox u-align-items-center u-fill-height">
+									<img th:src="${user.profileImage != null} ? @{${profileImageBaseUrl + user.profileImage}} : @{'/images/icons/profile-default.png'}"
+										alt="Imagen de perfil" class="web_ui__Image__content" style="width: 50px; height: 50px; border-radius: 50%;">
+								</div>
 							</div>
-							<div class="m-b-20">
-								<label for="cardExpiry" class="stext-111 cl2 p-b-10">Fecha de expiración</label>
-								<input type="text" id="cardExpiry" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
-							</div>
-							<div class="m-b-20">
-								<label for="cardCVC" class="stext-111 cl2 p-b-10">CVC</label>
-								<input type="text" id="cardCVC" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
+							<div class="web_ui__Cell__content">
+								<div class="web_ui__Cell__body">
+									<a th:href="@{/userProfile/{id}(id=${user.id}, token=${token})}" th:text="${user.username}" class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">
+										Nombre Usuario
+									</a>
+								</div>
 							</div>
 						</div>
-	
-						<div id="paypalFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
-								<input type="email" id="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
-							</div>
-						</div>
-	
-						<div id="bankTransferFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
-								<input type="text" id="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES00 1234 5678 9012 3456">
-							</div>
-							<div class="m-b-20">
-								<label for="bankName" class="stext-111 cl2 p-b-10">Nombre del banco</label>
-								<input type="text" id="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Banco Ejemplo">
-							</div>
-						</div>
-	
-						<div class="txt-center p-t-20">
-							<button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-								Procesar Pagos
-							</button>
-						</div>
-					</form>
-	
-					<div class="txt-center p-t-20">
-						<a href="/allItems" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-							Volver a la tienda
-						</a>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
 
-    <!-- Footer -->
+		</div>
+		<div th:if="${users != null and !users.isEmpty()}" class="pagination-container">
+			<form th:if="${page > 0}" th:action="@{/searchUsers(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page - 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<input type="hidden" name="search_text" th:value="${search_text}">
+				<button class="button-green">Anterior</button>
+			</form>
+
+			<span class="page-info">Página <span th:text="${page + 1}">1</span> de <span th:text="${totalPages}">1</span></span>
+
+			<form th:if="${page < totalPages - 1}" th:action="@{/searchUsers(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page + 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<input type="hidden" name="search_text" th:value="${search_text}">
+				<button class="button-green">Siguiente</button>
+			</form>
+		</div>
+
+	</section>
+	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
 			<div class="row">
@@ -461,23 +387,23 @@
 			<div class="p-t-40">
 				<div class="flex-c-m flex-w p-b-18">
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-01.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-02.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-03.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-04.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-05.png}" alt="ICON-PAY">
 					</a>
 				</div>
 
@@ -495,6 +421,7 @@
 		</div>
 	</footer>
 
+
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
@@ -503,14 +430,14 @@
 	</div>
 
 	<!--===============================================================================================-->
-	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script th:src="@{/vendor/jquery/jquery-3.2.1.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/bootstrap/js/popper.js"></script>
-	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/select2/select2.min.js"></script>
+	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
 		$(".js-select2").each(function () {
 			$(this).select2({
@@ -520,9 +447,9 @@
 		})
 	</script>
 	<!--===============================================================================================-->
-	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}" ></script>
 	<!--===============================================================================================-->
-	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -539,10 +466,10 @@
 		});
 	</script>
 	<!--===============================================================================================-->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
-	<script src="js/map-custom.js"></script>
+	<script  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
+	<script th:src="@{/js/map-custom.js}" ></script>
 	<!--===============================================================================================-->
-	<script src="js/main.js"></script>
+	<script th:src="@{/js/main.js}"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
         const userMenuToggle = document.querySelector(".user-menu-toggle");
@@ -561,30 +488,18 @@
     });
 	</script>
 	<script>
-		function togglePaymentFields(paymentMethod) {
-			const creditCardFields = document.getElementById("creditCardFields");
-			const paypalFields = document.getElementById("paypalFields");
-			const bankTransferFields = document.getElementById("bankTransferFields");
-
-			creditCardFields.style.display = "none";
-			paypalFields.style.display = "none";
-			bankTransferFields.style.display = "none";
-
-			if (paymentMethod === "credit_card") {
-				creditCardFields.style.display = "block";
-			} else if (paymentMethod === "paypal") {
-				paypalFields.style.display = "block";
-			} else if (paymentMethod === "bank_transfer") {
-				bankTransferFields.style.display = "block";
-			}
-		}
-	</script>
-
-	<script>
-		// Auto-mostrar los campos adecuados según el método de pago seleccionado por defecto
-		document.addEventListener("DOMContentLoaded", function() {
-			const paymentMethod = document.getElementById("paymentMethod").value;
-			togglePaymentFields(paymentMethod);
+		document.getElementById("closet-tab").addEventListener("click", function () {
+			document.getElementById("closet-content").style.display = "block";
+			document.getElementById("feedback-content").style.display = "none";
+			this.classList.add("web_ui__Tabs__is-active");
+			document.getElementById("feedback-tab").classList.remove("web_ui__Tabs__is-active");
+		});
+	
+		document.getElementById("feedback-tab").addEventListener("click", function () {
+			document.getElementById("closet-content").style.display = "none";
+			document.getElementById("feedback-content").style.display = "block";
+			this.classList.add("web_ui__Tabs__is-active");
+			document.getElementById("closet-tab").classList.remove("web_ui__Tabs__is-active");
 		});
 	</script>
 
@@ -623,4 +538,5 @@
 	</script>
 
 </body>
+
 </html>

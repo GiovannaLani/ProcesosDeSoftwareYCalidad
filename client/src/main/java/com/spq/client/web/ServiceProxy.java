@@ -855,6 +855,34 @@ public class ServiceProxy implements IVintedServiceProxy {
 			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Offer>>() {}).getBody();
 
 	}
+
+	@Override
+	public PaginatedResponse<User> searchUsers(Long token, String search, int page)
+	{
+		try {
+			String url = apiBaseUrl + "/users/searchUsers?page=" + page;
+			if (search != null) {
+				url += "&search_text=" + search;
+			}
+			if (token != null) {
+				url += "&token=" + token;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
+	}
 }
 	
 

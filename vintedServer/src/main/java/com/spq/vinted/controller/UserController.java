@@ -1,7 +1,9 @@
 package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.EditUserDTO;
+import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.LoginDTO;
+import com.spq.vinted.dto.PaginatedResponseDTO;
 import com.spq.vinted.dto.RatingDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -319,5 +322,25 @@ public class UserController {
 					.body(null);
 		}
 	}
-
+	
+	@GetMapping("/searchUsers")
+    public ResponseEntity<PaginatedResponseDTO<UserDTO>> searchUsers(
+        @RequestParam(value = "token", required = false) Long token,
+        @RequestParam(value = "search_text",required = false) String query,
+        @RequestParam(value = "page", defaultValue = "0") int page) {
+        try {
+            Page<User> users = userService.searchUsers(token, query, page);
+            List<UserDTO> usersDTOs = users.getContent().stream()
+				.map(user -> user.toDTO())
+				.collect(Collectors.toList());
+            PaginatedResponseDTO<UserDTO> result = new PaginatedResponseDTO<>(
+                usersDTOs,
+                users.getNumber(),
+                users.getTotalPages()
+            );
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

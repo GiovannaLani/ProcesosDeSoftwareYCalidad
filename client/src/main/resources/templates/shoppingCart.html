@@ -97,6 +97,7 @@
 											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
 												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
 												aria-labelledby="search-item" name="username" required>
+
 										</div>
 					
 										<div class="web_ui__InputBar__suffix"></div>
@@ -104,7 +105,7 @@
 								</div>
 								<input type="hidden" name="token" th:value="${token}">
 								<input type="hidden" name="type" th:value="${type}">
-								<input type="hidden" name="page" th:value="${0}">
+								<input id="page_text" type="hidden" name="page" th:value="${0}">
 								<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							</form>
 						</div>
@@ -505,11 +506,13 @@
 		const searchForm = document.getElementById("search-form");
 		const searchType = document.getElementById("search-type");
 		const searchText = document.getElementById("search_text");
-	
+		const pageText = document.getElementById("page_text");
+
 		function updateFormBeforeSubmit() {
 			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
+				searchForm.action = "/searchUsers";
 				searchText.name = "username"; 
+				pageText.name = "page"; 
 			} else {
 				searchForm.action = "/search";
 				searchText.name = "search_text";
