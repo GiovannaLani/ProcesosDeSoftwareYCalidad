@@ -205,11 +205,14 @@ public class ClientController {
 			Item item = vintedService.getItemById(id);
 			Long sellerId = vintedService.getSeller(item).id();
 			User seller = vintedService.getSeller(item);
+			List<Item> recommendedItems = vintedService.getRecommendedItems(id, token);
 
 			model.addAttribute("item", item);
 			model.addAttribute("sellerId", sellerId);
 			model.addAttribute("seller", seller);
+			model.addAttribute("recommendedItems", recommendedItems);
 			model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
+			model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
 
 			return "product-details"; 
 		} catch (RuntimeException e) {

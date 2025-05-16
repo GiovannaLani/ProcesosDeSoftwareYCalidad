@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -412,6 +413,22 @@ public class ItemController {
             return ResponseEntity.ok(itemDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/productDetails/{id}")
+    public ResponseEntity<?> getProductDetails(@PathVariable Long id, @RequestParam String token) {
+        try {
+            Item item = itemService.getItemById(id);
+            List<Item> recommendedItems = itemService.getRecommendedProducts(item);
+
+            return ResponseEntity.ok(Map.of(
+                "item", item.toDTO(),
+                "recommendedItems", recommendedItems.stream().map(Item::toDTO).collect(Collectors.toList())
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los detalles del producto");
         }
     }
 

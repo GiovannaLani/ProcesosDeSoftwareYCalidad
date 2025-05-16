@@ -393,6 +393,44 @@ public class ItemService {
         System.out.println("2"+items);
         return items;
     }
+
+    public List<Item> getRecommendedProducts(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo");
+        }
+
+        return itemRepository.findAll().stream()
+                .filter(i -> i.getId() != item.getId()) // Excluir el producto actual
+                .filter(i -> i.getClass().equals(item.getClass())) // Coincidir por subclase (Clothes, Electronics, etc.)
+                .filter(i -> {
+                    if (i instanceof Clothes && item instanceof Clothes) {
+                        Clothes clothesItem = (Clothes) i;
+                        Clothes currentClothes = (Clothes) item;
+                        return clothesItem.getCategory().equals(currentClothes.getCategory()) &&
+                            clothesItem.getClothesType().equals(currentClothes.getClothesType());
+                    } else if (i instanceof Electronics && item instanceof Electronics) {
+                        Electronics electronicsItem = (Electronics) i;
+                        Electronics currentElectronics = (Electronics) item;
+                        return electronicsItem.getElectronicsType().equals(currentElectronics.getElectronicsType());
+                    } else if (i instanceof Pet && item instanceof Pet) {
+                        Pet petItem = (Pet) i;
+                        Pet currentPet = (Pet) item;
+                        return petItem.getSpecies().equals(currentPet.getSpecies());
+                    } else if (i instanceof Entertainment && item instanceof Entertainment) {
+                        Entertainment entertainmentItem = (Entertainment) i;
+                        Entertainment currentEntertainment = (Entertainment) item;
+                        return entertainmentItem.getEntertainmentType().equals(currentEntertainment.getEntertainmentType());
+                    } else if (i instanceof Home && item instanceof Home) {
+                        Home homeItem = (Home) i;
+                        Home currentHome = (Home) item;
+                        return homeItem.getHomeType().equals(currentHome.getHomeType());
+                    }
+                    return false;
+                })
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
 }
 
 

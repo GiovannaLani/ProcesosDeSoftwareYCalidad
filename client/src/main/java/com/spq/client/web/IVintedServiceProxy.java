@@ -76,4 +76,5 @@ public interface IVintedServiceProxy {
 	public List<Rating> getRatingsForUser(long userId);
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
+	public List<Item> getRecommendedItems(Long itemId, Long token);
 }
