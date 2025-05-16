@@ -803,8 +803,13 @@ public class ServiceProxy implements IVintedServiceProxy {
 	public List<Item> getRecommendedItems(Long itemId, Long token) {
 		try {
 			String url = apiBaseUrl + "/items/productDetails/" + itemId + "?token=" + token;
-			ResponseEntity<Item[]> response = restTemplate.getForEntity(url, Item[].class);
-			return Arrays.asList(response.getBody());
+			ResponseEntity<List<Item>> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<List<Item>>() {}
+			);
+			return response.getBody();
 		} catch (Exception e) {
 			System.err.println("Error al obtener productos recomendados: " + e.getMessage());
 			return List.of();

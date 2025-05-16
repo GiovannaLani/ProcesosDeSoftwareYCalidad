@@ -398,10 +398,10 @@ public class ItemService {
         if (item == null) {
             throw new IllegalArgumentException("El producto no puede ser nulo");
         }
-
+        System.out.println("caracola3");
         return itemRepository.findAll().stream()
-                .filter(i -> i.getId() != item.getId()) // Excluir el producto actual
-                .filter(i -> i.getClass().equals(item.getClass())) // Coincidir por subclase (Clothes, Electronics, etc.)
+                .filter(i -> i.getId() != item.getId())
+                .filter(i -> i.getClass().equals(item.getClass()))
                 .filter(i -> {
                     if (i instanceof Clothes && item instanceof Clothes) {
                         Clothes clothesItem = (Clothes) i;

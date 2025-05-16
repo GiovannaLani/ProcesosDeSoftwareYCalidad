@@ -417,18 +417,20 @@ public class ItemController {
     }
 
     @GetMapping("/productDetails/{id}")
-    public ResponseEntity<?> getProductDetails(@PathVariable Long id, @RequestParam String token) {
+    public ResponseEntity<List<ItemDTO>> getProductDetails(@PathVariable Long id, @RequestParam String token) {
+        System.out.println("caracola");
         try {
             Item item = itemService.getItemById(id);
             List<Item> recommendedItems = itemService.getRecommendedProducts(item);
-
-            return ResponseEntity.ok(Map.of(
-                "item", item.toDTO(),
-                "recommendedItems", recommendedItems.stream().map(Item::toDTO).collect(Collectors.toList())
-            ));
+            System.out.println("caracola2");
+            System.out.println("Recommended items: " + recommendedItems);
+    
+            return ResponseEntity.ok(
+                recommendedItems.stream().map(Item::toDTO).collect(Collectors.toList())
+            );
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los detalles del producto");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
