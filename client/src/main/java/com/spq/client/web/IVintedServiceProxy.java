@@ -80,4 +80,5 @@ public interface IVintedServiceProxy {
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
 	public PaginatedResponse<User> searchUsers(Long token, String search, int page);
+	public List<Item> getRecommendedItems(Long itemId, Long token);
 }

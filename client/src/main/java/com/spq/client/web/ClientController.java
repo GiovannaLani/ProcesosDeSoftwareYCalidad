@@ -211,21 +211,39 @@ public class ClientController {
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
+			if (token == null) {
+				model.addAttribute("errorMessage", "El token es obligatorio para acceder a esta página.");
+				return "error";
+			}
+	
 			Item item = vintedService.getItemById(id);
-			Long sellerId = vintedService.getSeller(item).id();
+			if (item == null) {
+				model.addAttribute("errorMessage", "El producto no existe.");
+				return "error";
+			}
+	
 			User seller = vintedService.getSeller(item);
-
+			if (seller == null) {
+				model.addAttribute("errorMessage", "El vendedor no existe.");
+				return "error";
+			}
+			Long sellerId = seller.id();
+	
+			List<Item> recommendedItems = vintedService.getRecommendedItems(id, token);
+			System.out.println("Recommended items: " + recommendedItems);
 			model.addAttribute("item", item);
 			model.addAttribute("sellerId", sellerId);
 			model.addAttribute("seller", seller);
-			model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
-
-			return "product-details"; 
+			model.addAttribute("recommendedItems", recommendedItems);
+			model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
+	
+			return "product-details";
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
+			model.addAttribute("errorMessage", "No se pudo cargar el producto.");
+			return "allItems";
 		}
-		return null;
 	}
 
 	@GetMapping("/clothes")
