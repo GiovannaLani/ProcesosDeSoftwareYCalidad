@@ -1296,14 +1296,18 @@ public class ClientController {
 			RedirectAttributes redirectAttributes,
 			Model model) {
 
-		if (redirectUrl == null) {
-			redirectUrl = "/";
+		if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
+			redirectUrl = "/uploadAd?token=" + token;
+		} else if (!redirectUrl.contains("token=")) {
+			if (redirectUrl.contains("?")) {
+				redirectUrl += "&token=" + token;
+			} else {
+				redirectUrl += "?token=" + token;
+			}
 		}
 
 		try {
-			if (token != null) {
-				redirectUrl += "?token=" + token;
-			}
+
 			model.addAttribute("redirectUrl", redirectUrl);
 
 			
@@ -1314,7 +1318,7 @@ public class ClientController {
 			}
 
 			redirectAttributes.addFlashAttribute("successMessage", "Anuncio creado correctamente.");
-			return "uploadAd";
+			return "redirect:" + redirectUrl;
 		} catch (RuntimeException e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el anuncio.");
 			return "redirect:" + redirectUrl;
