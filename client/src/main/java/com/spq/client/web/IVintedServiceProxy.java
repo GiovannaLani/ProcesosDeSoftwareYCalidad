@@ -7,6 +7,7 @@ import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.Shipment;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
@@ -57,7 +58,7 @@ public interface IVintedServiceProxy {
 	public List<Item> getUserItems(Long userId);
 	public User getSeller(Item item);
 	public void deletePurchase(Long token, Long purchaseId);
-	public void deleteItem(Long token, Long itemId);
+	//public void deleteItem(Long token, Long itemId);
 	public void followUser(Long token, Long targetUserId);
 	public void unfollowUser(Long token, Long targetUserId);
 	public List<User> getFollowers(Long targetUserId);
@@ -77,4 +78,5 @@ public interface IVintedServiceProxy {
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
 	public List<Item> getRecommendedItems(Long itemId, Long token);
+    public List<Shipment> getShipmentsByBuyerId(Long token, Long buyerId);
 }

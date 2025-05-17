@@ -20,6 +20,7 @@ import com.spq.client.data.Offer;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.Shipment;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -823,11 +824,10 @@ public class ClientController {
 				redirectAttributes.addFlashAttribute("errorMessage", "La compra ya ha sido procesada.");
 				return "redirect:/login";
 			}
-	
 			boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
 			if (paymentSuccess) {
 				try {
-					vintedService.deleteItem(token, purchase.itemId());
+					//vintedService.deleteItem(token, purchase.itemId());
 					redirectAttributes.addFlashAttribute("successMessage", "Pago realizado con éxito. El artículo ha sido eliminado.");
 				} catch (RuntimeException e) {
 					redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado con éxito, pero no se pudo eliminar el artículo.");
@@ -854,16 +854,17 @@ public class ClientController {
 			List<Long> purchaseIdList = Arrays.stream(purchaseIds.split(","))
 					.map(Long::valueOf)
 					.collect(Collectors.toList());
-		
 			boolean allPaymentsSuccessful = true;
 	
 			for (Long purchaseId : purchaseIdList) {
+				System.out.println("Processing payment for purchase ID: " + purchaseId);
 				boolean paymentSuccess = vintedService.processPayment(purchaseId, paymentMethod, token);
+				System.out.println("Payment success: " + paymentSuccess);
 				if (paymentSuccess) {
 					try {
 						Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 						if (purchase != null) {
-							vintedService.deleteItem(token, purchase.itemId());
+							//vintedService.deleteItem(token, purchase.itemId());
 						}
 					} catch (RuntimeException e) {
 						redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado, pero no se pudo eliminar un artículo.");
@@ -1241,4 +1242,22 @@ public class ClientController {
 		}
 	}
 
+	
+@GetMapping("/shipments/{buyerId}")
+    public String getShipmentsByBuyerId(
+     @PathVariable Long buyerId, 
+     @RequestParam("token") Long token,
+     Model model) {
+    
+    	try {
+        	List<Shipment> shipments = vintedService.getShipmentsByBuyerId(buyerId, token);
+			System.out.println("Shipments: " + shipments);
+        	model.addAttribute("shipments", shipments);
+        	return "shipments";
+    	} catch (Exception e) {
+        	model.addAttribute("error", "Error al cargar envíos: " + e.getMessage());
+        	e.printStackTrace();
+        	return "redirect:/allItems";
+    	}
+    }
 }

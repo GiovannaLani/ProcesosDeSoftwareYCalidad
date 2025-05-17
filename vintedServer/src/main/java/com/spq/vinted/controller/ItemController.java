@@ -382,24 +382,24 @@ public class ItemController {
         }
     }
 
-    @DeleteMapping("/delete/{itemId}")
-    public ResponseEntity<Void> deleteItem(@RequestParam("token") long token, @PathVariable long itemId) {
-        try {
-            System.out.println("Deleting item with ID: " + itemId);
-            itemService.deleteItem(token, itemId);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+    // @DeleteMapping("/delete/{itemId}")
+    // public ResponseEntity<Void> deleteItem(@RequestParam("token") long token, @PathVariable long itemId) {
+    //     try {
+    //         System.out.println("Deleting item with ID: " + itemId);
+    //         itemService.deleteItem(token, itemId);
+    //         return ResponseEntity.noContent().build();
+    //     } catch (RuntimeException e) {
+    //         System.err.println("Error: " + e.getMessage());
+    //         e.printStackTrace();
 
-            if ("Item not found".equals(e.getMessage())) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if ("Not authorized".equals(e.getMessage())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    //         if ("Item not found".equals(e.getMessage())) {
+    //             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    //         } else if ("Not authorized".equals(e.getMessage())) {
+    //             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    //         }
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    //     }
+    // }
 
     @GetMapping("/search")
     public ResponseEntity<List<ItemDTO>> searchItems(

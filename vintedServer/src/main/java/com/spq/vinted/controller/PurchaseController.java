@@ -1,7 +1,12 @@
 package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.PurchaseDTO;
+import com.spq.vinted.model.ShipmentStatus;
+import com.spq.vinted.model.User;
 import com.spq.vinted.service.PurchaseService;
+import com.spq.vinted.service.ShipmentService;
+import com.spq.vinted.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,10 @@ public class PurchaseController {
 
     @Autowired
     private PurchaseService purchaseService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ShipmentService shipmentService;
 
     @PostMapping("/create")
     public ResponseEntity<PurchaseDTO> createPurchase(@RequestParam long token, @RequestBody PurchaseDTO purchase) {
@@ -44,6 +53,8 @@ public class PurchaseController {
         boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);
         Map<String, String> response = new HashMap<>();
         if (success) {
+            System.out.println("Purchase IDs: " + purchaseId);
+            shipmentService.createShipment(purchaseId, ShipmentStatus.SHIPPED, token);
             response.put("status", "success");
             response.put("message", "Payment successful.");
             return ResponseEntity.ok(response);
@@ -64,14 +75,16 @@ public class PurchaseController {
     
         for (Long purchaseId : purchaseIds) {
             boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);
+            System.out.println("Purchase ID: " + purchaseId + ", Payment Method: " + paymentMethod + ", Success: " + success);
             if (!success) {
+                System.out.println("Payment failed for purchase ID: " + purchaseId);
                 allPaymentsSuccessful = false;
                 response.put("status", "error");
                 response.put("message", "Payment failed for purchase ID " + purchaseId);
                 return ResponseEntity.badRequest().body(response);
             }
         }
-    
+        System.out.println("All payments processed successfully." + allPaymentsSuccessful);
         if (allPaymentsSuccessful) {
             response.put("status", "success");
             response.put("message", "All payments processed successfully.");

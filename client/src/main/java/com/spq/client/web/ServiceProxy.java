@@ -28,6 +28,7 @@ import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.Shipment;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
@@ -244,6 +245,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public boolean processPayment(long purchaseId, String paymentMethod, long token) {
 		String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
+		System.out.println("URLNo: " + url);
 		try {
 			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
 			System.out.println("Server response: " + response);
@@ -266,7 +268,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 				.queryParam("paymentMethod", paymentMethod)
 				.queryParam("purchaseIds", purchaseIds.toArray())
 				.toUriString();
-	
+		System.out.println("URL: " + url);
 		try {
 			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
 			System.out.println("Server response: " + response);
@@ -283,20 +285,20 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
-	@Override
-	public void deleteItem(Long token, Long itemId) {
-		try {
-			System.out.println("borrar" + itemId);
-			String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
-			restTemplate.delete(url);
-		} catch (HttpStatusCodeException e) {
-			switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("Item not found");
-				case 403 -> throw new RuntimeException("Not authorized to delete this item");
-				default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
-			}
-		}
-	}
+	// @Override
+	// public void deleteItem(Long token, Long itemId) {
+	// 	try {
+	// 		System.out.println("borrar" + itemId);
+	// 		String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
+	// 		restTemplate.delete(url);
+	// 	} catch (HttpStatusCodeException e) {
+	// 		switch (e.getStatusCode().value()) {
+	// 			case 404 -> throw new RuntimeException("Item not found");
+	// 			case 403 -> throw new RuntimeException("Not authorized to delete this item");
+	// 			default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
+	// 		}
+	// 	}
+	// }
 
 	public void deleteUser(long token) {
 		try {
@@ -815,6 +817,20 @@ public class ServiceProxy implements IVintedServiceProxy {
 			return List.of();
 		}
 	}
+
+    @Override
+    public List<Shipment> getShipmentsByBuyerId(Long buyerId, Long token) {
+     String url = apiBaseUrl + "/shipments/" + buyerId + "?token=" + token;
+     try {
+         System.out.println("URL: " + url);
+         return restTemplate.exchange(url, HttpMethod.GET, null,new ParameterizedTypeReference<List<Shipment>>() {}).getBody();
+     } catch (HttpStatusCodeException e) {
+         switch (e.getStatusCode().value()) {
+             case 404 -> throw new RuntimeException("Buyer not found");
+             default -> throw new RuntimeException("Failed to fetch shipments: " + e.getStatusText());
+         }
+     }
+    }
 
 }
 	

@@ -139,6 +139,7 @@
 							<div class="account-dropdown-menu">
 								<ul>
 									<li><a th:href="@{/userProfile/{id}(id=${loggedUserId}, token=${token})}">Mi Perfil</a></li>
+									<li><a th:href="@{/shipments/{id}(id=${loggedUserId}, token=${token})}">Pedidos</a></li>
 									<li><a th:href="@{/logout(token=${token})}">Cerrar Sesión</a></li>
 								</ul>
 							</div>
