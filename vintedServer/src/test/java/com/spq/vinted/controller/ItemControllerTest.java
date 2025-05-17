@@ -6,7 +6,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -974,4 +978,58 @@ void testSearchItems_Success() throws Exception {
                 }))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    void getProductDetails_ReturnsRecommendedItems() {
+        Long itemId = 1L;
+        String token = "token";
+        Item item = new Clothes();
+        item.setId(itemId);
+
+        Item recommended = new Clothes();
+        recommended.setId(2L);
+
+        List<Item> recommendedList = List.of(recommended);
+
+        when(itemService.getItemById(itemId)).thenReturn(item);
+        when(itemService.getRecommendedProducts(item)).thenReturn(recommendedList);
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(recommended.getId(), response.getBody().get(0).getId());
+    }
+
+    @Test
+    void getProductDetails_NoRecommendedItems_ReturnsEmptyList() {
+        Long itemId = 1L;
+        String token = "token";
+        Item item = new Clothes();
+        item.setId(itemId);
+
+        when(itemService.getItemById(itemId)).thenReturn(item);
+        when(itemService.getRecommendedProducts(item)).thenReturn(List.of());
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    void getProductDetails_ItemServiceThrowsException_Returns500() {
+        Long itemId = 1L;
+        String token = "token";
+
+        when(itemService.getItemById(itemId)).thenThrow(new RuntimeException("Error"));
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(500, response.getStatusCodeValue());
+        assertNull(response.getBody());
+    }
+
 }

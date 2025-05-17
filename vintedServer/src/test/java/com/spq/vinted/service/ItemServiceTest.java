@@ -1223,4 +1223,88 @@ void testGetItems_WithTokenAndType() {
     assertEquals("Sofa", result.getContent().get(0).getTitle());
 }
 
+@Test
+void testGetRecommendedProducts() {
+    Clothes baseItem = new Clothes();
+    baseItem.setId(1L);
+    baseItem.setCategory(Category.MAN);
+    baseItem.setClothesType(ClothesType.TSHIRT);
+
+    Clothes recommended1 = new Clothes();
+    recommended1.setId(2L);
+    recommended1.setCategory(Category.MAN);
+    recommended1.setClothesType(ClothesType.TSHIRT);
+
+    Clothes notRecommended1 = new Clothes();
+    notRecommended1.setId(3L);
+    notRecommended1.setCategory(Category.WOMAN);
+    notRecommended1.setClothesType(ClothesType.TSHIRT);
+
+    Clothes notRecommended2 = new Clothes();
+    notRecommended2.setId(4L);
+    notRecommended2.setCategory(Category.MAN);
+    notRecommended2.setClothesType(ClothesType.JACKET);
+
+    Electronics electronics = new Electronics();
+    electronics.setId(5L);
+
+    List<Item> allItems = List.of(baseItem, recommended1, notRecommended1, notRecommended2, electronics);
+
+    when(itemRepository.findAll()).thenReturn(allItems);
+
+    List<Item> result = itemService.getRecommendedProducts(baseItem);
+
+    assertEquals(1, result.size());
+    assertTrue(result.contains(recommended1));
+    assertFalse(result.contains(baseItem));
+    assertFalse(result.contains(notRecommended1));
+    assertFalse(result.contains(notRecommended2));
+    assertFalse(result.contains(electronics));
+}
+
+@Test
+void testGetRecommendedProducts_EmptyList() {
+    Clothes baseItem = new Clothes();
+    baseItem.setId(1L);
+    baseItem.setCategory(Category.MAN);
+    baseItem.setClothesType(ClothesType.TSHIRT);
+
+    when(itemRepository.findAll()).thenReturn(List.of());
+
+    List<Item> result = itemService.getRecommendedProducts(baseItem);
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty(), "La lista de recomendados debe estar vacía si no hay ítems");
+}
+
+@Test
+void testGetRecommendedProducts_NullItem() {
+    assertThrows(IllegalArgumentException.class, () -> itemService.getRecommendedProducts(null));
+}
+
+@Test
+void testGetRecommendedProducts_LimitFive() {
+    Clothes baseItem = new Clothes();
+    baseItem.setId(1L);
+    baseItem.setCategory(Category.MAN);
+    baseItem.setClothesType(ClothesType.TSHIRT);
+
+    List<Item> allItems = new ArrayList<>();
+    allItems.add(baseItem);
+    for (long i = 2; i <= 11; i++) {
+        Clothes rec = new Clothes();
+        rec.setId(i);
+        rec.setCategory(Category.MAN);
+        rec.setClothesType(ClothesType.TSHIRT);
+        allItems.add(rec);
+    }
+
+    when(itemRepository.findAll()).thenReturn(allItems);
+
+    List<Item> result = itemService.getRecommendedProducts(baseItem);
+
+    assertEquals(5, result.size(), "Debe devolver como máximo 5 recomendados");
+    assertFalse(result.contains(baseItem));
+}
+
 }
