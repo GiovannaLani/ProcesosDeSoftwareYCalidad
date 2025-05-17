@@ -21,6 +21,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.InheritanceType;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -71,6 +72,12 @@ public abstract class Item {
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
+    @OneToOne(optional = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "shipment_id")
+    private Shipment shipment;
+
+    private boolean isSold = false;
+
     public Item() {
     }
     
@@ -79,6 +86,7 @@ public abstract class Item {
         this.description = description;
         this.price = price;
         this.seller = seller;
+        this.isSold = false;
     }
 
     public long getId() {
@@ -130,6 +138,14 @@ public abstract class Item {
     }
     public List<User> getUsersWithItemInCart() {
         return usersWithItemInCart;
+    }
+
+    public boolean getIsSold() {
+        return isSold;
+    }
+
+    public void setIsSold(boolean isSold) {
+        this.isSold = isSold;
     }
 
     public void setUsersWithItemInCart(List<User> usersWithItemInCart) {

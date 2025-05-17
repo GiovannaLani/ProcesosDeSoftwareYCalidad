@@ -31,8 +31,10 @@ import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.Shipment;
 import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoom;
@@ -286,6 +288,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 	@Override
 	public boolean processPayment(long purchaseId, String paymentMethod, long token) {
 		String url = apiBaseUrl + "/purchases/pay?purchaseId=" + purchaseId + "&paymentMethod=" + paymentMethod + "&token=" + token;
+		System.out.println("URLNo: " + url);
 		try {
 			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
 			System.out.println("Server response: " + response);
@@ -308,7 +311,7 @@ public class ServiceProxy implements IVintedServiceProxy {
 				.queryParam("paymentMethod", paymentMethod)
 				.queryParam("purchaseIds", purchaseIds.toArray())
 				.toUriString();
-	
+		System.out.println("URL: " + url);
 		try {
 			Map<String, String> response = restTemplate.postForObject(url, null, Map.class);
 			System.out.println("Server response: " + response);
@@ -325,20 +328,20 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
-	@Override
-	public void deleteItem(Long token, Long itemId) {
-		try {
-			System.out.println("borrar" + itemId);
-			String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
-			restTemplate.delete(url);
-		} catch (HttpStatusCodeException e) {
-			switch (e.getStatusCode().value()) {
-				case 404 -> throw new RuntimeException("Item not found");
-				case 403 -> throw new RuntimeException("Not authorized to delete this item");
-				default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
-			}
-		}
-	}
+	// @Override
+	// public void deleteItem(Long token, Long itemId) {
+	// 	try {
+	// 		System.out.println("borrar" + itemId);
+	// 		String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
+	// 		restTemplate.delete(url);
+	// 	} catch (HttpStatusCodeException e) {
+	// 		switch (e.getStatusCode().value()) {
+	// 			case 404 -> throw new RuntimeException("Item not found");
+	// 			case 403 -> throw new RuntimeException("Not authorized to delete this item");
+	// 			default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
+	// 		}
+	// 	}
+	// }
 
 	public void deleteUser(long token) {
 		try {
@@ -903,6 +906,80 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
+    @Override
+    public List<Shipment> getShipmentsByBuyerId(Long buyerId, Long token) {
+     String url = apiBaseUrl + "/shipments/" + buyerId + "?token=" + token;
+     try {
+         System.out.println("URL: " + url);
+         return restTemplate.exchange(url, HttpMethod.GET, null,new ParameterizedTypeReference<List<Shipment>>() {}).getBody();
+     } catch (HttpStatusCodeException e) {
+         switch (e.getStatusCode().value()) {
+             case 404 -> throw new RuntimeException("Buyer not found");
+             default -> throw new RuntimeException("Failed to fetch shipments: " + e.getStatusText());
+         }
+     }
+    }
+
+	public List<Ad> getAllAds() {
+		try {
+			String url = apiBaseUrl + "/ads";
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Ad>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ads: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public Ad getAdById(Long token, Long id) {
+		try {
+			String url = apiBaseUrl + "/ads/" + id;
+			return restTemplate.getForObject(url, Ad.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ad: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public long uploadAdData(Long token, String title, String description) {
+		String url = apiBaseUrl + "/ads/adData?token=" + token;
+		Ad ad = new Ad(title, description);
+		try {
+			Long adId = restTemplate.postForObject(url, ad, Long.class);
+			if (adId == null) {
+				throw new RuntimeException("Failed to get ad ID");
+			}
+			return adId;
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad: " + e.getStatusText());
+		}
+	}
+
+	@Override
+	public void uploadAdImage(Long adId, MultipartFile image) {
+		try {
+			String url = apiBaseUrl + "/ads/adImage?adId=" + adId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("image", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad image: " + e.getStatusText());
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+
+	@Override
+	public void uploadAd(Long token, String title, String description, MultipartFile image) {
+		long adId = uploadAdData(token, title, description);
+		uploadAdImage(adId, image);
+	}
+	
 }
 	
 

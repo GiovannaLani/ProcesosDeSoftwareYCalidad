@@ -303,35 +303,35 @@ public class ItemService {
         return user.getItemsForSale();
     }
 
-    @Transactional
-    public void deleteItem(long token, long itemId) {
-        User user = userService.getUserByToken(token);
-        if (user == null) {
-            throw new RuntimeException("Not authorized");
-        }
+    // @Transactional
+    // public void deleteItem(long token, long itemId) {
+    //     User user = userService.getUserByToken(token);
+    //     if (user == null) {
+    //         throw new RuntimeException("Not authorized");
+    //     }
 
-        Item item = getItemById(itemId);
-        if (item == null) {
-            throw new RuntimeException("Item not found");
-        }
+    //     Item item = getItemById(itemId);
+    //     if (item == null) {
+    //         throw new RuntimeException("Item not found");
+    //     }
 
-        for (User u : item.getUsersWithItemInCart()) {
-            u.getCartItems().remove(item);
-            userRepository.save(u);
-        }
-        item.getUsersWithItemInCart().clear();
+    //     for (User u : item.getUsersWithItemInCart()) {
+    //         u.getCartItems().remove(item);
+    //         userRepository.save(u);
+    //     }
+    //     item.getUsersWithItemInCart().clear();
 
-        for (User u : item.getUsersWithItemInWishlist()) {
-            u.getWishlistItems().remove(item);
-            userRepository.save(u);
-        }
-        item.getUsersWithItemInWishlist().clear();
+    //     for (User u : item.getUsersWithItemInWishlist()) {
+    //         u.getWishlistItems().remove(item);
+    //         userRepository.save(u);
+    //     }
+    //     item.getUsersWithItemInWishlist().clear();
 
-        itemRepository.save(item);
-        itemRepository.delete(item);
+    //     itemRepository.save(item);
+    //     itemRepository.delete(item);
 
-        System.out.println("Item borrado correctamente.");
-    }
+    //     System.out.println("Item borrado correctamente.");
+    // }
     
     public static ItemDTO getDTOById(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found with id: " + itemId));

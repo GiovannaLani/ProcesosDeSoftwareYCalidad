@@ -1,15 +1,23 @@
 package com.spq.vinted.service;
 
 import com.spq.vinted.dto.PurchaseDTO;
+import com.spq.vinted.model.Purchase;
+import com.spq.vinted.model.User;
+
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class PurchaseService {
+    private final UserService userService;
     private final Map<Long, PurchaseDTO> purchases = new HashMap<>();
     private final Map<Long, List<Long>> userPurchases = new HashMap<>();
     private long purchaseCounter = 1;
+
+    public PurchaseService(UserService userService) {
+        this.userService = userService;
+    }
 
     public List<PurchaseDTO> createMultiplePurchases(long token, List<PurchaseDTO> purchases) {
         List<PurchaseDTO> createdPurchases = new ArrayList<>();
@@ -34,6 +42,7 @@ public class PurchaseService {
         if (purchase != null && userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {
             purchase.setPaymentMethod(paymentMethod);
             purchase.setStatus("COMPLETED");
+            purchases.put(purchaseId, purchase);
             return true;
         }
         return false;
@@ -65,4 +74,34 @@ public class PurchaseService {
             throw new RuntimeException("Purchase not found or not authorized.");
         }
     }
+
+    public Purchase fromDTO(PurchaseDTO purchaseDTO, Long token) {
+        User buyer = userService.getUserByUsername(purchaseDTO.getBuyerUsername(),token);
+        User seller = userService.getUserByUsername(purchaseDTO.getSellerUsername(),token);
+        Purchase purchase = new Purchase();
+        purchase.setId(purchaseDTO.getId());
+        purchase.setItemId(purchaseDTO.getItemId());
+        purchase.setStatus(purchaseDTO.getStatus());
+        purchase.setBuyer(buyer);
+        purchase.setSeller(seller);
+        purchase.setPrice(purchaseDTO.getPrice());
+        purchase.setPaymentMethod(purchaseDTO.getPaymentMethod());
+        return purchase;
+    }
+
+    // public List<PurchaseDTO> convertToDTO(List<Purchase> purchases) {
+    //     List<PurchaseDTO> purchaseDTOs = new ArrayList<>();
+    //     for (Purchase purchase : purchases) {
+    //         PurchaseDTO dto = new PurchaseDTO();
+    //         dto.setId(purchase.getId());
+    //         dto.setItemId(purchase.getItemId());
+    //         dto.setBuyerUsername(purchase.getBuyer().getUsername());
+    //         dto.setSellerUsername(purchase.getSeller().getUsername());
+    //         dto.setStatus(purchase.getStatus());
+    //         dto.setPaymentMethod(purchase.getPaymentMethod());
+    //         purchaseDTOs.add(dto);
+    //     }
+    //     return purchaseDTOs;
+    // }
+
 }

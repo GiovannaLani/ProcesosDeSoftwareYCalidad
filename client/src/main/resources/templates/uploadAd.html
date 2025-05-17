@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Log in</title>
+    <title>Register</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -67,7 +67,8 @@
 
 					<!-- Menu desktop -->
 
-					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
+					<div
+						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
 							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
@@ -75,7 +76,7 @@
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
 													</select>
@@ -83,7 +84,6 @@
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
-					
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
 												<div class="u-flexbox u-align-items-center">
@@ -97,16 +97,11 @@
 											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
 												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
 												aria-labelledby="search-item" name="username" required>
-
 										</div>
-					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
 								<input type="hidden" name="token" th:value="${token}">
-								<input type="hidden" name="type" th:value="${type}">
-								<input id="page_text" type="hidden" name="page" th:value="${0}">
-								<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							</form>
 						</div>
 					</div>
@@ -139,18 +134,17 @@
 							<div class="account-dropdown-menu">
 								<ul>
 									<li><a th:href="@{/userProfile/{id}(id=${loggedUserId}, token=${token})}">Mi Perfil</a></li>
-									<li><a th:href="@{/shipments/{id}(id=${loggedUserId}, token=${token})}">Pedidos</a></li>
 									<li><a th:href="@{/logout(token=${token})}">Cerrar Sesión</a></li>
 								</ul>
 							</div>
 						</div>
-						
 						<form th:unless="${token}" th:action="@{/login}" method="get">
 							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							<button  class="button-white">
 								Regístrate | Inicia sesión
 							</button>
 						</form>
+						
 						<form th:action="@{/uploadItem(token=${token}, redirectUrl=${currentUrl})}" method="get">
 							<input type="hidden" name="token" th:value="${token}">
 							<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
@@ -174,7 +168,7 @@
 							</li>
 
 							<li>
-								<a th:href="@{/allItems(token=${token}, type='Clothes')}">Ropa</a>
+								<a th:href="@{/clothes(token=${token})}">Ropa</a>
 							</li>
 
 							<li>
@@ -194,17 +188,17 @@
 							</li>
 
 							<li>
-								<a th:href="@{/allItems(token=${token}, type='Home')}">Hogar</a>
+								<a th:href="@{/home(token=${token})}">Hogar</a>
 							</li>
 
 							<li>
-								<a th:href="@{/allItems(token=${token}, type='Electronics')}">Electrónica</a>
+								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
 							</li>
 							<li>
-								<a th:href="@{/allItems(token=${token}, type='Entertainment')}">Entretenimiento</a>
+								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
 							</li>
 							<li>
-								<a th:href="@{/allItems(token=${token}, type='Pet')}">Mascotas</a>
+								<a th:href="@{/pet(token=${token})}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -216,194 +210,44 @@
 	</header>
 
 
-	<!-- Product Detail -->
-	<section class="sec-product-detail bg0 p-t-104 p-b-116">
-		<div class="container">
-			<div class="row">
-
-				<div class="col-md-6 col-lg-7 p-b-30">
-					<div class="p-l-25 p-r-30 p-lr-0-lg">
-						<div class="wrap-slick3 flex-sb flex-w">
-							<div class="wrap-slick3-dots"></div>
-							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
-				
-							<div class="slick3 gallery-lb">
-								<div th:if="${item.images != null and not #lists.isEmpty(item.images)}"
-									 th:each="image : ${item.images}" 
-									 class="item-slick3" 
-									 th:data-thumb="@{${itemImageBaseUrl + image}}">
-									 
-									<div class="wrap-pic-w pos-relative">
-										<img th:src="@{${itemImageBaseUrl + image}}" alt="IMG-PRODUCT">
-				
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-										   th:href="@{${itemImageBaseUrl + image}}">
-											<i class="fa fa-expand"></i>
-										</a>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				
-	
-				<div class="col-md-6 col-lg-5 p-b-30">
-					<div class="p-r-50 p-t-5 p-lr-0-lg">
-						<h4 th:text="${item?.title ?: 'Título no disponible'}" class="mtext-105 cl2 js-name-detail p-b-14"></h4>
-	
-						<span class="mtext-106 cl2" th:text="${item?.price != null ? item.price + '€' : 'Precio no disponible'}"></span>
-	
-						<p class="stext-102 cl3 p-t-23" th:text="${item?.description ?: 'Descripción no disponible'}"></p>
-						
-						<!-- Additional Details -->
-						<div class="p-t-33">
-							<div class="flex-w p-b-10">
-								<div class="size-203 flex-c-m respon6">
-									<div th:if="${item?.type == 'clothes'}">
-										<p>Talla: <span th:text="${item?.size ?: 'No especificado'}"></span></p>
-										<p>Tipo: <span th:text="${item?.clothesType.displayName ?: 'No especificado'}"></span></p>
-										<p>Para: <span th:text="${item?.category.displayName ?: 'No especificado'}"></span></p>
-									</div>
-	
-									<div th:if="${item?.type == 'electronics'}">
-										<p>Tipo: <span th:text="${item?.electronicsType.displayName ?: 'No especificado'}"></span></p>
-									</div>
-									<div th:if="${item?.type == 'entertainment'}">
-										<p>Tipo: <span th:text="${item?.entertainmentType.displayName ?: 'No especificado'}"></span></p>
-									</div>
-									<div th:if="${item?.type == 'home'}">
-										<p>Tipo: <span th:text="${item?.homeType.displayName ?: 'No especificado'}"></span></p>
-									</div>
-									<div th:if="${item?.type == 'pet'}">
-										<p>Especie: <span th:text="${item?.species.displayName ?: 'No especificado'}"></span></p>
-									</div>
-										
-
-
-
-
-								</div>
-
-
-
-								
-								
-								
-								
-							</div>
-							
-							
-							<div class="seller-info-button flex-w p-t-10">
-								<a th:href="@{/userProfile/{id}(id=${sellerId}, token=${token})}" class="seller-card" style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-decoration: none;">
-									<div class="seller-photo">
-										<!-- <img th:src="${seller?.profileImage != null ? @{${profileImageBaseUrl + seller.profileImage}} : @{'/images/icons/profile-default.png'}}" alt="Foto de perfil" class="profile-photo"> -->
-									</div>
-									<div class="seller-details" style="margin-left: 10px; margin-right: 60px;">
-										<p th:text="${seller?.username ?: 'Usuario desconocido'}" style="font-size: 16px; color: #333; margin: 0;"></p>
-									</div>
-									<div class="seller-arrow" style="margin-left: auto;">
-										<img src="https://static.thenounproject.com/png/1918043-200.png" alt="Ir a perfil" style="width: 16px; height: 16px;">
-									</div>
-								</a>
-							</div>
-
-
-
-
-							
-	
-							<div class="flex-w flex-r-m p-b-10">
-								<div class="size-204 flex-w flex-m respon6-next">
-									<th:block th:if="${token == null}">
-										<a th:href="@{/login(redirectUrl=${currentUrl})}" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-											Inicia sesión para añadir al carrito
-										</a>
-									</th:block>
-									<form th:if="${token != null and loggedUserId != sellerId}" th:action="@{/shoppingCart/add(redirectUrl=${currentUrl})}" method="post" style="width: 100%;">
-										<input type="hidden" name="token" th:value="${token}" />
-										<input type="hidden" name="itemId" th:value="${item.id}" />
-										<button type="submit" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" style="width: 100%;">
-											Añadir al carrito
-										</button>
-									</form>
-									<form th:if="${token != null and loggedUserId != sellerId}" th:action="@{/vintedChat/chatRoom}" method="post" style="width: 100%; margin-top: 20px;">
-										<input type="hidden" name="token" th:value="${token}" />
-										<input type="hidden" name="itemId" th:value="${item.id}" />
-										<input type="hidden" name="sellerId" th:value="${sellerId}" />
-										<input type="hidden" name="redirectUrl" th:value="@{/vintedChat(token=${token})}" />
-										
-										<button type="submit" class="enviar-mensaje flex-c-m stext-101 size-101 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" style="width: 100%;">
-											Enviar mensaje
-										</button>
-									</form>
-								</div>
-							</div>
-						</div>
-
-						<div class="p-t-50">
-							<h4 class="mtext-105 cl2 p-b-14">Productos similares</h4>
-							<div class="row">
-								<th:block th:if="${recommendedItems != null and not #lists.isEmpty(recommendedItems)}">
-									<div th:each="recommendedItem : ${recommendedItems}" class="col-sm-6 col-lg-4 p-b-30">
-										<div class="block2">
-											<div class="block2-pic hov-img0">
-												<img th:if="${recommendedItem.images != null and !#lists.isEmpty(recommendedItem.images)}"
-     											th:src="@{${itemImageBaseUrl + recommendedItem.images[0]}}" alt="IMG-PRODUCT">
-
-												<a th:href="@{/item/{id}(id=${recommendedItem.id}, token=${token})}" 
-												   class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
-													Ver detalles
-												</a>
-											</div>
-											<div class="block2-txt flex-w flex-t p-t-14">
-												<div class="block2-txt-child1 flex-col-l">
-													<a th:href="@{/item/{id}(id=${recommendedItem.id}, token=${token})}" 
-													   class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6" 
-													   th:text="${recommendedItem.title}">
-														Nombre del producto
-													</a>
-													<span class="stext-105 cl3" th:text="${recommendedItem.price + '€'}">
-														Precio
-													</span>
-												</div>
-											</div>
-										</div>
-									</div>
-								</th:block>
-							</div>
-						</div>						
-						
-						<!-- Social Links -->
-						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
-							<div class="flex-m bor9 p-r-10 m-r-11">
-								<form th:if="${token != null and loggedUserId != sellerId}" th:action="@{/wishlist/add(redirectUrl=${currentUrl})}" method="post" style="width: 100%;">
-									<input type="hidden" name="token" th:value="${token}" />
-									<input type="hidden" name="itemId" th:value="${item.id}" />
-									<button type="submit" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist" style="background: none; border: none;">
-										<i class="zmdi zmdi-favorite"></i>
-									</button>
-								</form>
-							</div>
-	
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
-								<i class="fa fa-facebook"></i>
-							</a>
-	
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
-								<i class="fa fa-twitter"></i>
-							</a>
-	
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
-								<i class="fa fa-google-plus"></i>
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+		<!-- Content page -->
+        <section class="bg0 p-t-104 p-b-116">
+            <div class="container">
+                <h4 class="mtext-105 cl2 txt-center p-b-30">
+                    Subir anuncio
+                </h4>
+                <form th:action="@{/uploadAd}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <div class="flex-w flex-tr flex-login">
+                        <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
+                            <p>Sube 1 foto.</p>
+                            <div class="image-container">
+                                <div class="image-box">
+                                    <input id="adImage" name="adImage" type="file" class="file-input" accept="image/*" onchange="previewImage(event, this)" required />
+                                    <button class="upload-btn" type="button" onclick="this.previousElementSibling.click()">Subir imagen</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="size-700 bor10 p-lr-70 p-t-20 p-b-20 p-lr-15-lg bor-rad-10 m-b-50" style="width: 85%;">
+                            <div class="m-b-20">
+                                <label for="title" class="stext-111 cl2 p-b-10 login-label">Título</label>
+                                <input id="title" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" type="text" name="title" placeholder="Título del anuncio" required>
+                            </div>
+                            <div class="m-b-20">
+                                <label for="description" class="stext-111 cl2 p-b-10 login-label">Descripción</label>
+                                <input id="description" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" type="text" name="description" placeholder="Descripción del anuncio" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
+                            Subir
+                        </button>
+                        <div th:if="${errorMessage}">
+                            <p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
 
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
@@ -569,8 +413,8 @@
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script th:src="@{/vendor/bootstrap/js/popper.js}"></script>
-	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}" ></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}" ></script>
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
@@ -584,7 +428,7 @@
 	<!--===============================================================================================-->
 	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}"></script>
 	<!--===============================================================================================-->
-	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -622,21 +466,157 @@
         });
     });
 	</script>
-	<script th:src="@{/vendor/slick/slick.min.js}"></script>
-	<script th:src="@{/js/slick-custom.js}"></script>
+<script>
+    function previewImage(event) {
+        var output = document.getElementById('imagePreview');
+        var imageContainer = document.getElementById('imagePreviewContainer');
 
-	<script>
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                output.src = e.target.result;
+                output.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            output.style.display = 'none'; 
+        }
+    }
+</script>
+<script>
+	function validateForm() {
+	  const priceInput = document.getElementById("price");
+	  const price = parseFloat(priceInput.value);
+	
+	  if (isNaN(price) || price <= 0) {
+		alert("Please enter a valid price greater than 0.");
+		return false;
+	  }
+	  
+	  return true;
+	}
+	
+	function updateFields() {
+	  const category = document.getElementById("category").value;
+	  const extraFields = document.getElementById("extra-fields");
+	  extraFields.innerHTML = "";
+	
+	  if (category === "clothes") {
+		extraFields.innerHTML = `
+			<label for="size">Talla:</label>
+			<select id="size" name="size" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona una talla</option>
+				<option value="S">S</option>
+				<option value="M">M</option>
+				<option value="L">L</option>
+				<option value="XL">XL</option>
+			</select>
+
+			<label for="clothCategory">Para:</label>
+			<select id="clothCategory" name="clothCategory" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona un tipo</option>
+				<option value="man">Hombre</option>
+				<option value="woman">Mujer</option>
+				<option value="boy">Niño</option>
+				<option value="girl">Niña</option>
+
+			</select>
+			<label for="clothingType">Tipo de ropa:</label>
+			<select id="clothingType" name="clothingType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Selecciona un tipo de ropa</option>
+				<option value="Tshirt">Camiseta</option>
+				<option value="pants">Pantalón</option>
+				<option value="jacket">Chaqueta</option>
+				<option value="skirt">Falda</option>
+				<option value="dress">Vestido</option>
+				<option value="sweater">Suéter</option>
+				<option value="shorts">Short</option>
+			</select>
+		`;
+	  } else if (category === "pet") {
+		extraFields.innerHTML = `
+			  <label for="species">Especie:</label>
+			  <select id="species" name="species" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo de animal</option>
+				<option value="DOG">Perro</option>
+				<option value="CAT">Gato</option>
+			</select>
+		`;
+	  } else if (category === "home") {
+		extraFields.innerHTML = `
+			  <label for="homeType">Tipo:</label>
+			  <select id="homeType" name="homeType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="decoration">Decoración</option>
+				<option value="furniture">Mueble</option>
+			</select>
+		`;
+	  }else if (category === "electronics") {
+		extraFields.innerHTML = `
+			  <label for="electronicsType">Tipo:</label>
+			  <select id="electronicsType" name="electronicsType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="device">Dispositivo</option>
+				<option value="videogame">Videojuegos</option>
+			</select>
+		`;
+	  }else if (category === "entertainment") {
+		extraFields.innerHTML = `
+			  <label for="entertainmentType">Tipo:</label>
+			  <select id="entertainmentType" name="entertainmentType" required class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10">
+				<option value="" disabled selected>Seleccione un tipo</option>
+				<option value="game">Juegos</option>
+				<option value="book">Libros</option>
+			</select>
+		`;
+	  }
+	}
+</script>
+<script>
+	function previewImage(event, inputElement) {
+	const file = event.target.files[0];
+	const imageBox = inputElement.closest('.image-box');
+	const button = imageBox.querySelector('.upload-btn');
+	const img = document.createElement('img');
+
+	const reader = new FileReader();
+
+	reader.onload = function (e) {
+		img.src = e.target.result;
+		imageBox.appendChild(img);
+		button.style.display = 'none';
+	};
+
+	reader.readAsDataURL(file);
+
+	setTimeout(() => {
+		enableNextBox(imageBox);
+	}, 300);
+	}
+
+	function enableNextBox(currentBox) {
+	const nextBox = currentBox.nextElementSibling;
+	if (nextBox && nextBox.classList.contains('image-box')) {
+		nextBox.classList.remove('hidden');
+		nextBox.querySelector('.file-input').disabled = false;
+	}
+	}
+
+</script>
+
+<script>
 	document.addEventListener("DOMContentLoaded", function () {
 		const searchForm = document.getElementById("search-form");
 		const searchType = document.getElementById("search-type");
 		const searchText = document.getElementById("search_text");
-		const pageText = document.getElementById("page_text");
-
+	
 		function updateFormBeforeSubmit() {
 			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUsers";
+				searchForm.action = "/searchUser";
 				searchText.name = "username"; 
-				pageText.name = "page"; 
 			} else {
 				searchForm.action = "/search";
 				searchText.name = "search_text";

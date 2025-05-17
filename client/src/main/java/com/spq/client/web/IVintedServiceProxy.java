@@ -7,12 +7,14 @@ import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.Shipment;
 import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
 import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoomInfo;
@@ -60,7 +62,7 @@ public interface IVintedServiceProxy {
 	public List<Item> getUserItems(Long userId);
 	public User getSeller(Item item);
 	public void deletePurchase(Long token, Long purchaseId);
-	public void deleteItem(Long token, Long itemId);
+	//public void deleteItem(Long token, Long itemId);
 	public void followUser(Long token, Long targetUserId);
 	public void unfollowUser(Long token, Long targetUserId);
 	public List<User> getFollowers(Long targetUserId);
@@ -81,4 +83,10 @@ public interface IVintedServiceProxy {
 	public Offer rejectOffer(Long id);
 	public PaginatedResponse<User> searchUsers(Long token, String search, int page);
 	public List<Item> getRecommendedItems(Long itemId, Long token);
+    public List<Shipment> getShipmentsByBuyerId(Long token, Long buyerId);
+	public List<Ad> getAllAds();
+	public Ad getAdById(Long token, Long id);
+	public void uploadAd(Long token, String title, String description, MultipartFile image);
+	public void uploadAdImage(Long adId, MultipartFile image);
+	public long uploadAdData(Long token, String title, String description);
 }

@@ -8,6 +8,7 @@ import com.spq.vinted.model.User;
 import com.spq.vinted.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,17 +16,24 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -38,6 +46,9 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @InjectMocks
+    private UserController userController;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -615,7 +626,7 @@ class UserControllerTest {
             .andExpect(jsonPath("$.totalPages").value(0));
     }
 
-    @Test
+@Test
     void testSearchUsers_ExceptionHandling() throws Exception {
         int page = 0;
         String query = "test";
@@ -628,5 +639,96 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }
+
+        @Test
+        void testFollowUser_Success() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doNothing().when(userService).followUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Usuario seguido con éxito"));
+        }
+
+        @Test
+        void testFollowUser_InvalidToken() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(null);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Token inválido"));
+        }
+
+        @Test
+        void testUnfollowUser_InvalidToken() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(null);
+
+        mockMvc.perform(post("/users/unfollow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Token inválido"));
+        }
+
+        @Test
+        void testUnfollowUser_Success() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doNothing().when(userService).unfollowUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/unfollow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Usuario dejado de seguir con éxito"));
+        }
+
+        @Test
+        void testUnfollowUser_Exception() {
+                Long token = 1L;
+                Long targetUserId = 2L;
+                Long userId = 3L;
+
+                when(userService.getUserIdByToken(token)).thenReturn(userId);
+                doThrow(new RuntimeException()).when(userService).unfollowUser(userId, targetUserId);
+
+                ResponseEntity<String> response = userController.unfollowUser(token, targetUserId);
+
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+                assertEquals("Error al dejar de seguir al usuario", response.getBody());
+        }
+
+        @Test
+        void testFollowUser_Exception() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doThrow(new RuntimeException()).when(userService).followUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Error al seguir al usuario"));
+        }
 
 }

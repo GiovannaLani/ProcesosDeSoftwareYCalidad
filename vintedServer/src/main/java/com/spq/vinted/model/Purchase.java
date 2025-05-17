@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 
 @Entity
 @Table(name = "purchases")
@@ -51,25 +52,43 @@ public class Purchase {
     public Long getId() {
         return id;
     }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getItemId() {
         return itemId;
+    }
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
     public User getBuyer() {
         return buyer;
     }
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
+    }
 
     public User getSeller() {
         return seller;
+    }
+    public void setSeller(User seller) {
+        this.seller = seller;
     }
 
     public float getPrice() {
         return price;
     }
+    public void setPrice(float price) {
+        this.price = price;
+    }
 
     public String getPaymentMethod() {
         return paymentMethod;
+    }
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public String getStatus() {
@@ -79,4 +98,5 @@ public class Purchase {
     public void setStatus(String status) {
         this.status = status;
     }
+
 }
