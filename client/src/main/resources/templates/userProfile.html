@@ -254,27 +254,6 @@
 										</div>
 									</div>
 									<div class="web_ui__Cell__suffix">
-										<div th:if="${not isMyProfile}">
-											<h3>Valorar a este usuario</h3>
-											<form th:action="@{/rateUser}" method="post">
-												<input type="hidden" name="ratedUserId" th:value="${user.id}" />
-												<input type="hidden" name="ratingUserId" th:value="${loggedUserId}" />
-												<input type="hidden" name="token" th:value="${token}" />
-												<label for="score">Puntuación:</label>
-												<select name="score" id="score" required>
-													<option value="1">1 - Muy malo</option>
-													<option value="2">2 - Malo</option>
-													<option value="3">3 - Regular</option>
-													<option value="4">4 - Bueno</option>
-													<option value="5">5 - Excelente</option>
-												</select>
-												<br />
-												<label for="comment">Comentario:</label>
-												<textarea name="comment" id="comment" rows="3" maxlength="500"></textarea>
-												<br />
-												<button type="submit">Enviar valoración</button>
-											</form>
-										</div>
 										<div th:unless="${isMyProfile}" class="u-flexbox">
 											<form th:action="${isFollowing} ? @{/userProfile/{id}/unfollow(id=${user.id})} : @{/userProfile/{id}/follow(id=${user.id})}" method="post">
 												<input type="hidden" name="token" th:value="${token}" />
@@ -486,15 +465,32 @@
 									Valoraciones recibidas
 								</h1>
 								<div th:each="rating : ${ratings}" class="web_ui__Card__card web_ui__Card__default m-b-10">
-									<div class="web_ui__Card__content">
+									<div class="web_ui__Card__content" style="padding: 20px;">
+										<div class="web_ui__Cell__cell web_ui__Cell__tight" role="presentation">
+											<div class="web_ui__Cell__image">
+												<div class="u-flexbox u-align-items-center u-fill-height">
+													<img th:src="${rating.ratingUserProfileImage != null} ? @{${profileImageBaseUrl + rating.ratingUserProfileImage}} : @{'/images/icons/profile-default.png'}"
+														alt="Imagen de perfil" class="web_ui__Image__content" style="width: 50px; height: 50px; border-radius: 50%;">
+												</div>
+											</div>
+											<div class="web_ui__Cell__content">
+												<div class="web_ui__Cell__body">
+													<a th:href="@{/userProfile/{id}(id=${rating.ratingUserId}, token=${token})}" th:text="${rating.ratingUsername}" class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">
+														Nombre Usuario
+													</a>
+												</div>
+											</div>
+                                    	</div>
+										
+										<div class="rating-stars">
+											<span th:each="i : ${#numbers.sequence(0, 4)}" 
+												th:class="'star ' + (${i < rating.score} ? 'filled' : '')"
+												data-index="${i}">
+												&#9733;
+											</span>
+										</div>
 										<p class="web_ui__Text__body">
-											<strong>Usuario:</strong> <span th:text="${rating.ratingUserId}">Usuario</span>
-										</p>
-										<p class="web_ui__Text__body">
-											<strong>Puntuación:</strong> <span th:text="${rating.score}">5</span>
-										</p>
-										<p class="web_ui__Text__body">
-											<strong>Comentario:</strong> <span th:text="${rating.comment}">Sin comentario</span>
+											<span th:text="${rating.comment}">Sin comentario</span>
 										</p>
 									</div>
 								</div>
@@ -774,7 +770,18 @@
 		});
 	});
 	</script>
+	<style>
+		.rating-stars .star {
+			font-size: 24px;
+			color: #ccc;
+			cursor: pointer;
+			margin-right: 1px;
+		}
 
+		.rating-stars .star.filled {
+			color: #09b1ba;
+		}
+	</style>
 </body>
 
 </html>

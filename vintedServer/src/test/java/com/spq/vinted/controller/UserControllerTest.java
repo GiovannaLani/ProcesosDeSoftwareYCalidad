@@ -202,8 +202,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Rating added successfully"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -219,8 +218,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Error adding rating: Database error"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -234,13 +232,16 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Rated user or rating user not found"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void testGetUserRatings() throws Exception {
-        Mockito.when(userService.getRatingsForUser(1L)).thenReturn(Arrays.asList(ratingDTO));
+        RatingInfoDTO ratingInfoDTO = new RatingInfoDTO();
+        ratingInfoDTO.setScore(5);
+        ratingInfoDTO.setComment("Great user!");
+        
+        Mockito.when(userService.getRatingsForUser(1L)).thenReturn(Arrays.asList(ratingInfoDTO));
 
         mockMvc.perform(get("/users/1/ratings"))
                 .andExpect(status().isOk())

@@ -1,11 +1,13 @@
 package com.spq.client.web;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.client.data.Signup;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
@@ -73,8 +75,8 @@ public interface IVintedServiceProxy {
 	public Offer createOffer(OfferCreator offer, long token);
 	public Map<String, Offer> updateOfferStatus(Long id, String status);
 	public List<Offer> getOffersByItem(Long itemId, Long token);
-	public String addRating(Rating rating, Long token);
-	public List<Rating> getRatingsForUser(long userId);
+	public ResponseEntity<Void> addRating(Rating rating, Long token);
+	public List<RatingInfo> getRatingsForUser(long userId);
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
 	public PaginatedResponse<User> searchUsers(Long token, String search, int page);

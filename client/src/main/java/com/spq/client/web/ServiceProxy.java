@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
+import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
@@ -786,14 +788,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	public String addRating(Rating rating, Long token) {
+	public ResponseEntity<Void> addRating(Rating rating, Long token) {
+		System.out.println("Adding rating: " + rating);
+		System.out.println("Token: " + token);
 		String url = apiBaseUrl + "/users/rate?token=" + token;
 		try {
-			restTemplate.postForObject(url, rating, Void.class);
-			return "Rating added successfully";
+			restTemplate.postForObject(apiBaseUrl + "/users/rate?token=" + token, rating, Void.class);
+			return ResponseEntity.ok().build();
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return "Error adding rating: " + e.getResponseBodyAsString();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
@@ -809,10 +813,10 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	public List<Rating> getRatingsForUser(long userId) {
+	public List<RatingInfo> getRatingsForUser(long userId) {
 		String url = apiBaseUrl + "/users/" + userId + "/ratings";
 		try {
-			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Rating>>() {}).getBody();
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<RatingInfo>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
 			return Collections.emptyList();

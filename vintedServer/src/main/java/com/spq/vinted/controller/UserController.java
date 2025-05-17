@@ -5,6 +5,7 @@ import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.LoginDTO;
 import com.spq.vinted.dto.PaginatedResponseDTO;
 import com.spq.vinted.dto.RatingDTO;
+import com.spq.vinted.dto.RatingInfoDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Item;
@@ -284,38 +285,31 @@ public class UserController {
     }
 
 	@PostMapping("/rate")
-	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
+	public ResponseEntity<Void> rateUser(@RequestBody RatingDTO rating) {
 		try {
-			// Validar que los IDs no sean nulos
 			if (rating.getRatedUserId() == null || rating.getRatingUserId() == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+				return ResponseEntity.badRequest().build();
 			}
 			
 			User ratedUser = userService.getUserById(rating.getRatedUserId());
 			User ratingUser = userService.getUserById(rating.getRatingUserId());
 			
 			if (ratedUser == null || ratingUser == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+				return ResponseEntity.badRequest().build();
 			}
 			
-			RatingDTO ratingDTO = new RatingDTO(
-				ratedUser.getId(),
-				ratingUser.getId(),
-				rating.getScore(),
-				rating.getComment()
-			);
 
-			userService.addRating(ratingDTO);
-			return ResponseEntity.ok("Rating added successfully");
+			userService.addRating(rating);
+			return ResponseEntity.ok().build();
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Error adding rating: " + e.getMessage());
+			return ResponseEntity.badRequest().build();
 		}
 	}
 
 	@GetMapping("/{userId}/ratings")
-	public ResponseEntity<List<RatingDTO>> getUserRatings(@PathVariable long userId) {
+	public ResponseEntity<List<RatingInfoDTO>> getUserRatings(@PathVariable long userId) {
 		try {
-			List<RatingDTO> ratings = userService.getRatingsForUser(userId);
+			List<RatingInfoDTO> ratings = userService.getRatingsForUser(userId);
 			return ResponseEntity.ok(ratings);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

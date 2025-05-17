@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.vinted.dto.RatingDTO;
+import com.spq.vinted.dto.RatingInfoDTO;
 import com.spq.vinted.model.Category;
 import com.spq.vinted.model.Clothes;
 import com.spq.vinted.model.ClothesSize;
@@ -629,7 +630,7 @@ public class UserServiceTest {
 
         when(ratingRepository.findByRatedUserId(userId)).thenReturn(ratings);
 
-        List<RatingDTO> result = userService.getRatingsForUser(userId);
+        List<RatingInfoDTO> result = userService.getRatingsForUser(userId);
 
         assertEquals(2, result.size());
         assertEquals(5, result.get(0).getScore());
