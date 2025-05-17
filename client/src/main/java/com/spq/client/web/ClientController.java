@@ -13,14 +13,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.data.domain.Page;
+
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
 import com.spq.client.data.Shipment;
+import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
@@ -53,6 +58,7 @@ public class ClientController {
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
 		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
+		model.addAttribute("adsImageBaseUrl", "http://localhost:8080/ads/images/");
 		
 		// Manejo del carrito
 		if (token != null) {
@@ -153,6 +159,11 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
+			if ("admin@admin".equals(email) && "admin".equals(password)) {
+				long adminToken = System.currentTimeMillis(); 
+				return "redirect:/uploadAd?token=" + adminToken;
+			}
+
 			if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 				redirectUrl = "/allItems";
 			}
@@ -182,13 +193,21 @@ public class ClientController {
 	@GetMapping("/allItems")
 	public String getItems(
 			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "page", defaultValue = "0",required = false) int page,
+			@RequestParam(value = "type", required = false) String type,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		try {
-			List<Item> items = vintedService.getItems(token); 
-			model.addAttribute("items", items);
-	
+			PaginatedResponse itemPage = vintedService.getItems(token, page, type);
+			model.addAttribute("items", itemPage.content());
+			model.addAttribute("page", itemPage.page());
+			model.addAttribute("totalPages", itemPage.totalPages());
+			model.addAttribute("type", type);
+			
+			List<Ad> ads = vintedService.getAllAds();
+			model.addAttribute("ads", ads);
 			return "product";
+			
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
 			e.printStackTrace();
@@ -262,17 +281,16 @@ public class ClientController {
 	@GetMapping("/clothes/{category}")
 	public String getClothesByCategory(
 		@RequestParam(value = "token", required = false) Long token,
+		@RequestParam(value = "page", defaultValue = "0",required = false) int page,
 		@PathVariable Category category,
 		@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 		Model model) {
-			try {
-		List<Clothes> clothesCategory = null;
-		if(token == null) {
-			clothesCategory = vintedService.getClothesByCategory(category, -1);
-		}else {
-			clothesCategory = vintedService.getClothesByCategory(category, token);
-		}
-		model.addAttribute("items", clothesCategory);
+	try {
+		PaginatedResponse itemPage = vintedService.getClothesByCategory(token, page, category);
+		model.addAttribute("items", itemPage.content());
+		model.addAttribute("page", itemPage.page());
+		model.addAttribute("totalPages", itemPage.totalPages());
+		model.addAttribute("type", "Clothes");
 		return "product";
     } catch (RuntimeException e) {
         System.err.println("Ha ocurrido un error: " + e.getMessage());
@@ -401,14 +419,16 @@ public class ClientController {
 	@GetMapping("/userProfile/{id}")
 	public String showUserProfile(
 			@PathVariable("id") Long id,
-			@RequestParam(value = "token") Long token,
+			@RequestParam(value = "token", required = false) Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		if (redirectUrl == null) {
 			redirectUrl = "/";
 		}
-
+		if (token == null) {
+			return "redirect:/login";
+		}
 		return loadUserProfile(id, token, model, redirectAttributes);
 	}
 	
@@ -1046,57 +1066,66 @@ public class ClientController {
 		return "redirect:" + redirectUrl;
 	}
 
-	@GetMapping("/userProfile/{id}/followers")
-	public String getFollowers(
+	@GetMapping("/userList/followers/{id}")
+	public String showFollowersList(
 			@PathVariable("id") Long userId,
 			@RequestParam("token") Long token,
 			Model model) {
 		try {
+			User user = vintedService.getUser(userId, token);
 			List<User> followers = vintedService.getFollowers(userId);
-			model.addAttribute("followers", followers);
-			return "userProfile"; 
-		} catch (RuntimeException e) {
+			model.addAttribute("users", followers);
+			model.addAttribute("user", user);
+			model.addAttribute("listType", "Seguidores");
+			model.addAttribute("loggedUserId", this.userId);
+			return "userList";
+		} catch (Exception e) {
 			model.addAttribute("errorMessage", "Error al cargar los seguidores.");
-			e.printStackTrace();
 			return "error";
 		}
 	}
 
-	@GetMapping("/userProfile/{id}/following")
-	public String getFollowing(
+	@GetMapping("/userList/following/{id}")
+	public String showFollowingList(
 			@PathVariable("id") Long userId,
 			@RequestParam("token") Long token,
 			Model model) {
 		try {
+			User user = vintedService.getUser(userId, token);
 			List<User> following = vintedService.getFollowing(userId);
-			model.addAttribute("following", following);
-			return "userProfile"; 
-		} catch (RuntimeException e) {
+			model.addAttribute("users", following);
+			model.addAttribute("user", user);
+			model.addAttribute("listType", "Siguiendo");
+			model.addAttribute("loggedUserId", this.userId);
+			return "userList";
+		} catch (Exception e) {
 			model.addAttribute("errorMessage", "Error al cargar los usuarios seguidos.");
-			e.printStackTrace();
 			return "error";
 		}
 	}
 
 	@GetMapping("/search")
     public String searchItems(
-            @RequestParam("search_text") String search,
-            @RequestParam("token") Long token,
+            @RequestParam(value = "search_text", required = false) String search,
+            @RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+			@RequestParam(value = "type", required = false) String type,
             Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            List<Item> items = vintedService.searchItems(token, search);
-            if (items != null && !items.isEmpty()) {
-                model.addAttribute("items", items);
-                return "search";
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "No se encontraron artículos.");
-                return "redirect:/allItems";
-            }
+            PaginatedResponse<Item> items = vintedService.searchItems(token, search, page, type);
+			model.addAttribute("items", items.content());
+			model.addAttribute("page", items.page());
+			model.addAttribute("totalPages", items.totalPages());
+			model.addAttribute("search_text", search);
+			if(type != null) {
+				model.addAttribute("type", type);
+			}
+			return "search";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar los artículos.");
             e.printStackTrace();
-            return "redirect:/allItems";
+            return "search";
         }
     }
 	@GetMapping("/searchUser")
@@ -1108,11 +1137,32 @@ public class ClientController {
 		try {
 			User user = vintedService.getUserByUsername(username, token);
 			if (user != null) {
-				return loadUserProfile(user.id(), token, model, redirectAttributes);
+				return "searchUser";
 			} else {
 				redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
 				return "redirect:/allItems";
 			}
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
+			e.printStackTrace();
+			return "redirect:/allItems";
+		}
+	}
+	@GetMapping("/searchUsers")
+	public String searchUsers(
+			@RequestParam(value = "username", required = false) String username,
+			@RequestParam(value = "token", required = false) Long token,
+        	@RequestParam(value = "page", defaultValue = "0") int page,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			PaginatedResponse<User> users = vintedService.searchUsers(token, username, page);
+			model.addAttribute("users", users.content());
+			model.addAttribute("page", users.page());
+			model.addAttribute("totalPages", users.totalPages());
+			model.addAttribute("search_text", username);
+
+			return "searchUser";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al buscar el usuario.");
 			e.printStackTrace();
@@ -1173,27 +1223,6 @@ public class ClientController {
 
 		return "redirect:" + redirectUrl;
 	}
-	
-
-	@PostMapping("/rateUser")
-	public String rateUser(
-			@RequestParam("ratedUserId") Long ratedUserId,
-			@RequestParam("ratingUserId") Long ratingUserId,
-			@RequestParam("score") int score,
-			@RequestParam(value = "comment", required = false) String comment,
-			@RequestParam("token") Long token,
-			RedirectAttributes redirectAttributes,
-			Model model) {
-		try {
-			Rating rating = new Rating(0L, ratedUserId, ratingUserId, score, comment);
-			String response = vintedService.addRating(rating, token);
-			redirectAttributes.addFlashAttribute("successMessage", response);
-		} catch (Exception e) {
-			redirectAttributes.addFlashAttribute("errorMessage", "Error al enviar la valoración.");
-			e.printStackTrace();
-		}
-		return loadUserProfile(ratedUserId, token, model, redirectAttributes);
-	}
 
 	@GetMapping("/user/{userId}/ratings")
 	public String getUserRatings(
@@ -1201,7 +1230,7 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
-			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			List<RatingInfo> ratings = vintedService.getRatingsForUser(userId);
 			model.addAttribute("ratings", ratings);
 			return "userProfile";
 		} catch (Exception e) {
@@ -1219,7 +1248,7 @@ public class ClientController {
 			List<Item> items = vintedService.getUserItems(userId);
 			model.addAttribute("items", items);
 	
-			List<Rating> ratings = vintedService.getRatingsForUser(userId);
+			List<RatingInfo> ratings = vintedService.getRatingsForUser(userId);
 			model.addAttribute("ratings", ratings);
 	
 			boolean isMyProfile = userId.equals(this.userId);
@@ -1243,7 +1272,7 @@ public class ClientController {
 	}
 
 	
-@GetMapping("/shipments/{buyerId}")
+	@GetMapping("/shipments/{buyerId}")
     public String getShipmentsByBuyerId(
      @PathVariable Long buyerId, 
      @RequestParam("token") Long token,
@@ -1260,4 +1289,57 @@ public class ClientController {
         	return "redirect:/allItems";
     	}
     }
+
+	@GetMapping("/uploadAd")
+	public String showUploadAd(
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+		if (token == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("redirectUrl", redirectUrl);
+		model.addAttribute("token", token);
+		return "uploadAd";
+	}
+
+	@PostMapping("/uploadAd")
+	public String uploadAd(
+			@RequestParam("token") Long token,
+			@RequestParam("title") String title,
+			@RequestParam("description") String description,
+			@RequestParam(value = "adImage") MultipartFile adImage,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
+			model.addAttribute("redirectUrl", redirectUrl);
+
+			
+			long adId = vintedService.uploadAdData(token, title, description);
+
+			if (adImage != null && !adImage.isEmpty()) {
+				vintedService.uploadAdImage(adId, adImage);
+			}
+
+			redirectAttributes.addFlashAttribute("successMessage", "Anuncio creado correctamente.");
+			return "uploadAd";
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el anuncio.");
+			return "redirect:" + redirectUrl;
+		}
+	}
+
 }
+

@@ -8,21 +8,33 @@ import com.spq.vinted.model.User;
 import com.spq.vinted.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,6 +46,9 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @InjectMocks
+    private UserController userController;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -198,8 +213,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Rating added successfully"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -215,8 +229,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Error adding rating: Database error"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -230,13 +243,16 @@ class UserControllerTest {
         mockMvc.perform(post("/users/rate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rating)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Rated user or rating user not found"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void testGetUserRatings() throws Exception {
-        Mockito.when(userService.getRatingsForUser(1L)).thenReturn(Arrays.asList(ratingDTO));
+        RatingInfoDTO ratingInfoDTO = new RatingInfoDTO();
+        ratingInfoDTO.setScore(5);
+        ratingInfoDTO.setComment("Great user!");
+        
+        Mockito.when(userService.getRatingsForUser(1L)).thenReturn(Arrays.asList(ratingInfoDTO));
 
         mockMvc.perform(get("/users/1/ratings"))
                 .andExpect(status().isOk())
@@ -519,5 +535,200 @@ class UserControllerTest {
     }
 
 
+    @Test
+    void testSearchUsers_NoQuery() throws Exception {
+        int page = 0;
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, PageRequest.of(page, 28), users.size());
+
+        when(userService.searchUsers(null, null, page)).thenReturn(userPage);
+
+        mockMvc.perform(get("/users/searchUsers")
+                .param("page", String.valueOf(page))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].username").value("testuser"))
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void testSearchUsers_WithQuery() throws Exception {
+        int page = 0;
+        String query = "test";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, PageRequest.of(page, 28), users.size());
+
+        when(userService.searchUsers(null, query, page)).thenReturn(userPage);
+
+        mockMvc.perform(get("/users/searchUsers")
+                .param("search_text", query)
+                .param("page", String.valueOf(page))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].username").value("testuser"))
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void testSearchUsers_WithToken() throws Exception {
+        long token = 12345L;
+        int page = 0;
+        String query = "test";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        List<User> users = List.of(user);
+        Page<User> userPage = new PageImpl<>(users, PageRequest.of(page, 28), users.size());
+
+        when(userService.searchUsers(token, query, page)).thenReturn(userPage);
+
+        mockMvc.perform(get("/users/searchUsers")
+                .param("token", String.valueOf(token))
+                .param("search_text", query)
+                .param("page", String.valueOf(page))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].username").value("testuser"))
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void testSearchUsers_NoResults() throws Exception {
+        int page = 0;
+        String query = "nonexistent";
+
+        Page<User> emptyPage = new PageImpl<>(List.of(), PageRequest.of(page, 28), 0);
+
+        when(userService.searchUsers(null, query, page)).thenReturn(emptyPage);
+
+        mockMvc.perform(get("/users/searchUsers")
+                .param("search_text", query)
+                .param("page", String.valueOf(page))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isEmpty())
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.totalPages").value(0));
+    }
+
+@Test
+    void testSearchUsers_ExceptionHandling() throws Exception {
+        int page = 0;
+        String query = "test";
+
+        when(userService.searchUsers(null, query, page)).thenThrow(new RuntimeException("Unexpected error"));
+
+        mockMvc.perform(get("/users/searchUsers")
+                .param("search_text", query)
+                .param("page", String.valueOf(page))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+        @Test
+        void testFollowUser_Success() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doNothing().when(userService).followUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Usuario seguido con éxito"));
+        }
+
+        @Test
+        void testFollowUser_InvalidToken() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(null);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Token inválido"));
+        }
+
+        @Test
+        void testUnfollowUser_InvalidToken() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(null);
+
+        mockMvc.perform(post("/users/unfollow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Token inválido"));
+        }
+
+        @Test
+        void testUnfollowUser_Success() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doNothing().when(userService).unfollowUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/unfollow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Usuario dejado de seguir con éxito"));
+        }
+
+        @Test
+        void testUnfollowUser_Exception() {
+                Long token = 1L;
+                Long targetUserId = 2L;
+                Long userId = 3L;
+
+                when(userService.getUserIdByToken(token)).thenReturn(userId);
+                doThrow(new RuntimeException()).when(userService).unfollowUser(userId, targetUserId);
+
+                ResponseEntity<String> response = userController.unfollowUser(token, targetUserId);
+
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+                assertEquals("Error al dejar de seguir al usuario", response.getBody());
+        }
+
+        @Test
+        void testFollowUser_Exception() throws Exception {
+        Long token = 1L;
+        Long targetUserId = 2L;
+        Long userId = 3L;
+
+        when(userService.getUserIdByToken(token)).thenReturn(userId);
+        doThrow(new RuntimeException()).when(userService).followUser(userId, targetUserId);
+
+        mockMvc.perform(post("/users/follow")
+                .param("token", String.valueOf(token))
+                .param("targetUserId", String.valueOf(targetUserId)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Error al seguir al usuario"));
+        }
 
 }

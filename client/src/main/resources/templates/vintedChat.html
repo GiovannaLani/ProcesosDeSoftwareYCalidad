@@ -71,42 +71,46 @@
 
 					<!-- Menu desktop -->
 
-					<div
-						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
+					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
-							<form action="/catalog" method="get">
+							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
 									<div class="web_ui__InputBar__input-bar" data-testid="search-text">
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" class=" web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
-													  </select>
-													  
-																</div>
+													</select>
+												</div>
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
+					
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
-												<div class="u-flexbox u-align-items-center"><span
-														class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2"
-														style="width:16px"><svg viewBox="0 0 16 16" width="16"
-															height="16" aria-hidden="true">
-															<path
-																d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z">
-															</path>
-														</svg></span></div>
-											</div><input id="search_text" placeholder="Busca artículos"
-												data-testid="search-text--input" class="web_ui__InputBar__value"
-												autocomplete="off" maxlength="5000" aria-labelledby="search-item"
-												name="search_text" value="">
+												<div class="u-flexbox u-align-items-center">
+													<span class="web_ui__Icon__icon web_ui__Icon__greyscale-level-2" style="width:16px">
+														<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+															<path d="M7 11.5a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 7 11.5zm4.74-.82a6 6 0 1 0-1.06 1.06l3.25 3.25L15 13.93l-3.25-3.25z"></path>
+														</svg>
+													</span>
+												</div>
+											</div>
+											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
+												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
+												aria-labelledby="search-item" name="username" required>
+
 										</div>
+					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
+								<input type="hidden" name="token" th:value="${token}">
+								<input type="hidden" name="type" th:value="${type}">
+								<input id="page_text" type="hidden" name="page" th:value="${0}">
+								<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							</form>
 						</div>
 					</div>
@@ -174,7 +178,7 @@
 							</li>
 
 							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
+								<a th:href="@{/allItems(token=${token}, type='Clothes')}">Ropa</a>
 							</li>
 
 							<li>
@@ -194,17 +198,17 @@
 							</li>
 
 							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
+								<a th:href="@{/allItems(token=${token}, type='Home')}">Hogar</a>
 							</li>
 
 							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
+								<a th:href="@{/allItems(token=${token}, type='Electronics')}">Electrónica</a>
 							</li>
 							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
+								<a th:href="@{/allItems(token=${token}, type='Entertainment')}">Entretenimiento</a>
 							</li>
 							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
+								<a th:href="@{/allItems(token=${token}, type='Pet')}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -307,10 +311,15 @@
 										</div>
 									</div>
 									<div class="web_ui__Cell__suffix" data-testid="hero-message--suffix">
+										<button id="ratingButton" type="button" class="button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated">
+												Valorar
+										</button>
 										<div id="item-button-id" class="u-flexbox" style="display: none;">
-											<button type="button" class="button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated">
+											
+											<button type="button" id="offerButton" class="m-r-10 button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated">
 													Hacer una oferta
 											</button>
+
 											<div class="m-r-20"></div>
 											<form id="buyForm" th:action="@{/shoppingCart/add(token=${token}, redirectUrl=${currentUrl})}" method="post">
 												<input type="hidden" name="itemId" id="buyFormItemId" />
@@ -695,7 +704,7 @@
 <div id="offerModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <span class="close">&times;</span>
+            <span id = "offerClose" class="close">&times;</span>
             <h2>Hacer una oferta</h2>
         </div>
         <div class="modal-body">
@@ -718,6 +727,35 @@
     </div>
 </div>
 
+<!-- Pop up valorar -->
+<div id="ratingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="raitingClose">&times;</span>
+            <h2>Valorar usuario</h2>
+        </div>
+        <div class="modal-body">
+            <div class="star-rating">
+				<span class="star" data-index="0">&#9733;</span>
+				<span class="star" data-index="1">&#9733;</span>
+				<span class="star" data-index="2">&#9733;</span>
+				<span class="star" data-index="3">&#9733;</span>
+				<span class="star" data-index="4">&#9733;</span>
+            </div>
+			<div class="rating-form">
+				<label for="ratingInput">Comentario:</label>
+					<div class="web_ui__InputBar__input web_ui__InputBar__input-bar" style="padding: 10px;">
+					<textarea id="ratingInput" name="composerInput" placeholder="Escribir mensaje" data-testid="composer--input" class="web_ui__InputBar__value" autocomplete="off" style="height: 26px !important;"></textarea>
+				</div>
+			
+			</div>
+        </div>
+        <div class="modal-footer">
+            <button id="submitRatingBtn" class="button-green">Enviar valoración</button>
+        </div>
+    </div>
+</div>
+
 <script>
 
 let currentItemId = null;
@@ -727,15 +765,17 @@ let currentItemPrice = null;
 
 
 const offerModal = document.getElementById('offerModal');
-const closeModalBtn = document.querySelector('.close');
+const ratingModal = document.getElementById('ratingModal');
+const closeModalBtn = document.getElementById('offerClose');
 const offerPriceInput = document.getElementById('offerPrice');
 const offerPriceWithProtection = document.getElementById('offerPriceWithProtection');
 const submitOfferBtn = document.getElementById('submitOfferBtn');
-
+const submitRatingBtn = document.getElementById('submitRatingBtn');
+const closeRatingModalBtn = document.getElementById('raitingClose');
 // listeners botones
 document.addEventListener('DOMContentLoaded', function() {
     
-    const offerButton = document.querySelector('.web_ui__Button__primary');
+    const offerButton = document.getElementById('offerButton');
     if (offerButton) {
         offerButton.addEventListener('click', openOfferModal);
     }
@@ -749,6 +789,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     
     submitOfferBtn.addEventListener('click', submitOffer);
+
+
+	const ratingButton = document.getElementById('ratingButton');
+    if (ratingButton) {
+        ratingButton.addEventListener('click', openRatingModal);
+    }
+    closeRatingModalBtn.addEventListener('click', closeRatingModal);
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === ratingModal) {
+            closeRatingModal();
+        }
+    });
+    
+    
+    submitRatingBtn.addEventListener('click', submitRating);
 });
 
 //modal = pop-up
@@ -769,8 +825,18 @@ function openOfferModal() {
     offerModal.style.display = 'block';
 }
 
+function openRatingModal() {
+    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);    
+
+    ratingModal.style.display = 'block';
+}
+
 function closeOfferModal() {
     offerModal.style.display = 'none';
+}
+
+function closeRatingModal() {
+    ratingModal.style.display = 'none';
 }
 
 function submitOffer() {
@@ -841,6 +907,51 @@ function submitOffer() {
 		alert('No se pudo enviar la oferta. ' + error.message);
 	});
 }
+
+function submitRating() {
+    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
+    const ratedUserId = chatRoomElement ? chatRoomElement.getAttribute("data-other-user-id") : null;
+    const ratingUserId = userId;
+    const score = selectedRating;
+    const ratingInput = document.getElementById('ratingInput').value.trim();
+    const token = userToken;
+
+    if (!score) {
+        alert("Selecciona una puntuación antes de enviar.");
+        return;
+    }
+
+    const ratingData = {
+        ratedUserId: parseInt(ratedUserId),
+        ratingUserId: parseInt(ratingUserId),
+        score: score,
+        comment: ratingInput
+    };
+
+    console.log("Enviando valoración:", JSON.stringify(ratingData));
+
+    fetch(`/chatrooms/rateUser?token=${token}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(ratingData)  // Enviamos un JSON válido
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al enviar la valoración: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(data => {
+        console.log('Valoración enviada:', data);
+        closeRatingModal();
+    })
+    .catch(error => {
+        console.error('Error al enviar la valoración:', error);
+    });
+}
+
 
 
 function showMessage(message) {
@@ -1263,8 +1374,68 @@ function respondToOffer(offerId, status) {
 
 
 </script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const searchForm = document.getElementById("search-form");
+		const searchType = document.getElementById("search-type");
+		const searchText = document.getElementById("search_text");
+		const pageText = document.getElementById("page_text");
 
+		function updateFormBeforeSubmit() {
+			if (searchType.value === "miembros") {
+				searchForm.action = "/searchUsers";
+				searchText.name = "username"; 
+				pageText.name = "page"; 
+			} else {
+				searchForm.action = "/search";
+				searchText.name = "search_text";
+			}
+		}
+	
+		searchType.addEventListener("change", function () {
+			updateFormBeforeSubmit();
+		});
+	
+		searchForm.addEventListener("submit", function (event) {
+			const text = searchText.value.trim();
+			if (!text) {
+				event.preventDefault();
+				alert("Por favor, introduce un término de búsqueda.");
+				return;
+			}
+			updateFormBeforeSubmit();
+		});
+	});
+	</script>
+	<script>
+		const stars = document.querySelectorAll('.star');
+		let selectedRating = 0;
 
+		function updateStars(rating) {
+		stars.forEach((star, index) => {
+			star.classList.toggle('selected', index < rating);
+		});
+		}
+
+		stars.forEach((star, index) => {
+		star.addEventListener('click', () => {
+			if (selectedRating === index + 1) {
+			selectedRating = 0;
+			} else {
+			selectedRating = index + 1;
+			}
+			updateStars(selectedRating);
+		});
+
+		star.addEventListener('mouseover', () => {
+			updateStars(index + 1);
+		});
+
+		star.addEventListener('mouseout', () => {
+			updateStars(selectedRating);
+		});
+		});
+	</script>
 
 
 <style>
@@ -1298,7 +1469,7 @@ function respondToOffer(offerId, status) {
   margin-bottom: 20px;
 }
 
-.close {
+.close, #raitingClose, #offerClose {
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
@@ -1485,9 +1656,26 @@ function respondToOffer(offerId, status) {
 
 .offer-timestamp {
   text-align: center;
-  color: #999;
+  color: #d0d0d0;
   font-size: 12px;
   margin-top: 8px;
+}
+
+.star-rating {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.star {
+    font-size: 30px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color 0.3s;
+}
+
+.star.selected, .star:hover {
+    color: #09b1ba;
 }
 
 </style>

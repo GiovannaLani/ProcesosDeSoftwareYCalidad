@@ -26,12 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 
 import com.spq.vinted.dto.ClothesDTO;
 import com.spq.vinted.dto.ElectronicsDTO;
 import com.spq.vinted.dto.EntertainmentDTO;
 import com.spq.vinted.dto.HomeDTO;
 import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.PaginatedResponseDTO;
 import com.spq.vinted.dto.PetDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Category;
@@ -199,13 +201,23 @@ public class ItemController {
     }
  
     @GetMapping("/items")
-    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(value = "token", required = false) Long token) {
+    public ResponseEntity<PaginatedResponseDTO<ItemDTO>> getItems(
+            @RequestParam(value = "token", required = false) Long token,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "type", defaultValue = "", required = false) String type) {
+
         try {
-            List<Item> items = itemService.getItems(token);
-            List<ItemDTO> itemDTOs = items.stream()
-                                        .map(Item::toDTO)
-                                        .collect(Collectors.toList());
-            return ResponseEntity.ok(itemDTOs);
+            Page<Item> items = itemService.getItems(token, page, type);
+            Page<ItemDTO> itemDTOs = items.map(Item::toDTO);
+
+            PaginatedResponseDTO<ItemDTO> response = new PaginatedResponseDTO<>(
+                    itemDTOs.getContent(),
+                    itemDTOs.getNumber(),
+                    itemDTOs.getTotalPages()
+            );
+
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -241,18 +253,18 @@ public class ItemController {
     }
 
     @GetMapping("/clothes/{category}")
-    public ResponseEntity<List<ClothesDTO>> getClothesByCategory(@PathVariable Category category,@RequestParam(value = "token", required = false) Long token) {
+    public ResponseEntity<PaginatedResponseDTO<ClothesDTO>> getClothesByCategory(@PathVariable Category category,@RequestParam(value = "token", required = false) Long token, @RequestParam(value = "page", defaultValue = "0") int page) {
         try {
-            List<Clothes> clothes = itemService.getClothesByCategory(category);
-            if(token != null) {
-                Long userId = userService.getUserByToken(token).getId();
-                clothes = clothes.stream().filter(item -> !item.getSeller().getId().equals(userId)).collect(Collectors.toList());
-            }
-            List<ClothesDTO> clothesDTOs = new ArrayList<ClothesDTO>();
-            for(Clothes c: clothes){
-                clothesDTOs.add((ClothesDTO) c.toDTO());
-            }
-            return ResponseEntity.ok(clothesDTOs);
+            Page<Clothes> clothesPage = itemService.getClothesByCategory(category, page);
+            List<ClothesDTO> clothesDTOs = clothesPage.stream()
+                    .map(clothes -> (ClothesDTO) clothes.toDTO())
+                    .collect(Collectors.toList());
+            PaginatedResponseDTO<ClothesDTO> result = new PaginatedResponseDTO<>(
+                    clothesDTOs,
+                    clothesPage.getNumber(),
+                    clothesPage.getTotalPages()
+            );
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -402,15 +414,22 @@ public class ItemController {
     // }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDTO>> searchItems(
+    public ResponseEntity<PaginatedResponseDTO<ItemDTO>> searchItems(
         @RequestParam(value = "token", required = false) Long token,
-        @RequestParam("search_text") String query) {
+        @RequestParam(value = "search_text",required = false) String query,
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "type", defaultValue = "", required = false) String type) {
         try {
-            List<Item> items = itemService.searchItems(token, query);
+            Page<Item> items = itemService.searchItems(token, query, page, type);
             List<ItemDTO> itemDTOs = items.stream()
                                       .map(Item::toDTO)
                                       .collect(Collectors.toList());
-            return ResponseEntity.ok(itemDTOs);
+            PaginatedResponseDTO<ItemDTO> result = new PaginatedResponseDTO<>(
+                itemDTOs,
+                items.getNumber(),
+                items.getTotalPages()
+            );
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

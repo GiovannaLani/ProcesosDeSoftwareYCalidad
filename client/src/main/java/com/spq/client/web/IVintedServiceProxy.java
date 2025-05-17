@@ -8,18 +8,21 @@ import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
 import com.spq.client.data.Shipment;
+import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
-import com.spq.client.data.ChatRoom;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Clothes;
 import com.spq.client.data.Electronics;
 import com.spq.client.data.Entertainment;
 import com.spq.client.data.Home;
+
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,8 @@ import java.util.Map;
 public interface IVintedServiceProxy {
     public void createUser(Signup user);
 	public Long login(String email, String password);
-	public List<Item> getItems(Long token);
+	public PaginatedResponse<Item> getItems(Long token,int page, String type);
+	public PaginatedResponse<Item> getClothesByCategory(Long token, int page, Category category);
 	public Item getItemById(Long id);
 	public List<Clothes> getClothes(long token);
 	public List<Clothes> getClothesByCategory(Category category, long token);
@@ -63,7 +67,7 @@ public interface IVintedServiceProxy {
 	public void unfollowUser(Long token, Long targetUserId);
 	public List<User> getFollowers(Long targetUserId);
 	public List<User> getFollowing(Long targetUserId);
-	public List<Item> searchItems(Long token, String search);
+	public PaginatedResponse<Item> searchItems(Long token, String search, int page, String type);
 	public User getUserByUsername(String username, Long token);
 	public List<Item> getUserItems(Long userId, Long token);
 	public void createChatRoom(long buyerId, long sellerId, long itemId);
@@ -73,10 +77,16 @@ public interface IVintedServiceProxy {
 	public Offer createOffer(OfferCreator offer, long token);
 	public Map<String, Offer> updateOfferStatus(Long id, String status);
 	public List<Offer> getOffersByItem(Long itemId, Long token);
-	public String addRating(Rating rating, Long token);
-	public List<Rating> getRatingsForUser(long userId);
+	public ResponseEntity<Void> addRating(Rating rating, Long token);
+	public List<RatingInfo> getRatingsForUser(long userId);
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
+	public PaginatedResponse<User> searchUsers(Long token, String search, int page);
 	public List<Item> getRecommendedItems(Long itemId, Long token);
     public List<Shipment> getShipmentsByBuyerId(Long token, Long buyerId);
+	public List<Ad> getAllAds();
+	public Ad getAdById(Long token, Long id);
+	public void uploadAd(Long token, String title, String description, MultipartFile image);
+	public void uploadAdImage(Long adId, MultipartFile image);
+	public long uploadAdData(Long token, String title, String description);
 }

@@ -67,8 +67,7 @@
 
 					<!-- Menu desktop -->
 
-					<div
-						class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
+					<div class="u-desktops-only u-fill-width u-position-relative u-z-index-notification u-ui-margin-right-x3-large">
 						<div>
 							<form id="search-form" method="get" class="search-form">
 								<div class="u-position-relative">
@@ -76,7 +75,7 @@
 										<div class="web_ui__InputBar__prefix">
 											<div class="u-flexbox u-fill-height">
 												<div class="u-position-relative">
-													<select id="search-type" name="type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
+													<select id="search-type" class="web_ui__Button__flat web_ui__Button__medium web_ui__Button__muted web_ui__Button__truncated web_ui__Button__icon-right">
 														<option value="articulos">Artículos</option>
 														<option value="miembros">Miembros</option>
 													</select>
@@ -84,6 +83,7 @@
 												<div class="web_ui__Divider__divider web_ui__Divider__vertical"></div>
 											</div>
 										</div>
+					
 										<div class="web_ui__InputBar__input">
 											<div class="web_ui__InputBar__icon">
 												<div class="u-flexbox u-align-items-center">
@@ -97,15 +97,19 @@
 											<input id="search_text" placeholder="Busca artículos o miembros" data-testid="search-text--input" 
 												class="web_ui__InputBar__value" autocomplete="off" maxlength="5000" 
 												aria-labelledby="search-item" name="username" required>
+
 										</div>
+					
 										<div class="web_ui__InputBar__suffix"></div>
 									</div>
 								</div>
 								<input type="hidden" name="token" th:value="${token}">
+								<input type="hidden" name="type" th:value="${type}">
+								<input id="page_text" type="hidden" name="page" th:value="${0}">
+								<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
 							</form>
 						</div>
 					</div>
-
 
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
@@ -169,7 +173,7 @@
 							</li>
 
 							<li>
-								<a th:href="@{/clothes(token=${token})}">Ropa</a>
+								<a th:href="@{/allItems(token=${token}, type='Clothes')}">Ropa</a>
 							</li>
 
 							<li>
@@ -189,17 +193,17 @@
 							</li>
 
 							<li>
-								<a th:href="@{/home(token=${token})}">Hogar</a>
+								<a th:href="@{/allItems(token=${token}, type='Home')}">Hogar</a>
 							</li>
 
 							<li>
-								<a th:href="@{/electronics(token=${token})}">Electrónica</a>
+								<a th:href="@{/allItems(token=${token}, type='Electronics')}">Electrónica</a>
 							</li>
 							<li>
-								<a th:href="@{/entertainment(token=${token})}">Entretenimiento</a>
+								<a th:href="@{/allItems(token=${token}, type='Entertainment')}">Entretenimiento</a>
 							</li>
 							<li>
-								<a th:href="@{/pet(token=${token})}">Mascotas</a>
+								<a th:href="@{/allItems(token=${token}, type='Pet')}">Mascotas</a>
 							</li>
 						</ul>
 					</div>
@@ -508,11 +512,13 @@
 		const searchForm = document.getElementById("search-form");
 		const searchType = document.getElementById("search-type");
 		const searchText = document.getElementById("search_text");
-	
+		const pageText = document.getElementById("page_text");
+
 		function updateFormBeforeSubmit() {
 			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
+				searchForm.action = "/searchUsers";
 				searchText.name = "username"; 
+				pageText.name = "page"; 
 			} else {
 				searchForm.action = "/search";
 				searchText.name = "search_text";

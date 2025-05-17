@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,19 +18,23 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
 
+
 import com.spq.client.data.EditUser;
 import com.spq.client.data.Login;
 import com.spq.client.data.Pet;
 import com.spq.client.data.MultipartInputStreamFileResource;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
+import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Signup;
 import com.spq.client.data.Species;
 import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
 import com.spq.client.data.Shipment;
+import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoom;
@@ -88,15 +93,53 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 	@Override
-	public List<Item> getItems(Long token) {
+	public PaginatedResponse<Item> getItems(Long token, int page, String type) {
 		try {
-			if (token == null) {
-				return restTemplate.exchange(apiBaseUrl + "/items/items", HttpMethod.GET, null, 
-						new ParameterizedTypeReference<List<Item>>() {}).getBody();
-			} else {
-				return restTemplate.exchange(apiBaseUrl + "/items/items?token=" + token, HttpMethod.GET, null, 
-						new ParameterizedTypeReference<List<Item>>() {}).getBody();
+			String url = apiBaseUrl + "/items/items?page=" + page;
+
+			if (token != null) {
+				url += "&token=" + token;
 			}
+			if (type != null) {
+				url += "&type=" + type;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
+	}
+
+	public PaginatedResponse<Item> getClothesByCategory(Long token, int page, Category category)
+	{
+		try {
+			String url = apiBaseUrl + "/items/clothes/"+category+"?page=" + page;
+
+			if (token != null) {
+				url += "&token=" + token;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
 		} catch (HttpStatusCodeException e) {
 			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
 		}
@@ -631,19 +674,36 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
-    public List<Item> searchItems(Long token, String search) {
-        String url = apiBaseUrl + "/items/search?search_text=" + search + "&token=" + token;
-        try {
-            Item[] items = restTemplate.getForObject(url, Item[].class);
-            return Arrays.asList(items);
-        } catch (HttpStatusCodeException e) {
-            System.out.println("Error response: " + e.getResponseBodyAsString());
-            throw new RuntimeException("Failed to fetch items: " + e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("An unexpected error occurred while fetching items.", e);
-        }
+    public PaginatedResponse<Item> searchItems(Long token, String search, int page, String type) {
+		try {
+			String url = apiBaseUrl + "/items/search?page=" + page;
+			if (search != null) {
+				url += "&search_text=" + search;
+			}
+			if (token != null) {
+				url += "&token=" + token;
+			}
+			if (type != null) {
+				url += "&type=" + type;
+			}
+			System.out.println("Generated URL: " + url);
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
     }
-	
+
 	public User getUserByUsername(String username, Long token) {
 		String url = apiBaseUrl + "/users/search?username=" + username + "&token=" + token;
 		try {
@@ -731,14 +791,16 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	public String addRating(Rating rating, Long token) {
+	public ResponseEntity<Void> addRating(Rating rating, Long token) {
+		System.out.println("Adding rating: " + rating);
+		System.out.println("Token: " + token);
 		String url = apiBaseUrl + "/users/rate?token=" + token;
 		try {
-			restTemplate.postForObject(url, rating, Void.class);
-			return "Rating added successfully";
+			restTemplate.postForObject(apiBaseUrl + "/users/rate?token=" + token, rating, Void.class);
+			return ResponseEntity.ok().build();
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
-			return "Error adding rating: " + e.getResponseBodyAsString();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
@@ -754,10 +816,10 @@ public class ServiceProxy implements IVintedServiceProxy {
 			}
 		}
 	}
-	public List<Rating> getRatingsForUser(long userId) {
+	public List<RatingInfo> getRatingsForUser(long userId) {
 		String url = apiBaseUrl + "/users/" + userId + "/ratings";
 		try {
-			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Rating>>() {}).getBody();
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<RatingInfo>>() {}).getBody();
 		} catch (HttpStatusCodeException e) {
 			System.out.println("Error response: " + e.getResponseBodyAsString());
 			return Collections.emptyList();
@@ -802,6 +864,32 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
+	public PaginatedResponse<User> searchUsers(Long token, String search, int page)
+	{
+		try {
+			String url = apiBaseUrl + "/users/searchUsers?page=" + page;
+			if (search != null) {
+				url += "&search_text=" + search;
+			}
+			if (token != null) {
+				url += "&token=" + token;
+			}
+
+			ParameterizedTypeReference<PaginatedResponse> responseType = new ParameterizedTypeReference<>() {};
+
+			ResponseEntity<PaginatedResponse> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				responseType
+			);
+
+			return response.getBody();
+
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
+		}
+	}
 	public List<Item> getRecommendedItems(Long itemId, Long token) {
 		try {
 			String url = apiBaseUrl + "/items/productDetails/" + itemId + "?token=" + token;
@@ -832,6 +920,66 @@ public class ServiceProxy implements IVintedServiceProxy {
      }
     }
 
+	public List<Ad> getAllAds() {
+		try {
+			String url = apiBaseUrl + "/ads";
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Ad>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ads: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public Ad getAdById(Long token, Long id) {
+		try {
+			String url = apiBaseUrl + "/ads/" + id;
+			return restTemplate.getForObject(url, Ad.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ad: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public long uploadAdData(Long token, String title, String description) {
+		String url = apiBaseUrl + "/ads/adData?token=" + token;
+		Ad ad = new Ad(title, description);
+		try {
+			Long adId = restTemplate.postForObject(url, ad, Long.class);
+			if (adId == null) {
+				throw new RuntimeException("Failed to get ad ID");
+			}
+			return adId;
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad: " + e.getStatusText());
+		}
+	}
+
+	@Override
+	public void uploadAdImage(Long adId, MultipartFile image) {
+		try {
+			String url = apiBaseUrl + "/ads/adImage?adId=" + adId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("image", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad image: " + e.getStatusText());
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+
+	@Override
+	public void uploadAd(Long token, String title, String description, MultipartFile image) {
+		long adId = uploadAdData(token, title, description);
+		uploadAdImage(adId, image);
+	}
+	
 }
 	
 

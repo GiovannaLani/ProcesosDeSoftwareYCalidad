@@ -5,6 +5,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +22,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -452,35 +461,48 @@ public class ItemControllerTest {
     // Get Items Tests
     @Test
     void testGetItems_Success() throws Exception {
-        List<Item> items = new ArrayList<>();
         Clothes clothes = new Clothes();
         clothes.setId(1L);
         clothes.setTitle("T-Shirt");
-        items.add(clothes);
 
-        when(itemService.getItems(null)).thenReturn(items);
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, PageRequest.of(0, 10), items.size());
 
-        mockMvc.perform(get("/items/items"))
+        when(itemService.getItems(null, 0, "")).thenReturn(itemPage);
+
+        mockMvc.perform(get("/items/items")
+                .param("page", "0")
+                .param("type", "")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("T-Shirt"));
+                .andExpect(jsonPath("$.content[0].title").value("T-Shirt"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.totalPages").value(1));
     }
 
     @Test
     void testGetItems_WithToken() throws Exception {
         long token = 12345L;
-        List<Item> items = new ArrayList<>();
+
         Clothes clothes = new Clothes();
         clothes.setId(1L);
         clothes.setTitle("T-Shirt");
-        items.add(clothes);
 
-        when(itemService.getItems(token)).thenReturn(items);
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, PageRequest.of(1, 10), items.size());
+
+        when(itemService.getItems(token, 1, "")).thenReturn(itemPage);
 
         mockMvc.perform(get("/items/items")
-                .param("token", String.valueOf(token)))
+                .param("token", String.valueOf(token))
+                .param("page", "1")
+                .param("type", "")  // Agregar type
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("T-Shirt"));
+                .andExpect(jsonPath("$.content[0].title").value("T-Shirt"))
+                .andExpect(jsonPath("$.page").value(1));
     }
+
 
     @Test
     void testGetItemById_Success() throws Exception {
@@ -556,19 +578,24 @@ public class ItemControllerTest {
     @Test
     void testGetClothesByCategory_Success() throws Exception {
         Category category = Category.MAN;
-        List<Clothes> clothes = new ArrayList<>();
+
         Clothes item = new Clothes();
         item.setId(1L);
         item.setTitle("Men's T-Shirt");
         item.setCategory(category);
-        clothes.add(item);
 
-        when(itemService.getClothesByCategory(category)).thenReturn(clothes);
+        List<Clothes> clothesList = List.of(item);
+        Page<Clothes> clothesPage = new PageImpl<>(clothesList);
 
-        mockMvc.perform(get("/items/clothes/{category}", category))
+        when(itemService.getClothesByCategory(category, 0)).thenReturn(clothesPage);
+
+        mockMvc.perform(get("/items/clothes/{category}", category)
+                .param("page", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Men's T-Shirt"));
+                .andExpect(jsonPath("$.content[0].title").value("Men's T-Shirt"));
+                
     }
+
 
     @Test
     void testGetElectronics_WithToken() throws Exception {
@@ -797,40 +824,54 @@ public class ItemControllerTest {
 
     // Search Tests
     @Test
-    void testSearchItems_Success() throws Exception {
-        String query = "test";
-        List<Item> items = new ArrayList<>();
-        Clothes clothes = new Clothes();
-        clothes.setId(1L);
-        clothes.setTitle("Test T-Shirt");
-        items.add(clothes);
+void testSearchItems_Success() throws Exception {
+    String query = "test";
+    int page = 0;
+    String type = "Clothes";
 
-        when(itemService.searchItems(null, query)).thenReturn(items);
+    Clothes clothes = new Clothes();
+    clothes.setId(1L);
+    clothes.setTitle("Test T-Shirt");
 
-        mockMvc.perform(get("/items/search")
-                .param("search_text", query))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Test T-Shirt"));
+    List<Item> items = List.of(clothes);
+    Page<Item> itemPage = new PageImpl<>(items, PageRequest.of(page, 10), items.size());
+
+    when(itemService.searchItems(null, query, page, type)).thenReturn(itemPage);
+
+    mockMvc.perform(get("/items/search")
+            .param("search_text", query)
+            .param("page", String.valueOf(page))
+            .param("type", type))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].title").value("Test T-Shirt"));
     }
+
 
     @Test
     void testSearchItems_WithToken() throws Exception {
         long token = 12345L;
         String query = "test";
-        List<Item> items = new ArrayList<>();
+        int page = 0;
+        String type = "Clothes";
+
         Clothes clothes = new Clothes();
         clothes.setId(1L);
         clothes.setTitle("Test T-Shirt");
-        items.add(clothes);
 
-        when(itemService.searchItems(token, query)).thenReturn(items);
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, PageRequest.of(page, 10), items.size());
+
+        when(itemService.searchItems(token, query, page, type)).thenReturn(itemPage);
 
         mockMvc.perform(get("/items/search")
                 .param("token", String.valueOf(token))
-                .param("search_text", query))
+                .param("search_text", query)
+                .param("page", String.valueOf(page))
+                .param("type", type))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Test T-Shirt"));
+                .andExpect(jsonPath("$.content[0].title").value("Test T-Shirt"));
     }
+
 
     @Test
     void testSearchItems_Error() throws Exception {
@@ -912,9 +953,11 @@ public class ItemControllerTest {
 
     @Test
     void testGetItems_Error() throws Exception {
-        when(itemService.getItems(null)).thenThrow(new RuntimeException("Error getting items"));
+        when(itemService.getItems(null, 0,null)).thenThrow(new RuntimeException("Error getting items"));
 
-        mockMvc.perform(get("/items/items"))
+        mockMvc.perform(get("/items/items")
+                .param("page", "0")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
@@ -935,4 +978,58 @@ public class ItemControllerTest {
                 }))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    void getProductDetails_ReturnsRecommendedItems() {
+        Long itemId = 1L;
+        String token = "token";
+        Item item = new Clothes();
+        item.setId(itemId);
+
+        Item recommended = new Clothes();
+        recommended.setId(2L);
+
+        List<Item> recommendedList = List.of(recommended);
+
+        when(itemService.getItemById(itemId)).thenReturn(item);
+        when(itemService.getRecommendedProducts(item)).thenReturn(recommendedList);
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(recommended.getId(), response.getBody().get(0).getId());
+    }
+
+    @Test
+    void getProductDetails_NoRecommendedItems_ReturnsEmptyList() {
+        Long itemId = 1L;
+        String token = "token";
+        Item item = new Clothes();
+        item.setId(itemId);
+
+        when(itemService.getItemById(itemId)).thenReturn(item);
+        when(itemService.getRecommendedProducts(item)).thenReturn(List.of());
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    void getProductDetails_ItemServiceThrowsException_Returns500() {
+        Long itemId = 1L;
+        String token = "token";
+
+        when(itemService.getItemById(itemId)).thenThrow(new RuntimeException("Error"));
+
+        ResponseEntity<List<ItemDTO>> response = itemController.getProductDetails(itemId, token);
+
+        assertEquals(500, response.getStatusCodeValue());
+        assertNull(response.getBody());
+    }
+
 }

@@ -8,10 +8,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,8 @@ import com.spq.vinted.model.Home;
 import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Pet;
 import com.spq.vinted.repository.ItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.UserRepository;
@@ -51,8 +54,7 @@ public class ItemService {
         this.userRepository = userRepository;
         this.userService = userService;
     }
-
-    public List<Item> getItems(Long token) {
+    public List<Item> getAllItems(Long token) {
         try {
             if (token == null) {
                 return itemRepository.findAll();
@@ -65,6 +67,37 @@ public class ItemService {
         }
     }
 
+    public Page<Item> getItems(Long token, int page, String type) {
+        Pageable pageable = PageRequest.of(page, 28);
+
+        Map<String, Class<? extends Item>> typeMap = Map.of(
+            "Clothes", Clothes.class,
+            "Electronics", Electronics.class,
+            "Pet", Pet.class,
+            "Entertainment", Entertainment.class,
+            "Home", Home.class
+        );
+        
+        Class<? extends Item> itemType = (type != null) ? typeMap.get(type) : null;
+        if (itemType == null && type != null) {
+            return itemRepository.findAll(pageable);
+        }
+
+        if (token == null) {
+            if (itemType != null) {
+                return itemRepository.findByType(itemType, pageable);
+            }
+            return itemRepository.findAll(pageable);
+        } else {
+            Long userId = userService.getUserByToken(token).getId();
+            if (itemType != null) {
+                return itemRepository.findBySellerIdNotAndType(userId, itemType, pageable);
+            }
+            return itemRepository.findBySellerIdNot(userId, pageable);
+        }
+    }
+
+
     public Item getItemById(long id) {
         return itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found"));
     }
@@ -76,7 +109,14 @@ public class ItemService {
     public List<Clothes> getClothesByCategory(Category category){
         return itemRepository.findAll().stream().filter(item -> item instanceof Clothes).map(item -> (Clothes) item).filter(clothes -> clothes.getCategory().equals(category)).collect(Collectors.toList());
     }
-
+    public Page<Clothes> getClothesByCategory(Category category, int page) {
+        Pageable pageable = PageRequest.of(page, 28);
+        try {
+            return itemRepository.findClothesByCategory(category, pageable);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching clothes by category: " + e.getMessage(), e);
+        }
+    }
     public List<Electronics> getElectronics(){
         return itemRepository.findAll().stream().filter(item -> item instanceof Electronics).map(item -> (Electronics) item).collect(Collectors.toList());
     }
@@ -386,13 +426,43 @@ public class ItemService {
     }
     
     public List<Item> searchItems(Long token, String query) {
-        if (query == null || query.isBlank()) return getItems(token);
+        if (query == null || query.isBlank()) return getAllItems(token);
         List<Item> items = itemRepository.findAll().stream()
                 .filter(item -> item.getTitle().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
         System.out.println("2"+items);
         return items;
     }
+    public Page<Item> searchItems(Long token, String query, int page, String type) {
+        Map<String, Class<? extends Item>> typeMap = Map.of(
+            "Clothes", Clothes.class,
+            "Electronics", Electronics.class,
+            "Pet", Pet.class,
+            "Entertainment", Entertainment.class,
+            "Home", Home.class
+        );
+
+        Pageable pageable = PageRequest.of(page, 28);
+        String searchQuery = (query != null) ? query : "";
+
+        if ((searchQuery.isBlank()) && (type == null || type.isBlank())) {
+            return getItems(token, page, "");
+        }
+
+        if (type != null && !type.isBlank()) {
+            Class<? extends Item> itemType = typeMap.get(type);
+
+            if (itemType == null) {
+                return itemRepository.searchByQuery(searchQuery, pageable);
+            }
+
+            return itemRepository.searchByTypeAndQuery(itemType, searchQuery, pageable);
+        }
+
+        return itemRepository.searchByQuery(searchQuery, pageable);
+    }
+
+
 
     public List<Item> getRecommendedProducts(Item item) {
         if (item == null) {

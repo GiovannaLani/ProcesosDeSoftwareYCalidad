@@ -1,8 +1,11 @@
 package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.EditUserDTO;
+import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.dto.LoginDTO;
+import com.spq.vinted.dto.PaginatedResponseDTO;
 import com.spq.vinted.dto.RatingDTO;
+import com.spq.vinted.dto.RatingInfoDTO;
 import com.spq.vinted.dto.SignupDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Item;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -281,43 +285,56 @@ public class UserController {
     }
 
 	@PostMapping("/rate")
-	public ResponseEntity<String> rateUser(@RequestBody Rating rating) {
+	public ResponseEntity<Void> rateUser(@RequestBody RatingDTO rating) {
 		try {
-			// Validar que los IDs no sean nulos
 			if (rating.getRatedUserId() == null || rating.getRatingUserId() == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+				return ResponseEntity.badRequest().build();
 			}
 			
 			User ratedUser = userService.getUserById(rating.getRatedUserId());
 			User ratingUser = userService.getUserById(rating.getRatingUserId());
 			
 			if (ratedUser == null || ratingUser == null) {
-				return ResponseEntity.badRequest().body("Rated user or rating user not found");
+				return ResponseEntity.badRequest().build();
 			}
 			
-			RatingDTO ratingDTO = new RatingDTO(
-				ratedUser.getId(),
-				ratingUser.getId(),
-				rating.getScore(),
-				rating.getComment()
-			);
 
-			userService.addRating(ratingDTO);
-			return ResponseEntity.ok("Rating added successfully");
+			userService.addRating(rating);
+			return ResponseEntity.ok().build();
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Error adding rating: " + e.getMessage());
+			return ResponseEntity.badRequest().build();
 		}
 	}
 
 	@GetMapping("/{userId}/ratings")
-	public ResponseEntity<List<RatingDTO>> getUserRatings(@PathVariable long userId) {
+	public ResponseEntity<List<RatingInfoDTO>> getUserRatings(@PathVariable long userId) {
 		try {
-			List<RatingDTO> ratings = userService.getRatingsForUser(userId);
+			List<RatingInfoDTO> ratings = userService.getRatingsForUser(userId);
 			return ResponseEntity.ok(ratings);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(null);
 		}
 	}
-
+	
+	@GetMapping("/searchUsers")
+    public ResponseEntity<PaginatedResponseDTO<UserDTO>> searchUsers(
+        @RequestParam(value = "token", required = false) Long token,
+        @RequestParam(value = "search_text",required = false) String query,
+        @RequestParam(value = "page", defaultValue = "0") int page) {
+        try {
+            Page<User> users = userService.searchUsers(token, query, page);
+            List<UserDTO> usersDTOs = users.getContent().stream()
+				.map(user -> user.toDTO())
+				.collect(Collectors.toList());
+            PaginatedResponseDTO<UserDTO> result = new PaginatedResponseDTO<>(
+                usersDTOs,
+                users.getNumber(),
+                users.getTotalPages()
+            );
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

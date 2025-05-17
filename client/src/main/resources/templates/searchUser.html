@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Compra</title>
+    <title>User Profile</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" th:href="@{/images/icons/favicon.png}" />
@@ -27,7 +28,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/css-hamburgers/hamburgers.min.css}" />
 
     <!-- Animsition -->
-    <!--<link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />-->
+    <link rel="stylesheet" type="text/css" th:href="@{/vendor/animsition/css/animsition.min.css}" />
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css" th:href="@{/vendor/select2/select2.min.css}" />
@@ -46,50 +47,12 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/util.css}" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
-
-    <style>
-        /* Estilos para los gastos de gestión */
-        .total-summary {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e6e6e6;
-            border-radius: 10px;
-            background-color: #f8f8f8;
-        }
-        
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #e0e0e0;
-        }
-        
-        .summary-row.total {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-bottom: none;
-            border-top: 2px solid #e0e0e0;
-            font-size: 1.1em;
-        }
-        
-        .highlight-fees {
-            color: #e65540;
-            font-weight: 500;
-        }
-        
-        .item-box {
-            border-bottom: 1px solid #eeeeee;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
 </head>
+
 <body class="animsition">
 
-		<!-- Header -->
+	<!-- Header -->
 	<header class="header-v4">
 		<!-- Header desktop -->
 		<div class="container-menu-desktop">
@@ -148,6 +111,7 @@
 						</div>
 					</div>
 
+
 					<!-- Icon header -->
 					<div class="wrap-icon-header flex-w flex-r-m">
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
@@ -175,7 +139,6 @@
 							<div class="account-dropdown-menu">
 								<ul>
 									<li><a th:href="@{/userProfile/{id}(id=${loggedUserId}, token=${token})}">Mi Perfil</a></li>
-									<li><a th:href="@{/shipments/{id}(id=${loggedUserId}, token=${token})}">Pedidos</a></li>
 									<li><a th:href="@{/logout(token=${token})}">Cerrar Sesión</a></li>
 								</ul>
 							</div>
@@ -194,6 +157,7 @@
 								Vender ahora
 							</button>
 						</form>
+						
 					</div>
 				</nav>
 			</div>
@@ -251,202 +215,62 @@
 
 	</header>
 
-    <!-- Main Content -->
+<!-- Product -->
 	<section class="bg0 p-t-104 p-b-116">
 		<div class="container">
-			<div class="flex-w flex-tr flex-login">
-				<div th:if="${items != null and not #lists.isEmpty(items)|| offer != null}" class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md bor-rad-10">
-					<h4 class="mtext-105 cl2 txt-center p-b-30">
-						Comprar Artículos
-					</h4>
-					
-					<!-- CASO: COMPRA CON OFERTA -->
-					<div th:if="${offer != null}" class="txt-center p-b-30">
-						<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" 
-							 alt="Imagen del artículo" 
-							 style="max-width: 300px; max-height: 300px;">
-					</div>
-					
-					<!-- Información de la oferta con gastos de gestión -->
-					<div th:if="${offer != null}" class="total-summary">
-						<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-						<div class="summary-row">
-							<span>Precio del artículo:</span>
-							<span th:text="${offer.price}"></span> €
-						</div>
-						<div class="summary-row highlight-fees">
-							<span>Gastos de gestión:</span>
-							<span th:text="${#numbers.formatDecimal(offer.price * 0.15, 1, 2)}"></span> €
-						</div>
-						<div class="summary-row total">
-							<strong>Total a pagar:</strong>
-							<strong th:text="${#numbers.formatDecimal(offer.price * 1.15, 1, 2)}"></strong> €
+	
+			<div th:if="${users == null or users.isEmpty()}" class="row isotope-grid" style="justify-content: center;">
+				<p class="stext-107 cl7 size-201 errorMessage txt-center"
+					style="text-align: center; display: block; width: 100%;">
+					No hay usuarios
+				 </p>
+			</div>
+			<div class="m-t-20 row isotope-grid">
+				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women" th:each="user : ${users}">
+					<!-- Block2 -->
+					<div class="block2">
+						<div class="web_ui__Cell__cell web_ui__Cell__tight" role="presentation">
+							<div class="web_ui__Cell__image">
+								<div class="u-flexbox u-align-items-center u-fill-height">
+									<img th:src="${user.profileImage != null} ? @{${profileImageBaseUrl + user.profileImage}} : @{'/images/icons/profile-default.png'}"
+										alt="Imagen de perfil" class="web_ui__Image__content" style="width: 50px; height: 50px; border-radius: 50%;">
+								</div>
+							</div>
+							<div class="web_ui__Cell__content">
+								<div class="web_ui__Cell__body">
+									<a th:href="@{/userProfile/{id}(id=${user.id}, token=${token})}" th:text="${user.username}" class="web_ui__Text__text web_ui__Text__body web_ui__Text__left">
+										Nombre Usuario
+									</a>
+								</div>
+							</div>
 						</div>
 					</div>
-	
-					<form th:if="${offer != null}" th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
-						<h4 class="mtext-105 cl2 txt-center p-b-30">
-							Confirmar Compra
-						</h4>
-						<div class="m-b-20">
-							<label for="paymentMethod" class="stext-111 cl2 p-b-10">Método de pago</label>
-							<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" required onchange="togglePaymentFields(this.value)">
-								<option value="">Elegir opción</option>
-								<option value="credit_card">Tarjeta de crédito</option>
-								<option value="paypal">PayPal</option>
-								<option value="bank_transfer">Transferencia bancaria</option>
-							</select>
-						</div>
-	
-						<div id="creditCardFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
-								<input type="text" id="cardNumber" name="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
-							</div>
-							<div class="m-b-20">
-								<label for="cardExpiry" class="stext-111 cl2 p-b-10">Fecha de expiración</label>
-								<input type="text" id="cardExpiry" name="cardExpiry" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
-							</div>
-							<div class="m-b-20">
-								<label for="cardCVV" class="stext-111 cl2 p-b-10">CVV</label>
-								<input type="text" id="cardCVV" name="cardCVV" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
-							</div>
-						</div>
-	
-						<div id="paypalFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
-								<input type="email" id="paypalEmail" name="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
-							</div>
-						</div>
-	
-						<div id="bankTransferFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
-								<input type="text" id="bankAccount" name="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES76 1234 5678 9012 3456">
-							</div>
-							<div class="m-b-20">
-								<label for="bankName" class="stext-111 cl2 p-b-10">Nombre del banco</label>
-								<input type="text" id="bankName" name="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del banco">
-							</div>
-						</div>
-	
-						<input type="hidden" name="token" th:value="${token}">
-						<input type="hidden" name="offerId" th:value="${offer != null ? offer.id : ''}">
-						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
-							Confirmar compra
-						</button>
-						<div th:if="${errorMessage}">
-							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
-						</div>
-					</form>
-					
-					<!-- CASO: COMPRA MÚLTIPLE -->
-					<form th:if="${offer == null}" th:action="@{/createMultiplePurchase}" method="POST">
-						<div th:each="item : ${items}" class="item-box p-b-30">
-							<h5 class="mtext-105 cl2 txt-center">
-								<span th:text="${item.title}"></span>
-							</h5>
-							<div class="txt-center p-b-20">
-								<img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}" 
-									 alt="Imagen del artículo" 
-									 style="max-width: 200px; max-height: 200px;">
-							</div>
-							<p class="txt-center">Descripción: <span th:text="${item.description}"></span></p>
-							
-							<!-- Precio con gastos de gestión para cada item -->
-							<div class="price-summary">
-								<div class="summary-row">
-									<span>Precio del artículo:</span>
-									<span th:text="${#numbers.formatDecimal(item.price, 1, 2)}"></span> €
-								</div>
-								<div class="summary-row highlight-fees">
-									<span>Gastos de gestión:</span>
-									<span th:text="${#numbers.formatDecimal(item.price * 0.15, 1, 2)}"></span> €
-								</div>
-								<div class="summary-row total">
-									<strong>Total:</strong>
-									<strong th:text="${#numbers.formatDecimal(item.price * 1.15, 1, 2)}"></strong> €
-								</div>
-							</div>
-							<input type="hidden" name="itemIds" th:value="${item.id}">
-						</div>
-						
-						<!-- Resumen total para compras múltiples -->
-						<div class="total-summary" th:if="${items != null and items.size() > 1}">
-							<h5 class="mtext-105 cl2 p-b-10">Resumen del pedido</h5>
-							<div class="summary-row">
-								<span>Subtotal:</span>
-								<span th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]), 1, 2)}"></span> €
-							</div>
-							<div class="summary-row highlight-fees">
-								<span>Gastos de gestión:</span>
-								<span th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]) * 0.15, 1, 2)}"></span> €
-							</div>
-							<div class="summary-row total">
-								<strong>Total:</strong>
-								<strong th:text="${#numbers.formatDecimal(#aggregates.sum(items.![price]) * 1.15, 1, 2)}"></strong> €
-							</div>
-						</div>
-						
-						<h4 class="mtext-105 cl2 txt-center p-b-30">Confirmar Compra</h4>
-						<div class="m-b-20">
-							<label for="paymentMethod" class="stext-111 cl2 p-b-10">Método de pago</label>
-							<select name="paymentMethod" id="paymentMethod" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" required onchange="togglePaymentFields(this.value)">
-								<option value="">Elegir opción</option>
-								<option value="credit_card">Tarjeta de crédito</option>
-								<option value="paypal">PayPal</option>
-								<option value="bank_transfer">Transferencia bancaria</option>
-							</select>
-						</div>
-	
-						<div id="creditCardFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="cardNumber" class="stext-111 cl2 p-b-10">Número de tarjeta</label>
-								<input type="text" id="cardNumber" name="cardNumber" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="1234 5678 9012 3456">
-							</div>
-							<div class="m-b-20">
-								<label for="cardExpiry" class="stext-111 cl2 p-b-10">Fecha de expiración</label>
-								<input type="text" id="cardExpiry" name="cardExpiry" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="MM/AA">
-							</div>
-							<div class="m-b-20">
-								<label for="cardCVV" class="stext-111 cl2 p-b-10">CVV</label>
-								<input type="text" id="cardCVV" name="cardCVV" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="123">
-							</div>
-						</div>
-	
-						<div id="paypalFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="paypalEmail" class="stext-111 cl2 p-b-10">Correo electrónico de PayPal</label>
-								<input type="email" id="paypalEmail" name="paypalEmail" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="email@example.com">
-							</div>
-						</div>
-	
-						<div id="bankTransferFields" style="display: none;">
-							<div class="m-b-20">
-								<label for="bankAccount" class="stext-111 cl2 p-b-10">Número de cuenta bancaria</label>
-								<input type="text" id="bankAccount" name="bankAccount" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="ES76 1234 5678 9012 3456">
-							</div>
-							<div class="m-b-20">
-								<label for="bankName" class="stext-111 cl2 p-b-10">Nombre del banco</label>
-								<input type="text" id="bankName" name="bankName" class="stext-111 cl2 plh3 size-116 p-l-12 p-r-30 bor-rad-10" placeholder="Nombre del banco">
-							</div>
-						</div>
-	
-						<input type="hidden" name="token" th:value="${token}">
-						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer m-t-10">
-							Confirmar compra
-						</button>
-						<div th:if="${errorMessage}">
-							<p class="errorMessage txt-center"><span th:text="${errorMessage}"></span></p>
-						</div>
-					</form>
 				</div>
 			</div>
-		</div>
-	</section>
 
-    <!-- Footer -->
+		</div>
+		<div th:if="${users != null and !users.isEmpty()}" class="pagination-container">
+			<form th:if="${page > 0}" th:action="@{/searchUsers(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page - 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<input type="hidden" name="search_text" th:value="${search_text}">
+				<button class="button-green">Anterior</button>
+			</form>
+
+			<span class="page-info">Página <span th:text="${page + 1}">1</span> de <span th:text="${totalPages}">1</span></span>
+
+			<form th:if="${page < totalPages - 1}" th:action="@{/searchUsers(token=${token}, page=${page},redirectUrl=${currentUrl})}" method="get">
+				<input type="hidden" name="token" th:value="${token}">
+				<input type="hidden" name="page" th:value="${page + 1}">
+				<input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+				<input type="hidden" name="search_text" th:value="${search_text}">
+				<button class="button-green">Siguiente</button>
+			</form>
+		</div>
+
+	</section>
+	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
 			<div class="row">
@@ -563,23 +387,23 @@
 			<div class="p-t-40">
 				<div class="flex-c-m flex-w p-b-18">
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-01.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-02.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-03.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-04.png}" alt="ICON-PAY">
 					</a>
 
 					<a href="#" class="m-all-1">
-						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+						<img th:src="@{/images/icons/icon-pay-05.png}" alt="ICON-PAY">
 					</a>
 				</div>
 
@@ -597,6 +421,7 @@
 		</div>
 	</footer>
 
+
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
@@ -605,14 +430,14 @@
 	</div>
 
 	<!--===============================================================================================-->
-	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script th:src="@{/vendor/jquery/jquery-3.2.1.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<script th:src="@{/vendor/animsition/js/animsition.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/bootstrap/js/popper.js"></script>
-	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script th:src="@{/vendor/bootstrap/js/popper.js}"></script>
+	<script th:src="@{/vendor/bootstrap/js/bootstrap.min.js}"></script>
 	<!--===============================================================================================-->
-	<script src="vendor/select2/select2.min.js"></script>
+	<script th:src="@{/vendor/select2/select2.min.js}"></script>
 	<script>
 		$(".js-select2").each(function () {
 			$(this).select2({
@@ -622,9 +447,9 @@
 		})
 	</script>
 	<!--===============================================================================================-->
-	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<script th:src="@{/vendor/MagnificPopup/jquery.magnific-popup.min.js}" ></script>
 	<!--===============================================================================================-->
-	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script th:src="@{/vendor/perfect-scrollbar/perfect-scrollbar.min.js}" ></script>
 	<script>
 		$('.js-pscroll').each(function () {
 			$(this).css('position', 'relative');
@@ -641,10 +466,10 @@
 		});
 	</script>
 	<!--===============================================================================================-->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
-	<script src="js/map-custom.js"></script>
+	<script  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
+	<script th:src="@{/js/map-custom.js}" ></script>
 	<!--===============================================================================================-->
-	<script src="js/main.js"></script>
+	<script th:src="@{/js/main.js}"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
         const userMenuToggle = document.querySelector(".user-menu-toggle");
@@ -663,19 +488,19 @@
     });
 	</script>
 	<script>
-		function togglePaymentFields(paymentMethod) {
-			document.getElementById("creditCardFields").style.display = "none";
-			document.getElementById("paypalFields").style.display = "none";
-			document.getElementById("bankTransferFields").style.display = "none";
-
-			if (paymentMethod === "credit_card") {
-				document.getElementById("creditCardFields").style.display = "block";
-			} else if (paymentMethod === "paypal") {
-				document.getElementById("paypalFields").style.display = "block";
-			} else if (paymentMethod === "bank_transfer") {
-				document.getElementById("bankTransferFields").style.display = "block";
-			}
-		}
+		document.getElementById("closet-tab").addEventListener("click", function () {
+			document.getElementById("closet-content").style.display = "block";
+			document.getElementById("feedback-content").style.display = "none";
+			this.classList.add("web_ui__Tabs__is-active");
+			document.getElementById("feedback-tab").classList.remove("web_ui__Tabs__is-active");
+		});
+	
+		document.getElementById("feedback-tab").addEventListener("click", function () {
+			document.getElementById("closet-content").style.display = "none";
+			document.getElementById("feedback-content").style.display = "block";
+			this.classList.add("web_ui__Tabs__is-active");
+			document.getElementById("closet-tab").classList.remove("web_ui__Tabs__is-active");
+		});
 	</script>
 
 <script>
@@ -713,4 +538,5 @@
 	</script>
 
 </body>
+
 </html>

@@ -11,10 +11,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spq.vinted.dto.RatingDTO;
+import com.spq.vinted.dto.RatingInfoDTO;
 import com.spq.vinted.dto.UserDTO;
 import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Rating;
@@ -229,17 +233,28 @@ public class UserService {
 		ratingRepository.save(rating);
 	}
 	
-	public List<RatingDTO> getRatingsForUser(long userId) {
+	public List<RatingInfoDTO> getRatingsForUser(long userId) {
 		List<Rating> ratings = ratingRepository.findByRatedUserId(userId);
 	
 		return ratings.stream()
-				.map(rating -> new RatingDTO(
-						rating.getRatedUserId(),
-						rating.getRatingUserId(),
+				.map(rating -> new RatingInfoDTO(
 						rating.getScore(),
-						rating.getComment()
+						rating.getComment(),
+						rating.getRatingUserId(),
+						userRepository.findById(String.valueOf(rating.getRatingUserId())).map(User::getProfileImage).orElse(null),
+						userRepository.findById(String.valueOf(rating.getRatingUserId())).map(User::getUsername).orElse(null)
 				))
 				.collect(Collectors.toList());
+	}
+	public Page<User> searchUsers(Long token, String query, int page) {
+		Pageable pageable = PageRequest.of(page, 28);
+		String searchQuery = (query != null) ? query.trim().toLowerCase() : "";
+
+		if (searchQuery.isBlank()) {
+			return userRepository.findAll(pageable);
+		}
+
+		return userRepository.searchByQuery(searchQuery, pageable);
 	}
 
 }

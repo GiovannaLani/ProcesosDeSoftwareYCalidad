@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spq.client.data.Ad;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
+import com.spq.client.data.Rating;
 import com.spq.client.data.User;
 
 @RestController
@@ -81,6 +83,25 @@ public class ChatRoomController {
             e.printStackTrace(); 
             return ResponseEntity.badRequest().body("Error al aceptar la oferta: " + e.getMessage());
         }
+    }
+    @PostMapping("/rateUser")
+    public ResponseEntity<String> rateUser(
+            @RequestBody Rating rating,
+            @RequestParam("token") Long token) {
+        try {
+            System.out.println("Rating recibido: " + rating);
+            vintedService.addRating(rating, token);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al enviar la valoración.");
+        }
+    }
+
+    @GetMapping("/ads")
+    public ResponseEntity<List<Ad>> getAllAds() {
+        List<Ad> ads = vintedService.getAllAds();
+        return new ResponseEntity<>(ads, HttpStatus.OK);
     }
 }
 
