@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.data.domain.Page;
+
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
@@ -55,6 +57,7 @@ public class ClientController {
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
 		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
+		model.addAttribute("adsImageBaseUrl", "http://localhost:8080/ads/images/");
 		
 		// Manejo del carrito
 		if (token != null) {
@@ -155,6 +158,11 @@ public class ClientController {
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
+			if ("admin@admin".equals(email) && "admin".equals(password)) {
+				long adminToken = System.currentTimeMillis(); 
+				return "redirect:/uploadAd?token=" + adminToken;
+			}
+
 			if (redirectUrl == null || redirectUrl.isEmpty() || redirectUrl.equals("null")) {
 				redirectUrl = "/allItems";
 			}
@@ -195,6 +203,8 @@ public class ClientController {
 			model.addAttribute("totalPages", itemPage.totalPages());
 			model.addAttribute("type", type);
 			
+			List<Ad> ads = vintedService.getAllAds();
+			model.addAttribute("ads", ads);
 			return "product";
 			
 		} catch (RuntimeException e) {
@@ -1260,4 +1270,56 @@ public class ClientController {
 		}
 	}
 
+	@GetMapping("/uploadAd")
+	public String showUploadAd(
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+		if (token == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("redirectUrl", redirectUrl);
+		model.addAttribute("token", token);
+		return "uploadAd";
+	}
+
+	@PostMapping("/uploadAd")
+	public String uploadAd(
+			@RequestParam("token") Long token,
+			@RequestParam("title") String title,
+			@RequestParam("description") String description,
+			@RequestParam(value = "adImage") MultipartFile adImage,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
+		try {
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
+			model.addAttribute("redirectUrl", redirectUrl);
+
+			
+			long adId = vintedService.uploadAdData(token, title, description);
+
+			if (adImage != null && !adImage.isEmpty()) {
+				vintedService.uploadAdImage(adId, adImage);
+			}
+
+			redirectAttributes.addFlashAttribute("successMessage", "Anuncio creado correctamente.");
+			return "uploadAd";
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el anuncio.");
+			return "redirect:" + redirectUrl;
+		}
+	}
+
 }
+

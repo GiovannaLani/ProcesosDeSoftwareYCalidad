@@ -13,6 +13,7 @@ import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
 import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoomInfo;
@@ -81,4 +82,9 @@ public interface IVintedServiceProxy {
 	public Offer rejectOffer(Long id);
 	public PaginatedResponse<User> searchUsers(Long token, String search, int page);
 	public List<Item> getRecommendedItems(Long itemId, Long token);
+	public List<Ad> getAllAds();
+	public Ad getAdById(Long token, Long id);
+	public void uploadAd(Long token, String title, String description, MultipartFile image);
+	public void uploadAdImage(Long adId, MultipartFile image);
+	public long uploadAdData(Long token, String title, String description);
 }

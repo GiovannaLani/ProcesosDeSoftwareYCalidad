@@ -33,6 +33,7 @@ import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
 import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Item;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoom;
@@ -903,6 +904,66 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
+	public List<Ad> getAllAds() {
+		try {
+			String url = apiBaseUrl + "/ads";
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Ad>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ads: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public Ad getAdById(Long token, Long id) {
+		try {
+			String url = apiBaseUrl + "/ads/" + id;
+			return restTemplate.getForObject(url, Ad.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ad: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public long uploadAdData(Long token, String title, String description) {
+		String url = apiBaseUrl + "/ads/adData?token=" + token;
+		Ad ad = new Ad(title, description);
+		try {
+			Long adId = restTemplate.postForObject(url, ad, Long.class);
+			if (adId == null) {
+				throw new RuntimeException("Failed to get ad ID");
+			}
+			return adId;
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad: " + e.getStatusText());
+		}
+	}
+
+	@Override
+	public void uploadAdImage(Long adId, MultipartFile image) {
+		try {
+			String url = apiBaseUrl + "/ads/adImage?adId=" + adId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("image", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad image: " + e.getStatusText());
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+
+	@Override
+	public void uploadAd(Long token, String title, String description, MultipartFile image) {
+		long adId = uploadAdData(token, title, description);
+		uploadAdImage(adId, image);
+	}
+	
 }
 	
 

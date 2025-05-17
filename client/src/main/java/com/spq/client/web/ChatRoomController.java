@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spq.client.data.Ad;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
@@ -97,6 +98,10 @@ public class ChatRoomController {
         }
     }
 
-
+    @GetMapping("/ads")
+    public ResponseEntity<List<Ad>> getAllAds() {
+        List<Ad> ads = vintedService.getAllAds();
+        return new ResponseEntity<>(ads, HttpStatus.OK);
+    }
 }
 
