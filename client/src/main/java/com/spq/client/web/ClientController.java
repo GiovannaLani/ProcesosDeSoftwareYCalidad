@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatRoomInfo;
 import com.spq.client.data.Item;
@@ -52,6 +54,7 @@ public class ClientController {
 		}
 		model.addAttribute("profileImageBaseUrl", "http://localhost:8080/users/profile/imagen/");
 		model.addAttribute("itemImageBaseUrl", "http://localhost:8080/items/images/");
+		model.addAttribute("adsImageBaseUrl", "http://localhost:8080/ads/images/");
 		
 		// Manejo del carrito
 		if (token != null) {
@@ -185,8 +188,9 @@ public class ClientController {
 			Model model) {
 		try {
 			List<Item> items = vintedService.getItems(token); 
+			List<Ad> ads = vintedService.getAllAds();
 			model.addAttribute("items", items);
-	
+			model.addAttribute("ads", ads);
 			return "product";
 		} catch (RuntimeException e) {
 			System.err.println("Ha ocurrido un error: " + e.getMessage());
@@ -1213,6 +1217,34 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar el perfil del usuario.");
 			e.printStackTrace();
 			return "redirect:/userProfile";
+		}
+	}
+
+	@GetMapping("/ads/create")
+	public String showCreateAdForm(
+			@RequestParam("token") Long token,
+			Model model) {
+		model.addAttribute("token", token);
+		return "createAd"; 
+	}
+
+	@PostMapping("/ads/create")
+	public String createAd(
+			@RequestParam("token") Long token,
+			@RequestParam("title") String title,
+			@RequestParam("description") String description,
+			@RequestParam("imageUrl") String imageUrl,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+		try {
+			Ad ad = new Ad(0L, title, description, imageUrl);
+			vintedService.createAd(token, ad);
+			redirectAttributes.addFlashAttribute("successMessage", "Anuncio creado correctamente.");
+			return "redirect:/ads?token=" + token;
+		} catch (RuntimeException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el anuncio.");
+			e.printStackTrace();
+			return "redirect:/ads/create?token=" + token;
 		}
 	}
 

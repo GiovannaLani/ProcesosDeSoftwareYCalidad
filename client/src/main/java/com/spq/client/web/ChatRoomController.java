@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spq.client.data.Ad;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
@@ -81,6 +82,12 @@ public class ChatRoomController {
             e.printStackTrace(); 
             return ResponseEntity.badRequest().body("Error al aceptar la oferta: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/ads")
+    public ResponseEntity<List<Ad>> getAllAds() {
+        List<Ad> ads = vintedService.getAllAds();
+        return new ResponseEntity<>(ads, HttpStatus.OK);
     }
 }
 

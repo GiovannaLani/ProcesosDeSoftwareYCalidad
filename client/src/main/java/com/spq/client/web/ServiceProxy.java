@@ -29,6 +29,7 @@ import com.spq.client.data.User;
 import com.spq.client.data.Purchase;
 import com.spq.client.data.Rating;
 import com.spq.client.data.Item;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoom;
@@ -798,6 +799,37 @@ public class ServiceProxy implements IVintedServiceProxy {
 			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Offer>>() {}).getBody();
 
 	}
+
+	@Override
+	public List<Ad> getAllAds() {
+		try {
+			String url = apiBaseUrl + "/ads";
+			return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Ad>>() {}).getBody();
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ads: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public Ad getAdById(Long token, Long id) {
+		try {
+			String url = apiBaseUrl + "/ads/" + id;
+			return restTemplate.getForObject(url, Ad.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to fetch ad: " + e.getStatusText(), e);
+		}
+	}
+
+	@Override
+	public void createAd(Long token, Ad ad) {
+		try {
+			String url = apiBaseUrl + "/ads/create?token=" + token;
+			restTemplate.postForObject(url, ad, Void.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to create ad: " + e.getStatusText(), e);
+		}
+	}
+	
 }
 	
 

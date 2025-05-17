@@ -11,6 +11,7 @@ import com.spq.client.data.Item;
 import com.spq.client.data.Offer;
 import com.spq.client.data.OfferCreator;
 import com.spq.client.data.Pet;
+import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
 import com.spq.client.data.ChatMessage;
 import com.spq.client.data.ChatRoom;
@@ -76,4 +77,7 @@ public interface IVintedServiceProxy {
 	public List<Rating> getRatingsForUser(long userId);
 	public Offer acceptOffer(Long id);
 	public Offer rejectOffer(Long id);
+	public List<Ad> getAllAds();
+	public Ad getAdById(Long token, Long id);
+	public void createAd(Long token, Ad ad);
 }
