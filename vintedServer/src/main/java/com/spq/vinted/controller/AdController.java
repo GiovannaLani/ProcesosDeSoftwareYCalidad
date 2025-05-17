@@ -1,7 +1,9 @@
 package com.spq.vinted.controller;
 
+import com.spq.vinted.dto.AdDTO;
 import com.spq.vinted.model.Ad;
 import com.spq.vinted.service.AdService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,22 +50,6 @@ public class AdController {
         }
     }
 
-    @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Ad> createAd(
-            @RequestParam Long token,
-            @RequestParam String title,
-            @RequestParam String description,
-            @RequestParam("image") MultipartFile imageFile) {
-        try {
-            Ad ad = adService.createAd(title, description, imageFile);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ad);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
     @GetMapping("/images/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getAdImage(@PathVariable String filename) throws MalformedURLException {
@@ -75,6 +62,38 @@ public class AdController {
                 .body(resource);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/adData")
+    public ResponseEntity<Long> uploadAdData(
+            @RequestParam("token") long token,
+            @RequestBody AdDTO adDTO) {
+        Ad ad = new Ad(adDTO.getTitle(), adDTO.getDescription(), null); 
+        Ad savedAd = adService.saveAd(ad);
+
+        if (savedAd == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.ok(savedAd.getId());
+    }
+
+    @PutMapping(value = "/adImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateAdImage(
+            @RequestParam("adId") long adId,
+            @RequestPart("image") MultipartFile imageFile) {
+
+        try {
+            adService.uploadAdImage(adId, imageFile);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            if ("Ad not found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

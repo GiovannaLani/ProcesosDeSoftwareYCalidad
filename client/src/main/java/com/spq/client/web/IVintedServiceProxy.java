@@ -79,5 +79,7 @@ public interface IVintedServiceProxy {
 	public Offer rejectOffer(Long id);
 	public List<Ad> getAllAds();
 	public Ad getAdById(Long token, Long id);
-	public void createAd(Long token, Ad ad);
+	public void uploadAd(Long token, String title, String description, MultipartFile image);
+	public void uploadAdImage(Long adId, MultipartFile image);
+	public long uploadAdData(Long token, String title, String description);
 }

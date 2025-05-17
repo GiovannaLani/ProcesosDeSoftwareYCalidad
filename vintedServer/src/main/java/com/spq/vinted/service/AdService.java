@@ -29,18 +29,11 @@ public class AdService {
         return adRepository.findById(id).orElseThrow(() -> new RuntimeException("Ad not found"));
     }
 
-    public Ad createAd(String title, String description, MultipartFile imageFile) {
-        String imageUrl;
-        try {
-            imageUrl = saveAdImage(imageFile);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save ad image", e);
-        }
-        Ad ad = new Ad(title, description, imageUrl);
+    public Ad saveAd(Ad ad) {
         return adRepository.save(ad);
     }
 
-    public String saveAdImage(MultipartFile imageFile) throws IOException {
+    public String uploadAdImage(MultipartFile imageFile) throws IOException {
         String uploadDir = "uploads/ads/";
 
         File uploadPath = new File(uploadDir);
@@ -55,5 +48,23 @@ public class AdService {
         Files.copy(imageFile.getInputStream(), filePath);
 
         return uniqueFileName;
+    }
+
+    public void uploadAdImage(long adId, MultipartFile imageFile) throws IOException {
+        String uploadDir = "uploads/ads/";
+        Ad ad = adRepository.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
+
+        File uploadPath = new File(uploadDir);
+        if (!uploadPath.exists()) {
+            uploadPath.mkdirs();
+        }
+
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();
+
+        Files.copy(imageFile.getInputStream(), filePath);
+
+        ad.setImageUrl(uniqueFileName);
+        adRepository.save(ad);
     }
 }

@@ -821,14 +821,47 @@ public class ServiceProxy implements IVintedServiceProxy {
 	}
 
 	@Override
-	public void createAd(Long token, Ad ad) {
+	public long uploadAdData(Long token, String title, String description) {
+		String url = apiBaseUrl + "/ads/adData?token=" + token;
+		Ad ad = new Ad(title, description);
 		try {
-			String url = apiBaseUrl + "/ads/create?token=" + token;
-			restTemplate.postForObject(url, ad, Void.class);
+			Long adId = restTemplate.postForObject(url, ad, Long.class);
+			if (adId == null) {
+				throw new RuntimeException("Failed to get ad ID");
+			}
+			return adId;
 		} catch (HttpStatusCodeException e) {
-			throw new RuntimeException("Failed to create ad: " + e.getStatusText(), e);
+			throw new RuntimeException("Failed to upload ad: " + e.getStatusText());
 		}
 	}
+
+	@Override
+	public void uploadAdImage(Long adId, MultipartFile image) {
+		try {
+			String url = apiBaseUrl + "/ads/adImage?adId=" + adId;
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("image", new MultipartInputStreamFileResource(image.getInputStream(), image.getOriginalFilename()));
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+			restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+		} catch (HttpStatusCodeException e) {
+			throw new RuntimeException("Failed to upload ad image: " + e.getStatusText());
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading image file", e);
+		}
+	}
+
+	@Override
+	public void uploadAd(Long token, String title, String description, MultipartFile image) {
+		long adId = uploadAdData(token, title, description);
+		uploadAdImage(adId, image);
+	}
+
+
 	
 }
 	

@@ -1220,31 +1220,54 @@ public class ClientController {
 		}
 	}
 
-	@GetMapping("/ads/create")
-	public String showCreateAdForm(
-			@RequestParam("token") Long token,
+	@GetMapping("/uploadAd")
+	public String showUploadAd(
+			@RequestParam(value = "token", required = false) Long token,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+		if (token == null) {
+			return "redirect:/login";
+		}
+		model.addAttribute("redirectUrl", redirectUrl);
 		model.addAttribute("token", token);
-		return "createAd"; 
+		return "uploadAd";
 	}
 
-	@PostMapping("/ads/create")
-	public String createAd(
+	@PostMapping("/uploadAd")
+	public String uploadAd(
 			@RequestParam("token") Long token,
 			@RequestParam("title") String title,
 			@RequestParam("description") String description,
-			@RequestParam("imageUrl") String imageUrl,
-			Model model,
-			RedirectAttributes redirectAttributes) {
+			@RequestParam(value = "adImage") MultipartFile adImage,
+			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+			RedirectAttributes redirectAttributes,
+			Model model) {
+
+		if (redirectUrl == null) {
+			redirectUrl = "/";
+		}
+
 		try {
-			Ad ad = new Ad(0L, title, description, imageUrl);
-			vintedService.createAd(token, ad);
+			if (token != null) {
+				redirectUrl += "?token=" + token;
+			}
+			model.addAttribute("redirectUrl", redirectUrl);
+
+			
+			long adId = vintedService.uploadAdData(token, title, description);
+
+			if (adImage != null && !adImage.isEmpty()) {
+				vintedService.uploadAdImage(adId, adImage);
+			}
+
 			redirectAttributes.addFlashAttribute("successMessage", "Anuncio creado correctamente.");
-			return "redirect:/ads?token=" + token;
+			return "uploadAd";
 		} catch (RuntimeException e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el anuncio.");
-			e.printStackTrace();
-			return "redirect:/ads/create?token=" + token;
+			return "redirect:" + redirectUrl;
 		}
 	}
 
