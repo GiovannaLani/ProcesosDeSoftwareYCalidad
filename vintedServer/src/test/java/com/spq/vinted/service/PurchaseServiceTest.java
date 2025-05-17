@@ -15,7 +15,7 @@ class PurchaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        purchaseService = new PurchaseService();
+        //purchaseService = new PurchaseService();
     }
 
     @Test

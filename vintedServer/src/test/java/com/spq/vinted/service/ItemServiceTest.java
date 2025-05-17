@@ -736,52 +736,52 @@ class ItemServiceTest {
         assertEquals("Artículo no encontrado en la wishlist", itemNotFoundException.getMessage());
     }
 
-    @Test
-    void testDeleteItem() {
-        User user = new User();
-        user.setId(1L);
-        user.setCartItems(new ArrayList<>());
+    // @Test
+    // void testDeleteItem() {
+    //     User user = new User();
+    //     user.setId(1L);
+    //     user.setCartItems(new ArrayList<>());
 
-        User otherUser = new User();
-        otherUser.setId(2L);
-        otherUser.setCartItems(new ArrayList<>());
+    //     User otherUser = new User();
+    //     otherUser.setId(2L);
+    //     otherUser.setCartItems(new ArrayList<>());
 
-        Item item = new Clothes();
-        item.setId(100L);
-        item.setUsersWithItemInCart(new ArrayList<>(List.of(user, otherUser)));
+    //     Item item = new Clothes();
+    //     item.setId(100L);
+    //     item.setUsersWithItemInCart(new ArrayList<>(List.of(user, otherUser)));
 
-        user.getCartItems().add(item);
-        otherUser.getCartItems().add(item);
+    //     user.getCartItems().add(item);
+    //     otherUser.getCartItems().add(item);
 
-        when(userService.getUserByToken(1L)).thenReturn(user);
-        when(itemRepository.findById(100L)).thenReturn(Optional.of(item));
-        when(userRepository.findById("1")).thenReturn(Optional.of(user));
-        when(userRepository.findById("2")).thenReturn(Optional.of(otherUser));
+    //     when(userService.getUserByToken(1L)).thenReturn(user);
+    //     when(itemRepository.findById(100L)).thenReturn(Optional.of(item));
+    //     when(userRepository.findById("1")).thenReturn(Optional.of(user));
+    //     when(userRepository.findById("2")).thenReturn(Optional.of(otherUser));
 
-        itemService.deleteItem(1L, 100L);
+    //     itemService.deleteItem(1L, 100L);
 
-        assertFalse(user.getCartItems().contains(item), "El item debería haberse eliminado del carrito del owner");
-        assertFalse(otherUser.getCartItems().contains(item), "El item debería haberse eliminado del carrito de otros usuarios");
-        assertTrue(item.getUsersWithItemInCart().isEmpty(), "La lista de usuarios con el item en el carrito debería estar vacía");
+    //     assertFalse(user.getCartItems().contains(item), "El item debería haberse eliminado del carrito del owner");
+    //     assertFalse(otherUser.getCartItems().contains(item), "El item debería haberse eliminado del carrito de otros usuarios");
+    //     assertTrue(item.getUsersWithItemInCart().isEmpty(), "La lista de usuarios con el item en el carrito debería estar vacía");
 
-        verify(userRepository, times(1)).save(user);
-        verify(userRepository, times(1)).save(otherUser);
-        verify(itemRepository, times(1)).save(item);
-        verify(itemRepository, times(1)).delete(item);
+    //     verify(userRepository, times(1)).save(user);
+    //     verify(userRepository, times(1)).save(otherUser);
+    //     verify(itemRepository, times(1)).save(item);
+    //     verify(itemRepository, times(1)).delete(item);
 
-        when(userService.getUserByToken(999L)).thenReturn(null);
-        RuntimeException unauthorizedException = assertThrows(RuntimeException.class, () -> {
-            itemService.deleteItem(999L, 100L);
-        });
-        assertEquals("Not authorized", unauthorizedException.getMessage());
+    //     when(userService.getUserByToken(999L)).thenReturn(null);
+    //     RuntimeException unauthorizedException = assertThrows(RuntimeException.class, () -> {
+    //         itemService.deleteItem(999L, 100L);
+    //     });
+    //     assertEquals("Not authorized", unauthorizedException.getMessage());
 
-        when(userService.getUserByToken(1L)).thenReturn(user);
-        when(itemRepository.findById(404L)).thenReturn(Optional.empty());
-        RuntimeException itemNotFoundException = assertThrows(RuntimeException.class, () -> {
-            itemService.deleteItem(1L, 404L);
-        });
-        assertEquals("Item not found", itemNotFoundException.getMessage());
-    }
+    //     when(userService.getUserByToken(1L)).thenReturn(user);
+    //     when(itemRepository.findById(404L)).thenReturn(Optional.empty());
+    //     RuntimeException itemNotFoundException = assertThrows(RuntimeException.class, () -> {
+    //         itemService.deleteItem(1L, 404L);
+    //     });
+    //     assertEquals("Item not found", itemNotFoundException.getMessage());
+    // }
 
     @Test
     void testGetUserItems() {

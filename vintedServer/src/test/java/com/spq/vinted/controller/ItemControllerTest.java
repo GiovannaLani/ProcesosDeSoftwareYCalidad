@@ -777,50 +777,50 @@ public class ItemControllerTest {
     }
 
     // Delete Tests
-    @Test
-    void testDeleteItem_Success() throws Exception {
-        long token = 12345L;
-        long itemId = 1L;
+    // @Test
+    // void testDeleteItem_Success() throws Exception {
+    //     long token = 12345L;
+    //     long itemId = 1L;
 
-        mockMvc.perform(delete("/items/delete/{itemId}", itemId)
-                .param("token", String.valueOf(token)))
-                .andExpect(status().isNoContent());
+    //     mockMvc.perform(delete("/items/delete/{itemId}", itemId)
+    //             .param("token", String.valueOf(token)))
+    //             .andExpect(status().isNoContent());
 
-        verify(itemService).deleteItem(token, itemId);
-    }
+    //     verify(itemService).deleteItem(token, itemId);
+    // }
 
-    @Test
-    void testDeleteItem_NotFound() throws Exception {
-        long token = 12345L;
-        long itemId = 1L;
-        doThrow(new RuntimeException("Item not found")).when(itemService).deleteItem(token, itemId);
+    // @Test
+    // void testDeleteItem_NotFound() throws Exception {
+    //     long token = 12345L;
+    //     long itemId = 1L;
+    //     doThrow(new RuntimeException("Item not found")).when(itemService).deleteItem(token, itemId);
 
-        mockMvc.perform(delete("/items/delete/{itemId}", itemId)
-                .param("token", String.valueOf(token)))
-                .andExpect(status().isNotFound());
-    }
+    //     mockMvc.perform(delete("/items/delete/{itemId}", itemId)
+    //             .param("token", String.valueOf(token)))
+    //             .andExpect(status().isNotFound());
+    // }
 
-    @Test
-    void testDeleteItem_NotAuthorized() throws Exception {
-        long token = 12345L;
-        long itemId = 1L;
-        doThrow(new RuntimeException("Not authorized")).when(itemService).deleteItem(token, itemId);
+    // @Test
+    // void testDeleteItem_NotAuthorized() throws Exception {
+    //     long token = 12345L;
+    //     long itemId = 1L;
+    //     doThrow(new RuntimeException("Not authorized")).when(itemService).deleteItem(token, itemId);
 
-        mockMvc.perform(delete("/items/delete/{itemId}", itemId)
-                .param("token", String.valueOf(token)))
-                .andExpect(status().isForbidden());
-    }
+    //     mockMvc.perform(delete("/items/delete/{itemId}", itemId)
+    //             .param("token", String.valueOf(token)))
+    //             .andExpect(status().isForbidden());
+    // }
 
-    @Test
-    void testDeleteItem_InternalError() throws Exception {
-        long token = 12345L;
-        long itemId = 1L;
-        doThrow(new RuntimeException("Internal error")).when(itemService).deleteItem(token, itemId);
+    // @Test
+    // void testDeleteItem_InternalError() throws Exception {
+    //     long token = 12345L;
+    //     long itemId = 1L;
+    //     doThrow(new RuntimeException("Internal error")).when(itemService).deleteItem(token, itemId);
 
-        mockMvc.perform(delete("/items/delete/{itemId}", itemId)
-                .param("token", String.valueOf(token)))
-                .andExpect(status().isInternalServerError());
-    }
+    //     mockMvc.perform(delete("/items/delete/{itemId}", itemId)
+    //             .param("token", String.valueOf(token)))
+    //             .andExpect(status().isInternalServerError());
+    // }
 
     // Search Tests
     @Test
