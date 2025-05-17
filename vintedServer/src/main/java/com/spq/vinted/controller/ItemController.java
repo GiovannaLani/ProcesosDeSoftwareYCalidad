@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -431,6 +432,24 @@ public class ItemController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/productDetails/{id}")
+    public ResponseEntity<List<ItemDTO>> getProductDetails(@PathVariable Long id, @RequestParam String token) {
+        System.out.println("caracola");
+        try {
+            Item item = itemService.getItemById(id);
+            List<Item> recommendedItems = itemService.getRecommendedProducts(item);
+            System.out.println("caracola2");
+            System.out.println("Recommended items: " + recommendedItems);
+    
+            return ResponseEntity.ok(
+                recommendedItems.stream().map(Item::toDTO).collect(Collectors.toList())
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

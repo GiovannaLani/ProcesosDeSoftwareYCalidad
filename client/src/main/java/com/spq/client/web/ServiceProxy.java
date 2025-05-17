@@ -887,6 +887,22 @@ public class ServiceProxy implements IVintedServiceProxy {
 			throw new RuntimeException("Failed to fetch items: " + e.getStatusText(), e);
 		}
 	}
+	public List<Item> getRecommendedItems(Long itemId, Long token) {
+		try {
+			String url = apiBaseUrl + "/items/productDetails/" + itemId + "?token=" + token;
+			ResponseEntity<List<Item>> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				null,
+				new ParameterizedTypeReference<List<Item>>() {}
+			);
+			return response.getBody();
+		} catch (Exception e) {
+			System.err.println("Error al obtener productos recomendados: " + e.getMessage());
+			return List.of();
+		}
+	}
+
 }
 	
 
