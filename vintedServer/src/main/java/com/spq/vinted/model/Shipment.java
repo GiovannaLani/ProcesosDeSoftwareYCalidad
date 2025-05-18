@@ -1,5 +1,6 @@
 package com.spq.vinted.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.CascadeType;
@@ -34,6 +35,9 @@ public class Shipment {
     @Column(nullable = false)
     private ShipmentStatus status;
 
+    @Column(nullable = false)
+    private LocalDateTime createdDate;
+
     public Shipment() {
     }
 
@@ -41,6 +45,7 @@ public class Shipment {
         this.item = item;
         this.buyer = buyer;
         this.status = ShipmentStatus.SHIPPED;
+        this.createdDate = LocalDateTime.now();
     }
 
     public Long getId() { 
@@ -75,6 +80,12 @@ public class Shipment {
         this.status = status; 
     }
     
+        public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
 
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
 
 }

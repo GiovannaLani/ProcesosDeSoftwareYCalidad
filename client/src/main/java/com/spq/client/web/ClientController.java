@@ -1276,7 +1276,7 @@ public class ClientController {
     
     	try {
         	List<Shipment> shipments = vintedService.getShipmentsByBuyerId(buyerId, token);
-			System.out.println("Shipments: " + shipments);
+			System.out.println("ShipmentsID: " + shipments);
         	model.addAttribute("shipments", shipments);
         	return "shipments";
     	} catch (Exception e) {

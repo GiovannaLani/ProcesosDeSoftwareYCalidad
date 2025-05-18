@@ -1,7 +1,9 @@
 package com.spq.vinted.dto;
 
+import java.time.LocalDateTime;
+
 import com.spq.vinted.model.ShipmentStatus;
-import java.util.List;
+
 
 public class ShipmentDTO {
     
@@ -14,14 +16,17 @@ public class ShipmentDTO {
     private ItemDTO item;
     private UserDTO buyer;
 
+    private LocalDateTime createdDate;
+
     public ShipmentDTO() {}
     
 
-    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item) {
+    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item, LocalDateTime createdDate) {
         this.id = id;
         this.status = status;
         this.buyer = buyer;
         this.item = item;
+        this.createdDate = createdDate;
     }
 
     public Long getId() { return id; }
@@ -38,4 +43,7 @@ public class ShipmentDTO {
     
     public UserDTO getBuyer() { return buyer; }
     public void setBuyer(UserDTO buyer) { this.buyer = buyer; }
+
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 }
