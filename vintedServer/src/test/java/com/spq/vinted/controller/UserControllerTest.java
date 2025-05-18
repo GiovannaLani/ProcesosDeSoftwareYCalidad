@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -731,4 +732,63 @@ class UserControllerTest {
                 .andExpect(content().string("Error al seguir al usuario"));
         }
 
+         @Test
+    void getFollowers_Success() throws Exception {
+        User testUser = new User("test@example.com", "password", "testuser", "Test", "User");
+        testUser.setId(1L);
+        testUser.setDescription("Test Description");
+        testUser.setProfileImage("profile.jpg");
+
+        when(userService.getFollowers(1L)).thenReturn(List.of(testUser));
+
+
+        mockMvc.perform(get("/users/followers")
+                .param("targetUserId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].username").value("testuser"))
+                .andExpect(jsonPath("$[0].name").value("Test"))
+                .andExpect(jsonPath("$[0].surname").value("User"))
+                .andExpect(jsonPath("$[0].description").value("Test Description"))
+                .andExpect(jsonPath("$[0].profileImage").value("profile.jpg"));
+    }
+
+    @Test
+    void getFollowers_InternalError() throws Exception {
+
+        when(userService.getFollowers(1L)).thenThrow(new RuntimeException("Database error"));
+
+
+        mockMvc.perform(get("/users/followers")
+                .param("targetUserId", "1"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void getFollowing_Success() throws Exception {
+        User testUser = new User("test@example.com", "password", "testuser", "Test", "User");
+        testUser.setId(1L);
+        testUser.setDescription("Test Description");
+        testUser.setProfileImage("profile.jpg");
+
+        when(userService.getFollowing(1L)).thenReturn(List.of(testUser));
+
+        mockMvc.perform(get("/users/following")
+                .param("targetUserId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].username").value("testuser"));
+    }
+
+    @Test
+    void getFollowing_EmptyList() throws Exception {
+
+        when(userService.getFollowing(1L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/users/following")
+                .param("targetUserId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
 }
