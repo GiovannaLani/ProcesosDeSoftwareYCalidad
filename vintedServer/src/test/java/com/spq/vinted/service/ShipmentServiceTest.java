@@ -39,30 +39,24 @@ class ShipmentServiceTest {
 
     @Test
     void testGetShipmentsByBuyerId_Success() {
-        // Create a mock user and token
         Long validBuyerId = 1L;
         Long validToken = 12345L;
         
-        // Create a list of mock shipments
         List<Shipment> mockShipments = new ArrayList<>();
         mockShipments.add(createMockShipment(1L));
         mockShipments.add(createMockShipment(2L));
         
-        // Create mock DTOs
         List<ShipmentDTO> mockDTOs = new ArrayList<>();
         mockDTOs.add(createMockShipmentDTO(1L));
         mockDTOs.add(createMockShipmentDTO(2L));
         
-        // Mock the service calls
         when(shipmentService.getShipmentsbyBuyerId(validBuyerId, validToken))
             .thenReturn(mockShipments);
         when(shipmentService.convertToDTO(any(Shipment.class)))
             .thenReturn(mockDTOs.get(0), mockDTOs.get(1));
         
-        // Execute the method
         List<Shipment> result = shipmentService.getShipmentsbyBuyerId(validBuyerId, validToken);
         
-        // Verify results
         assertEquals(2, result.size());
         verify(shipmentService, times(1)).getShipmentsbyBuyerId(validBuyerId, validToken);
     }
@@ -82,7 +76,6 @@ class ShipmentServiceTest {
 
     @Test
     void testConvertToDTO() {
-        // Create a mock shipment with properly initialized item and buyer
         Shipment shipment = new Shipment();
         shipment.setId(1L);
         shipment.setStatus(ShipmentStatus.SHIPPED);
@@ -96,7 +89,6 @@ class ShipmentServiceTest {
         item.setId(10L);
         item.setTitle("Test Item");
         
-        // Important: Set a seller for the item
         User seller = new User();
         seller.setId(2L);
         seller.setUsername("seller1");
@@ -104,7 +96,6 @@ class ShipmentServiceTest {
         
         shipment.setItem(item);
         
-        // Create mock DTO
         ShipmentDTO expectedDTO = new ShipmentDTO();
         expectedDTO.setId(1L);
         expectedDTO.setStatus(ShipmentStatus.SHIPPED);
@@ -112,10 +103,8 @@ class ShipmentServiceTest {
         
         when(shipmentService.convertToDTO(shipment)).thenReturn(expectedDTO);
         
-        // Execute the method
         ShipmentDTO result = shipmentService.convertToDTO(shipment);
         
-        // Verify results
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals(ShipmentStatus.SHIPPED, result.getStatus());
@@ -180,7 +169,6 @@ class ShipmentServiceTest {
         item.setId(id * 10);
         item.setTitle("item" + id);
         
-        // Important: Set a seller for the item
         User seller = new User();
         seller.setId(id + 100);
         seller.setUsername("seller" + id);
@@ -201,7 +189,6 @@ class ShipmentServiceTest {
         item.setId(id * 10);
         item.setTitle("item" + id);
         
-        // Important: Set a seller for the item
         User seller = new User();
         seller.setId(id + 100);
         seller.setUsername("seller" + id);
