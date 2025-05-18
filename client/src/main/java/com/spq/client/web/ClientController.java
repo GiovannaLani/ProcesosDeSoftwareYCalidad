@@ -942,7 +942,8 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al añadir el artículo al carrito.");
 			e.printStackTrace();
 		}
-		return "redirect:" + redirectUrl;
+		
+		return "redirect:" + redirectUrl+"?token=" + token;
 	}
 
 	@PostMapping("/wishlist/add")
