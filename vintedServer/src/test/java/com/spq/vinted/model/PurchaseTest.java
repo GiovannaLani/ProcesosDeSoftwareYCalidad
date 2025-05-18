@@ -97,26 +97,23 @@ class PurchaseTest {
 
     @Test
     void testSetPrice() {
-        // Test valor positivo
+
         purchase.setPrice(150.5f);
         assertEquals(150.5f, purchase.getPrice(), 0.001, "El precio debería actualizarse con decimales");
         
-        // Test valor cero
         purchase.setPrice(0f);
         assertEquals(0f, purchase.getPrice(), 0.001, "El precio debería permitir cero");
         
-        // Test valor negativo
         purchase.setPrice(-50f);
         assertEquals(-50f, purchase.getPrice(), 0.001, "El precio debería permitir valores negativos");
     }
 
     @Test
     void testSetPaymentMethod() {
-        // Test método válido
+
         purchase.setPaymentMethod("PAYPAL");
         assertEquals("PAYPAL", purchase.getPaymentMethod(), "Debería aceptar nuevos métodos de pago");
         
-        // Test valor null
         purchase.setPaymentMethod(null);
         assertNull(purchase.getPaymentMethod(), "Debería permitir null como método de pago");
     }
