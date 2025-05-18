@@ -1,3 +1,7 @@
+/**
+ * @file PurchaseService.java
+ * @brief Clase de servicio para la gestión de compras.
+ */
 package com.spq.vinted.service;
 
 import com.spq.vinted.dto.PurchaseDTO;
@@ -9,18 +13,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * @class PurchaseService
+ * @brief Clase de servicio para la gestión de compras.
+ */
 @Service
 public class PurchaseService {
+
     private UserService userService;
     private final Map<Long, PurchaseDTO> purchases = new HashMap<>();
     private final Map<Long, List<Long>> userPurchases = new HashMap<>();
     private long purchaseCounter = 1;
 
+    /**
+     * @brief Constructor de la clase PurchaseService.
+     * @param userService Servicio de usuario.
+     */
     @Autowired
     public PurchaseService(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * @brief Método para crear una compra.
+     * @param token Token del usuario.
+     * @param purchase Compra a crear.
+     * @return Compra creada.
+     */
     public List<PurchaseDTO> createMultiplePurchases(long token, List<PurchaseDTO> purchases) {
         List<PurchaseDTO> createdPurchases = new ArrayList<>();
         for (PurchaseDTO purchase : purchases) {
@@ -30,6 +49,12 @@ public class PurchaseService {
         return createdPurchases;
     }
 
+    /**
+     * @brief Método para crear una compra.
+     * @param token Token del usuario.
+     * @param purchase Compra a crear.
+     * @return Compra creada.
+     */
     public PurchaseDTO createPurchase(long token, PurchaseDTO purchase) {
         purchase.setStatus("PENDING");
         purchase.setId(purchaseCounter);
@@ -39,6 +64,13 @@ public class PurchaseService {
         return purchase;
     }
 
+    /**
+     * @brief Método para procesar un pago.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @param paymentMethod Método de pago.
+     * @return true si el pago se procesa correctamente, false en caso contrario.
+     */
     public boolean processPayment(long token, long purchaseId, String paymentMethod) {
         PurchaseDTO purchase = purchases.get(purchaseId);
         if (purchase != null && userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {
@@ -50,6 +82,13 @@ public class PurchaseService {
         return false;
     }
 
+    /**
+     * @brief Método para obtener una compra por su ID.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @return Compra encontrada.
+     * @throws RuntimeException Excepción lanzada si la compra no se encuentra o no está autorizada.
+     */
     public PurchaseDTO getPurchaseById(long token, long purchaseId) {
         System.out.println("Token: " + token);
         System.out.println("Purchase ID: " + purchaseId);
@@ -62,6 +101,11 @@ public class PurchaseService {
         throw new RuntimeException("Purchase not found or not authorized.");
     }
 
+    /**
+     * @brief Método para obtener todas las compras de un usuario.
+     * @param token Token del usuario.
+     * @return Lista de compras del usuario.
+     */
     public List<PurchaseDTO> getUserPurchases(long token) {
         List<Long> userPurchaseIds = userPurchases.getOrDefault(token, Collections.emptyList());
         List<PurchaseDTO> userPurchasesList = new ArrayList<>();
@@ -71,6 +115,12 @@ public class PurchaseService {
         return userPurchasesList;
     }
 
+    /**
+     * @brief Método para cancelar una compra.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @throws RuntimeException Excepción lanzada si la compra no se encuentra o no está autorizada.
+     */
     public void cancelPurchase(long token, long purchaseId) {
         if (purchases.containsKey(purchaseId) && userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {
             purchases.remove(purchaseId);
@@ -80,6 +130,12 @@ public class PurchaseService {
         }
     }
 
+    /**
+     * @brief Método para convertir un objeto PurchaseDTO a un objeto Purchase.
+     * @param purchaseDTO Objeto PurchaseDTO a convertir.
+     * @param token Token del usuario.
+     * @return Objeto Purchase convertido.
+     */
     public Purchase fromDTO(PurchaseDTO purchaseDTO, Long token) {
         System.out.println("PurchaseDTO2: " + purchaseDTO+ "buyer: " + purchaseDTO.getBuyerUsername() + " seller: " + purchaseDTO.getSellerUsername());
         User buyer = userService.getUserByUsername(purchaseDTO.getBuyerUsername(),token);
@@ -97,20 +153,5 @@ public class PurchaseService {
         System.out.println("Purchase2: " + purchase);
         return purchase;
     }
-
-    // public List<PurchaseDTO> convertToDTO(List<Purchase> purchases) {
-    //     List<PurchaseDTO> purchaseDTOs = new ArrayList<>();
-    //     for (Purchase purchase : purchases) {
-    //         PurchaseDTO dto = new PurchaseDTO();
-    //         dto.setId(purchase.getId());
-    //         dto.setItemId(purchase.getItemId());
-    //         dto.setBuyerUsername(purchase.getBuyer().getUsername());
-    //         dto.setSellerUsername(purchase.getSeller().getUsername());
-    //         dto.setStatus(purchase.getStatus());
-    //         dto.setPaymentMethod(purchase.getPaymentMethod());
-    //         purchaseDTOs.add(dto);
-    //     }
-    //     return purchaseDTOs;
-    // }
 
 }

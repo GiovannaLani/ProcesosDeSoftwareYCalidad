@@ -1,3 +1,7 @@
+/**
+ * @file AdController.java
+ * @brief Controller para la gestión de anuncios.
+ */
 package com.spq.vinted.controller;
 
 import com.spq.vinted.dto.AdDTO;
@@ -20,13 +24,31 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+/**
+ * @class AdController
+ * @brief Controlador para la gestión de anuncios.
+ * 
+ * 
+ */
 @RestController
 @RequestMapping("/ads")
 public class AdController {
 
+
+    /**
+     * @brief Servicio para la gestión de anuncios.
+     * @param adService Servicio para la gestión de anuncios.
+     */
     @Autowired
     private AdService adService;
 
+
+    /**
+     * @brief Método para obtener todos los anuncios.
+     * 
+     * @return ResponseEntity<List<Ad>> Lista de anuncios.
+     * @throws Exception Excepción lanzada si ocurre un error al obtener los anuncios.
+     */
     @GetMapping
     public ResponseEntity<List<Ad>> getAllAds() {
         try {
@@ -37,6 +59,12 @@ public class AdController {
         }
     }
 
+    /**
+     * @brief Método para obtener un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity<Ad> Anuncio encontrado.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Ad> getAdById(@PathVariable long id) {
         try {
@@ -50,6 +78,13 @@ public class AdController {
         }
     }
 
+    /**
+     * @brief Método para obtener la imagen de un anuncio.
+     * 
+     * @param filename Nombre del archivo de la imagen.
+     * @return ResponseEntity<Resource> Imagen del anuncio.
+     * @throws MalformedURLException Excepción lanzada si la URL es incorrecta.
+     */
     @GetMapping("/images/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> getAdImage(@PathVariable String filename) throws MalformedURLException {
@@ -65,6 +100,13 @@ public class AdController {
         }
     }
 
+
+    /**
+     * @brief Método para eliminar un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity<Void> Respuesta de la eliminación.
+     */
     @PostMapping("/adData")
     public ResponseEntity<Long> uploadAdData(
             @RequestParam("token") long token,
@@ -78,6 +120,12 @@ public class AdController {
         return ResponseEntity.ok(savedAd.getId());
     }
 
+    /**
+     * @brief Método para eliminar un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity<Void> Respuesta de la eliminación.
+     */
     @PutMapping(value = "/adImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateAdImage(
             @RequestParam("adId") long adId,
