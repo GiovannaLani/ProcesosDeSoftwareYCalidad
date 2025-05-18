@@ -112,64 +112,12 @@ class MessageServiceTest {
         assertEquals("ChatRoom not found", exception.getMessage());
     }
 
-/*     @Test
-    void testSaveMessage() {
-        ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
-        chatMessageDTO.setSenderId(1L);
-        chatMessageDTO.setChatRoomId(2L);
-        chatMessageDTO.setContent("Hola!");
-
-        User sender = new User();
-        ChatRoom chatRoom = new ChatRoom();
-
-        when(userRepository.findById("1")).thenReturn(Optional.of(sender));
-        when(chatRoomRepository.findById(2L)).thenReturn(Optional.of(chatRoom));
-
-        Message result = messageService.saveMessage(chatMessageDTO);
-
-        assertNotNull(result);
-        verify(messageRepository).save(any(Message.class));
-    }  */
-
-    // @Test
-    // void testSaveMessage_SenderNotFound() {
-    //     when(userRepository.findById("1")).thenReturn(Optional.empty());
-
-    //     ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
-    //     chatMessageDTO.setSenderId(1L);
-    //     chatMessageDTO.setChatRoomId(2L);
-    //     chatMessageDTO.setContent("Hola!");
-
-    //     RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-    //         messageService.saveMessage(chatMessageDTO);
-    //     });
-
-    //     assertEquals("Sender not found", exception.getMessage());
-    // }
-
-    // @Test
-    // void testSaveMessage_ChatRoomNotFound() {
-    //     when(userRepository.findById("1")).thenReturn(Optional.of(new User()));
-    //     when(chatRoomRepository.findById(2L)).thenReturn(Optional.empty());
-
-    //     ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
-    //     chatMessageDTO.setSenderId(1L);
-    //     chatMessageDTO.setChatRoomId(2L);
-    //     chatMessageDTO.setContent("Hola!");
-
-    //     RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-    //         messageService.saveMessage(chatMessageDTO);
-    //     });
-
-    //     assertEquals("ChatRoom not found", exception.getMessage());
-    // }
-
     @Test
     public void testSaveMessage_WithOffer() {
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setSenderId(1L);
         dto.setChatRoomId(2L);
-        dto.setContent("10"); // offerId as string
+        dto.setContent("10"); 
         dto.setType("OFFER");
 
         User sender = new User();
@@ -184,7 +132,6 @@ class MessageServiceTest {
         Message savedMessage = new Message();
         savedMessage.setId(100L);
 
-        // Mocks
         when(userRepository.findById("1")).thenReturn(Optional.of(sender));
         when(chatRoomRepository.findById(2L)).thenReturn(Optional.of(chatRoom));
         when(offerRepository.findById(10L)).thenReturn(Optional.of(offer));
@@ -281,7 +228,6 @@ class MessageServiceTest {
 
         message.setOffer(offer);
 
-        // Mock estático si se requiere (si `ItemService.getDTOById()` es estático)
         ClothesDTO itemDTO = new ClothesDTO(); itemDTO.setId(100L);
         try (MockedStatic<ItemService> mocked = mockStatic(ItemService.class)) {
             mocked.when(() -> ItemService.getDTOById(100L)).thenReturn(itemDTO);
@@ -296,40 +242,5 @@ class MessageServiceTest {
             assertEquals(100L, dto.getOffer().getItemId());
         }
     }
-
-/* 
-    @Test
-    void testSaveAndSendMessage_WithOffer() {
-        Message message = new Message();
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.setId(2L);
-        message.setChatRoom(chatRoom);
-
-        User sender = new User();
-        sender.setId(1L);
-        User receiver = new User();
-        receiver.setId(2L);
-        Item item = mock(Item.class);
-        item.setId(3L);
-
-        Offer offer = new Offer();
-        offer.setPrice(50.0);
-        offer.setSender(sender);
-        offer.setReceiver(receiver);
-        offer.setItem(item);
-        offer.setStatus(Offer.OfferStatus.PENDING);
-
-        message.setSender(sender);
-        message.setContent("Oferta");
-        message.setOffer(offer);
-        message.setType(Message.MessageType.OFFER);
-
-        when(messageRepository.save(message)).thenReturn(message);
-
-        Message result = messageService.saveAndSendMessage(message);
-
-        assertNotNull(result);
-        verify(messagingTemplate).convertAndSend(eq("/topic/chat/2"), any(ChatMessageDTO.class));
-    } */
 
 }
