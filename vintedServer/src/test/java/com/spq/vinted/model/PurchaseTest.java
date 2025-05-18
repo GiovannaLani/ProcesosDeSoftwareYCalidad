@@ -64,4 +64,60 @@ class PurchaseTest {
         assertEquals(200.0f, purchase.getPrice(), "El precio debería ser 200.0");
         assertEquals("PAYPAL", purchase.getPaymentMethod(), "El método de pago debería ser PAYPAL");
     }
+
+    @Test
+    void testSetId() {
+        purchase.setId(999L);
+        assertEquals(999L, purchase.getId(), "El ID debería actualizarse correctamente");
+    }
+
+    @Test
+    void testSetItemId() {
+        purchase.setItemId(500L);
+        assertEquals(500L, purchase.getItemId(), "El ID del ítem debería actualizarse");
+    }
+
+    @Test
+    void testSetBuyer() {
+        User newBuyer = new User("newbuyer@test.com", "newpass", "newbuyer", "New", "Buyer");
+        purchase.setBuyer(newBuyer);
+        
+        assertEquals(newBuyer, purchase.getBuyer(), "El comprador debería actualizarse");
+        assertEquals("newbuyer", purchase.getBuyer().getUsername(), "El username del nuevo comprador debería coincidir");
+    }
+
+    @Test
+    void testSetSeller() {
+        User newSeller = new User("newseller@test.com", "newpass", "newseller", "New", "Seller");
+        purchase.setSeller(newSeller);
+        
+        assertEquals(newSeller, purchase.getSeller(), "El vendedor debería actualizarse");
+        assertEquals("newseller", purchase.getSeller().getUsername(), "El username del nuevo vendedor debería coincidir");
+    }
+
+    @Test
+    void testSetPrice() {
+        // Test valor positivo
+        purchase.setPrice(150.5f);
+        assertEquals(150.5f, purchase.getPrice(), 0.001, "El precio debería actualizarse con decimales");
+        
+        // Test valor cero
+        purchase.setPrice(0f);
+        assertEquals(0f, purchase.getPrice(), 0.001, "El precio debería permitir cero");
+        
+        // Test valor negativo
+        purchase.setPrice(-50f);
+        assertEquals(-50f, purchase.getPrice(), 0.001, "El precio debería permitir valores negativos");
+    }
+
+    @Test
+    void testSetPaymentMethod() {
+        // Test método válido
+        purchase.setPaymentMethod("PAYPAL");
+        assertEquals("PAYPAL", purchase.getPaymentMethod(), "Debería aceptar nuevos métodos de pago");
+        
+        // Test valor null
+        purchase.setPaymentMethod(null);
+        assertNull(purchase.getPaymentMethod(), "Debería permitir null como método de pago");
+    }
 }

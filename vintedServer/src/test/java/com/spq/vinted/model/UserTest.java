@@ -93,4 +93,74 @@ class UserTest {
         assertEquals(user.getDescription(), userDTO.description(), "La descripción debería coincidir");
         assertEquals(user.getProfileImage(), userDTO.profileImage(), "La imagen de perfil debería coincidir");
     }
+
+    @Test
+    void testFollowersManagement() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        User user2 = new User();
+        user2.setUsername("user2");
+        List<User> followersList = new ArrayList<>();
+        followersList.add(user2);
+        
+        user1.setFollowers(followersList);
+        
+        assertEquals(1, user1.getFollowers().size());
+        assertEquals("user2", user1.getFollowers().get(0).getUsername());
+        
+        User newUser = new User("new@test.com", "pass", "newuser", "New", "User");
+        assertNotNull(newUser.getFollowers());
+        assertTrue(newUser.getFollowers().isEmpty());
+    }
+
+
+    @Test
+    void testFollowUser() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        User user2 = new User();
+        user2.setUsername("user2");
+        user1.follow(user2);
+        
+        assertTrue(user1.getFollowing().contains(user2));
+        assertTrue(user2.getFollowers().contains(user1));
+        
+        user1.follow(user2);
+        assertEquals(1, user1.getFollowing().size());
+    }
+
+    @Test
+    void testUnfollowUser() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        User user2 = new User();
+        user2.setUsername("user2");
+        user1.follow(user2);
+        
+        user1.unfollow(user2);
+        
+        assertFalse(user1.getFollowing().contains(user2));
+        assertFalse(user2.getFollowers().contains(user1));
+        
+        user1.unfollow(user2);  
+        assertEquals(0, user1.getFollowing().size());
+    }
+
+    @Test
+    void testWishlistManagement() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        Item testItem = new Clothes();
+        testItem.setTitle("Camiseta Vintage");
+        user1.addItemToWishlist(testItem);
+        
+        assertEquals(1, user1.getWishlistItems().size());
+        assertEquals("Camiseta Vintage", user1.getWishlistItems().get(0).getTitle());
+        
+        User newUser = new User("new@test.com", "pass", "newuser", "New", "User");
+        assertNotNull(newUser.getWishlistItems());
+        assertTrue(newUser.getWishlistItems().isEmpty());
+    }
+    
+
 }
