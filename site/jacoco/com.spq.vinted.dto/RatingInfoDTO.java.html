@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RatingInfoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.dto</a> &gt; <span class="el_source">RatingInfoDTO.java</span></div><h1>RatingInfoDTO.java</h1><pre class="source lang-java linenums">package com.spq.vinted.dto;
+
+public class RatingInfoDTO {
+    private int score;
+    private String comment;
+    private Long ratingUserId;
+    private String ratingUserProfileImage;
+    private String ratingUsername;
+
+<span class="fc" id="L10">    public RatingInfoDTO() {}</span>
+
+<span class="fc" id="L12">    public RatingInfoDTO(int score, String comment, Long ratingUserId, String ratingUserProfileImage, String ratingUsername) {</span>
+<span class="fc" id="L13">        this.score = score;</span>
+<span class="fc" id="L14">        this.comment = comment;</span>
+<span class="fc" id="L15">        this.ratingUserId = ratingUserId;</span>
+<span class="fc" id="L16">        this.ratingUserProfileImage = ratingUserProfileImage;</span>
+<span class="fc" id="L17">        this.ratingUsername = ratingUsername;</span>
+<span class="fc" id="L18">    }</span>
+    public int getScore() {
+<span class="fc" id="L20">        return score;</span>
+    }
+    public void setScore(int score) {
+<span class="fc" id="L23">        this.score = score;</span>
+<span class="fc" id="L24">    }</span>
+    public String getComment() {
+<span class="fc" id="L26">        return comment;</span>
+    }
+    public void setComment(String comment) {
+<span class="fc" id="L29">        this.comment = comment;</span>
+<span class="fc" id="L30">    }</span>
+    public Long getRatingUserId() {
+<span class="fc" id="L32">        return ratingUserId;</span>
+    }
+    public void setRatingUserId(Long ratingUserId) {
+<span class="nc" id="L35">        this.ratingUserId = ratingUserId;</span>
+<span class="nc" id="L36">    }</span>
+    public String getRatingUserProfileImage() {
+<span class="fc" id="L38">        return ratingUserProfileImage;</span>
+    }
+    public void setRatingUserProfileImage(String ratingUserProfileImage) {
+<span class="nc" id="L41">        this.ratingUserProfileImage = ratingUserProfileImage;</span>
+<span class="nc" id="L42">    }</span>
+    public String getRatingUsername() {
+<span class="fc" id="L44">        return ratingUsername;</span>
+    }
+    public void setRatingUsername(String ratingUsername) {
+<span class="nc" id="L47">        this.ratingUsername = ratingUsername;</span>
+<span class="nc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

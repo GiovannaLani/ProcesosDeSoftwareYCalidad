@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoomInfoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.dto</a> &gt; <span class="el_source">ChatRoomInfoDTO.java</span></div><h1>ChatRoomInfoDTO.java</h1><pre class="source lang-java linenums">package com.spq.vinted.dto;
+
+public class ChatRoomInfoDTO {
+    private long id;
+    private long buyerId;
+    private String buyerName;
+    private long sellerId;
+    private String sellerName;
+    private long itemId;
+    private String itemName;
+    private String itemImage;
+    private float itemPrice;
+    private boolean itemIsSold;
+
+<span class="fc" id="L15">    public ChatRoomInfoDTO() {</span>
+<span class="fc" id="L16">    }</span>
+
+<span class="fc" id="L18">    public ChatRoomInfoDTO(long id, long buyerId, String buyerName, long sellerId, String sellerName, long itemId, String itemName, String itemImage, float itemPrice, boolean itemIsSold) {</span>
+<span class="fc" id="L19">        this.id = id;</span>
+<span class="fc" id="L20">        this.buyerId = buyerId;</span>
+<span class="fc" id="L21">        this.buyerName = buyerName;</span>
+<span class="fc" id="L22">        this.sellerId = sellerId;</span>
+<span class="fc" id="L23">        this.sellerName = sellerName;</span>
+<span class="fc" id="L24">        this.itemId = itemId;</span>
+<span class="fc" id="L25">        this.itemName = itemName;</span>
+<span class="fc" id="L26">        this.itemImage = itemImage;</span>
+<span class="fc" id="L27">        this.itemPrice = itemPrice;</span>
+<span class="fc" id="L28">        this.itemIsSold = itemIsSold;</span>
+<span class="fc" id="L29">    }</span>
+
+    public long getId() {
+<span class="fc" id="L32">        return id;</span>
+    }
+
+    public void setId(long id) {
+<span class="fc" id="L36">        this.id = id;</span>
+<span class="fc" id="L37">    }</span>
+
+    public long getBuyerId() {
+<span class="fc" id="L40">        return buyerId;</span>
+    }
+
+    public void setBuyerId(long buyerId) {
+<span class="fc" id="L44">        this.buyerId = buyerId;</span>
+<span class="fc" id="L45">    }</span>
+
+    public String getBuyerName() {
+<span class="fc" id="L48">        return buyerName;</span>
+    }
+
+    public void setBuyerName(String buyerName) {
+<span class="fc" id="L52">        this.buyerName = buyerName;</span>
+<span class="fc" id="L53">    }</span>
+
+    public long getSellerId() {
+<span class="fc" id="L56">        return sellerId;</span>
+    }
+
+    public void setSellerId(long sellerId) {
+<span class="fc" id="L60">        this.sellerId = sellerId;</span>
+<span class="fc" id="L61">    }</span>
+
+    public String getSellerName() {
+<span class="fc" id="L64">        return sellerName;</span>
+    }
+
+    public void setSellerName(String sellerName) {
+<span class="fc" id="L68">        this.sellerName = sellerName;</span>
+<span class="fc" id="L69">    }</span>
+
+    public long getItemId() {
+<span class="fc" id="L72">        return itemId;</span>
+    }
+
+    public void setItemId(long itemId) {
+<span class="fc" id="L76">        this.itemId = itemId;</span>
+<span class="fc" id="L77">    }</span>
+    
+    public String getItemName() {
+<span class="fc" id="L80">        return itemName;</span>
+    }
+
+    public void setItemName(String itemName) {
+<span class="fc" id="L84">        this.itemName = itemName;</span>
+<span class="fc" id="L85">    }</span>
+
+    public String getItemImage() {
+<span class="fc" id="L88">        return itemImage;</span>
+    }
+
+    public void setItemImage(String itemImage) {
+<span class="fc" id="L92">        this.itemImage = itemImage;</span>
+<span class="fc" id="L93">    }</span>
+    public float getItemPrice() {
+<span class="fc" id="L95">        return itemPrice;</span>
+    }
+    public void setItemPrice(float itemPrice) {
+<span class="fc" id="L98">        this.itemPrice = itemPrice;</span>
+<span class="fc" id="L99">    }</span>
+    public boolean getItemIsSold() {
+<span class="fc" id="L101">        return itemIsSold;</span>
+    }
+    public void setItemIsSold(boolean itemIsSold) {
+<span class="nc" id="L104">        this.itemIsSold = itemIsSold;</span>
+<span class="nc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

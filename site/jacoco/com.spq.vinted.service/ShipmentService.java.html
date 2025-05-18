@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShipmentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">ShipmentService.java</span></div><h1>ShipmentService.java</h1><pre class="source lang-java linenums">package com.spq.vinted.service;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.PurchaseDTO;
+import com.spq.vinted.dto.ShipmentDTO;
+import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Purchase;
+import com.spq.vinted.model.Shipment;
+import com.spq.vinted.model.ShipmentStatus;
+import com.spq.vinted.model.User;
+import com.spq.vinted.repository.ItemRepository;
+import com.spq.vinted.repository.PurchaseRepository;
+import com.spq.vinted.repository.ShipmentRepository;
+import com.spq.vinted.repository.UserRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+public class ShipmentService {
+;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final ShipmentRepository shipmentRepository;
+    private final ItemService itemService;
+    private final PurchaseRepository purchaseRepository;
+    private final PurchaseService purchaseService;
+    
+
+    @Autowired
+    public ShipmentService(UserService userService,
+                           ShipmentRepository shipmentRepository, UserRepository userRepository,
+<span class="fc" id="L43">                           ItemService itemService, PurchaseRepository purchaseRepository, PurchaseService purchaseService) {</span>
+<span class="fc" id="L44">        this.userRepository = userRepository;</span>
+<span class="fc" id="L45">        this.userService = userService;</span>
+<span class="fc" id="L46">        this.shipmentRepository = shipmentRepository;</span>
+<span class="fc" id="L47">        this.itemService = itemService;</span>
+<span class="fc" id="L48">        this.purchaseRepository = purchaseRepository;</span>
+<span class="fc" id="L49">        this.purchaseService = purchaseService;</span>
+<span class="fc" id="L50">    }</span>
+
+    @Transactional
+    public Shipment createShipment(Long purchaseIds, ShipmentStatus status,Long token) {
+<span class="nc" id="L54">        System.out.println(&quot;purchaseIds: &quot; + purchaseIds);</span>
+<span class="nc" id="L55">        PurchaseDTO purchaseDTO = purchaseService.getPurchaseById(token, purchaseIds);</span>
+<span class="nc" id="L56">        System.out.println(&quot;purchaseDTO: &quot; + purchaseDTO);</span>
+<span class="nc" id="L57">        Purchase purchase = purchaseService.fromDTO(purchaseDTO,token);</span>
+<span class="nc" id="L58">        System.out.println(&quot;purchases: &quot; + purchase);</span>
+<span class="nc" id="L59">        User user = userService.getUserByToken(token);</span>
+<span class="nc" id="L60">        Item item = itemService.getItemById(purchase.getItemId());</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if(item.getPrice()!= purchase.getPrice()){</span>
+<span class="nc" id="L62">            item.setPrice(purchase.getPrice());</span>
+        }
+        // Crear envío
+<span class="nc" id="L65">        Shipment shipment = new Shipment();</span>
+<span class="nc" id="L66">        shipment.setItem(item);</span>
+<span class="nc" id="L67">        System.out.println(&quot;item: &quot; + item);</span>
+<span class="nc" id="L68">        shipment.setBuyer(user);</span>
+<span class="nc" id="L69">        System.out.println(&quot;buyer: &quot; + user);</span>
+<span class="nc" id="L70">        shipment.setSeller(purchase.getSeller());</span>
+<span class="nc" id="L71">        System.out.println(&quot;seller: &quot; + purchase.getSeller());</span>
+<span class="nc" id="L72">        shipment.setStatus(status);</span>
+<span class="nc" id="L73">        shipment.setCreatedDate(LocalDateTime.now());</span>
+<span class="nc" id="L74">        System.out.println(&quot;shipment: &quot; + shipment.getBuyer() + &quot; &quot; + shipment.getItem() + &quot; &quot; + shipment.getStatus() + &quot; &quot; + shipment.getCreatedDate());</span>
+<span class="nc" id="L75">        return shipmentRepository.save(shipment);</span>
+    }
+
+    public ShipmentDTO convertToDTO(Shipment shipment) {
+<span class="nc" id="L79">        ShipmentDTO dto = new ShipmentDTO();</span>
+<span class="nc" id="L80">        dto.setId(shipment.getId());</span>
+<span class="nc" id="L81">        dto.setStatus(shipment.getStatus());</span>
+<span class="nc" id="L82">        ItemDTO itemDTO = ItemService.convertToDTO(shipment.getItem());</span>
+<span class="nc" id="L83">        dto.setItem(itemDTO);</span>
+<span class="nc" id="L84">        dto.setBuyerId(shipment.getBuyer().getId());</span>
+<span class="nc" id="L85">        dto.setBuyer(shipment.getBuyer().toDTO());</span>
+<span class="nc" id="L86">        dto.setCreatedDate(shipment.getCreatedDate());</span>
+<span class="nc" id="L87">        dto.setSellerId(shipment.getSeller().getId());</span>
+<span class="nc" id="L88">        return dto;</span>
+    }
+
+    public List&lt;Shipment&gt; getShipmentsbyBuyerId(Long buyerId, Long token) {
+<span class="nc" id="L92">        System.out.println(&quot;buyerId: &quot; + buyerId);</span>
+<span class="nc" id="L93">        System.out.println(&quot;token: &quot; + token);</span>
+<span class="nc" id="L94">        User user = userService.getUserById(buyerId);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L96">            throw new IllegalArgumentException(&quot;El usuario no existe&quot;);</span>
+        }
+<span class="nc" id="L98">        System.out.println(&quot;user id: &quot; + user.getId());</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (!user.getId().equals(buyerId)) {</span>
+<span class="nc" id="L100">            throw new IllegalArgumentException(&quot;El usuario no tiene permiso para ver este envío&quot;);</span>
+        }
+<span class="nc" id="L102">        List&lt;Shipment&gt; shipments = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L103">        shipments = shipmentRepository.findAllByBuyerId(buyerId);</span>
+<span class="nc" id="L104">        System.out.println(&quot;shipments: &quot; + shipments);</span>
+<span class="nc" id="L105">        return shipments;</span>
+    }
+    
+    @Scheduled(fixedRate = 60000)
+    public void autoUpdateShipmentStatuses() {
+<span class="fc" id="L110">        List&lt;Shipment&gt; shipments = shipmentRepository.findByStatusNot(ShipmentStatus.DELIVERED);</span>
+        
+<span class="fc" id="L112">        shipments.forEach(shipment -&gt; {</span>
+<span class="nc" id="L113">            long minutesElapsed = ChronoUnit.MINUTES.between(</span>
+<span class="nc" id="L114">                shipment.getCreatedDate(), </span>
+<span class="nc" id="L115">                LocalDateTime.now()</span>
+            );
+            
+<span class="nc bnc" id="L118" title="All 4 branches missed.">            if (shipment.getStatus() == ShipmentStatus.SHIPPED &amp;&amp; minutesElapsed &gt;= 1) {</span>
+<span class="nc" id="L119">                shipment.setStatus(ShipmentStatus.IN_TRANSIT);</span>
+<span class="nc bnc" id="L120" title="All 4 branches missed.">            } else if (shipment.getStatus() == ShipmentStatus.IN_TRANSIT &amp;&amp; minutesElapsed &gt;= 2) {</span>
+<span class="nc" id="L121">                shipment.setStatus(ShipmentStatus.DELIVERED);</span>
+            }
+<span class="nc" id="L123">        });</span>
+        
+<span class="fc" id="L125">        shipmentRepository.saveAll(shipments);</span>
+<span class="fc" id="L126">    }</span>
+    
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

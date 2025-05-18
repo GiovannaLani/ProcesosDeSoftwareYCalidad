@@ -1,0 +1,87 @@
+<h1 id="springboot-rest-api-mysql">SpringBoot + REST API + MySQL</h1>
+<p>This example relies on the SpringBoot to create a REST API and
+connecting to a MySQL database using JPA, with a sample web application
+and a command line client.</p>
+<p>The basic structure of a SpringBoot project can be initialized using
+<em>Spring initializr</em> at https://start.spring.io/.</p>
+<h2 id="launching-the-application">Launching the application</h2>
+<p>First, check all the required dependencies specified by the pom.xml
+file and the database configuration contained in
+<em>src/main/resources/application.properties</em> file.</p>
+<p>Now, run the following command to check to download all dependencies
+and check that everything correctly compiles</p>
+<pre><code>  mvn compile</code></pre>
+<p>Make sure that the MySQL database was correctly configured before
+connecting the application to use it. Use the contents of the file
+<em>src/main/resources/dbsetup.sql</em> to create the database, an
+specific user ‘spq’ (pass: ‘spq’) for the application and grant
+privileges to that user. If you are using the command line client for
+MySQL you could run the following command</p>
+<pre><code>  mysql –uroot -p &lt; src/main/resources/dbsetup.sql</code></pre>
+<p>otherwise you could use the contents of the file in any other MySQL
+client you are using.</p>
+<p>Now, launch the server using the following command</p>
+<pre><code>mvn spring-boot:run</code></pre>
+<p>If there are no errors, you should get a running web application
+serving its contents at http://localhost:8080/. You can press Ctrl+C to
+stop the running application.</p>
+<h2 id="rest-api">REST API</h2>
+<p>The application exposes a REST API, which is used by the web
+application, which is implemented in the BookController class. To
+execute these methods, you may install <a
+href="https://learning.postman.com/docs/getting-started/first-steps/get-postman/">POSTman
+app</a> or <a href="https://curl.se/">CURL command line tool</a>. For
+example, some methods are</p>
+<p>Retrieves all the registered books</p>
+<pre><code>GET http://localhost:8080/api/books</code></pre>
+<p>Adds a new book to the database</p>
+<pre><code>POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+&quot;title&quot;: &quot;Spring Boot in Action&quot;,
+&quot;author&quot;: &quot;Craig Walls&quot;,
+&quot;isbn&quot;: &quot;9781617292545&quot;
+}</code></pre>
+<p>Removes a previously registered book</p>
+<pre><code>DELETE http://localhost:8080/api/books/1</code></pre>
+<p>To see the full list of methods from the REST API, you can visit
+Swagger interface at: http://localhost:8080/swagger-ui.html. Check the
+annotations in the <em>BookController</em> class, the required
+dependencies in the <em>pom.xml</em> file and the
+<em>application.properties</em> file for its configuration</p>
+<h2 id="command-line-client">Command line client</h2>
+<p>There is a sample REST API client implementation using the SpringBoot
+REST client libraries in class <em>BookManager.java</em>. You can launch
+the client using the following Maven command (check)</p>
+<pre><code>mvn exec:java</code></pre>
+<p>See <build> section in <em>pom.xml</em> to see how this command was
+configured to work.</p>
+<h2 id="packaging-the-application">Packaging the application</h2>
+<p>Application can be packaged executing the following command</p>
+<pre><code>mvn package</code></pre>
+<p>including all the SpringBoot required libraries inside the
+<em>target/rest-api-0.0.1-SNAPSHOT.jar</em>, which can be
+distributed.</p>
+<p>Once packaged, the server can be launched with</p>
+<pre><code>java -jar rest-api-0.0.1-SNAPSHOT.jar</code></pre>
+<p>and the sample client by running, as SpringBoot changes the way the
+default Java loader</p>
+<pre><code>java -cp rest-api-0.0.1-SNAPSHOT.jar -Dloader.main=com.example.restapi.client.BookManager org.springframework.boot.loader.launch.PropertiesLauncher localhost 8080</code></pre>
+<p>Therefore, in a real development, it would be advisable to create
+different Maven projects for server and client applications, easing
+distribution and manteinance of each application separately.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Very good explaination of the project: https://medium.com/<span
+class="citation"
+data-cites="pratik.941/building-rest-api-using-spring-boot-a-comprehensive-guide-3e9b6d7a8951">@pratik.941/building-rest-api-using-spring-boot-a-comprehensive-guide-3e9b6d7a8951</span></li>
+<li>Building REST services with Spring:
+https://spring.io/guides/tutorials/rest</li>
+<li>Good example documenting how to generate Swagger APIs in Spring
+Boot:
+https://bell-sw.com/blog/documenting-rest-api-with-swagger-in-spring-boot-3/#mcetoc_1heq9ft3o1v</li>
+<li>Docker example with Spring: https://medium.com/<span
+class="citation"
+data-cites="yunuseulucay/end-to-end-spring-boot-with-mysql-and-docker-2c42a6e036c0">@yunuseulucay/end-to-end-spring-boot-with-mysql-and-docker-2c42a6e036c0</span></li>
+</ul>

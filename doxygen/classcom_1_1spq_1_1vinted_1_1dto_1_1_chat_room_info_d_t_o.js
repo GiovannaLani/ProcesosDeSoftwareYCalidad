@@ -1,0 +1,25 @@
+var classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o =
+[
+    [ "ChatRoomInfoDTO", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#ad32e8b6d2186b2e4ee0cd006fbebefa6", null ],
+    [ "ChatRoomInfoDTO", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a67309097a412fa2a092ad0c0abadd0aa", null ],
+    [ "getBuyerId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a70e1a3b6aa2a5b8ec7c186ab3db889c3", null ],
+    [ "getBuyerName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a3d62495f3bd4a8ed734e80605871eb1d", null ],
+    [ "getId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a56cc2d2564146278561dbb1b166b5728", null ],
+    [ "getItemId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#ad00ec8fb12012f506e2c048014d2d052", null ],
+    [ "getItemImage", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#ab0fb099c8a010d98b6385bf5fc935b37", null ],
+    [ "getItemIsSold", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a67ef9d7069d132d8285ba7d66e22b1f8", null ],
+    [ "getItemName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a819a359899dd92fdc06811168b73cb3e", null ],
+    [ "getItemPrice", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#affdb5e0898b7a0e7a368c738191e3d40", null ],
+    [ "getSellerId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a31702b8a68849b3bf75275cfd1ef6f51", null ],
+    [ "getSellerName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a8ff96c91172c95d09c102352e280d671", null ],
+    [ "setBuyerId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a7811f86657d868beecc8b17225d722a1", null ],
+    [ "setBuyerName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#ae261ccd910c4a971f9329c467ac2d392", null ],
+    [ "setId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a0de77f880d1c02971f2175fa827cb5e1", null ],
+    [ "setItemId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a9d2d8f74533786ed0d1148da9fc25d88", null ],
+    [ "setItemImage", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a79dacd74f9f7804c89585334680ec8b7", null ],
+    [ "setItemIsSold", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a27b1dcbeee64835800eaaee28a0a1610", null ],
+    [ "setItemName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#ad2cb18c90ff1a68f866243e5507f764a", null ],
+    [ "setItemPrice", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#af33d697807cb0344b3b8bbafc48d906d", null ],
+    [ "setSellerId", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a8e721abe5dc21f00b096588977ef3e86", null ],
+    [ "setSellerName", "classcom_1_1spq_1_1vinted_1_1dto_1_1_chat_room_info_d_t_o.html#a2d4c8f60e562dfad66c73084a4a3f83e", null ]
+];

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClothesDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.dto</a> &gt; <span class="el_source">ClothesDTO.java</span></div><h1>ClothesDTO.java</h1><pre class="source lang-java linenums">/**
+ * @file ClothesDTO.java
+ * @brief Clase que representa un DTO (Data Transfer Object) para una prenda de ropa.
+ */
+package com.spq.vinted.dto;
+
+import java.util.List;
+
+import com.spq.vinted.model.Category;
+import com.spq.vinted.model.ClothesSize;
+import com.spq.vinted.model.ClothesType;
+
+/**
+ * @class ClothesDTO
+ * @brief Clase que representa un DTO (Data Transfer Object) para una prenda de ropa.
+ * 
+ * Esta clase hereda de la clase ItemDTO y representa una prenda de ropa con su tamaño, tipo y categoría.
+ */
+public class ClothesDTO extends ItemDTO {
+    
+    private ClothesSize size;
+    private ClothesType clothesType;
+    private Category category;
+
+    /**
+     * @brief Constructor por defecto de la clase ClothesDTO.
+     * 
+     * Este constructor es necesario para la creación de objetos de la clase ClothesDTO.
+     */
+<span class="fc" id="L30">    public ClothesDTO() {</span>
+
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * @brief Constructor de la clase ClothesDTO.
+     * 
+     * @param id ID del anuncio.
+     * @param title Título del anuncio.
+     * @param description Descripción del anuncio.
+     * @param price Precio del anuncio.
+     * @param size Tamaño de la prenda.
+     * @param type Tipo de prenda.
+     * @param category Categoría de la prenda.
+     * @param images Lista de imágenes del anuncio.
+     * @param isSold Indica si el anuncio está vendido o no.
+     */
+    public ClothesDTO(long id, String title, String description, float price, ClothesSize size, ClothesType type, Category category,List&lt;String&gt; images, boolean isSold) {
+<span class="fc" id="L48">        super(id, title, description, price,images, isSold); </span>
+<span class="fc" id="L49">        this.size = size;</span>
+<span class="fc" id="L50">        this.clothesType = type;</span>
+<span class="fc" id="L51">        this.category = category;</span>
+<span class="fc" id="L52">    }</span>
+
+
+    /**
+     * @brief Getter de la talla de una prenda de ropa.
+     * 
+     * @return Talla de la prenda.
+     */
+    public ClothesSize getSize() {
+<span class="fc" id="L61">        return size;</span>
+    }
+
+    /**
+     * @brief Setter de la talla de una prenda de ropa.
+     * 
+     * @param size Talla de la prenda.
+     */
+    public void setSize(ClothesSize size) {
+<span class="fc" id="L70">        this.size = size;</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * @brief Getter del tipo de prenda de ropa.
+     * 
+     * @return Tipo de prenda.
+     */
+    public ClothesType getClothesType() {
+<span class="fc" id="L79">        return clothesType;</span>
+    }
+    
+    /**
+     * @brief Setter del tipo de prenda de ropa.
+     * 
+     * @param type Tipo de prenda.
+     */
+    public void setClothesType(ClothesType type) {
+<span class="fc" id="L88">        this.clothesType = type;</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * @brief Getter de la categoría de una prenda de ropa.
+     * 
+     * @return Categoría de la prenda.
+     */
+    public Category getCategory() {
+<span class="fc" id="L97">        return category;</span>
+    }
+
+    /**
+     * @brief Setter de la categoría de una prenda de ropa.
+     * 
+     * @param category Categoría de la prenda.
+     */
+    public void setCategory(Category category) {
+<span class="fc" id="L106">        this.category = category;</span>
+<span class="fc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

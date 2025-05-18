@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatRoom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">ChatRoom.java</span></div><h1>ChatRoom.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+@Entity
+public class ChatRoom {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;item_id&quot;, nullable = false)
+    private Item item;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;buyer_id&quot;, nullable = false)
+    private User buyer;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;seller_id&quot;, nullable = false)
+    private User seller;
+
+<span class="fc" id="L34">    @OneToMany(mappedBy = &quot;chatRoom&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;Message&gt; messages = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L37">    public ChatRoom() {</span>
+<span class="fc" id="L38">    }</span>
+
+<span class="fc" id="L40">    public ChatRoom(Item item, User buyer, User seller) {</span>
+<span class="fc" id="L41">        this.item = item;</span>
+<span class="fc" id="L42">        this.buyer = buyer;</span>
+<span class="fc" id="L43">        this.seller = seller;</span>
+<span class="fc" id="L44">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L47">        return id;</span>
+    }
+    public void setId(Long id) {
+<span class="fc" id="L50">        this.id = id;</span>
+<span class="fc" id="L51">    }</span>
+    public Item getItem() {
+<span class="fc" id="L53">        return item;</span>
+    }
+    public void setItem(Item item) {
+<span class="fc" id="L56">        this.item = item;</span>
+<span class="fc" id="L57">    }</span>
+    public User getBuyer() {
+<span class="fc" id="L59">        return buyer;</span>
+    }
+    public void setBuyer(User buyer) {
+<span class="fc" id="L62">        this.buyer = buyer;</span>
+<span class="fc" id="L63">    }</span>
+    public User getSeller() {
+<span class="fc" id="L65">        return seller;</span>
+    }
+    public void setSeller(User seller) {
+<span class="fc" id="L68">        this.seller = seller;</span>
+<span class="fc" id="L69">    }</span>
+    public List&lt;Message&gt; getMessages() {
+<span class="fc" id="L71">        return messages;</span>
+    }
+    public void setMessages(List&lt;Message&gt; messages) {
+<span class="fc" id="L74">        this.messages = messages;</span>
+<span class="fc" id="L75">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

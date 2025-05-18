@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OfferDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.dto</a> &gt; <span class="el_source">OfferDTO.java</span></div><h1>OfferDTO.java</h1><pre class="source lang-java linenums">package com.spq.vinted.dto;
+
+public class OfferDTO {
+    private double price;
+    private String status;
+    private long senderId;
+    private long receiverId;
+    private long chatRoomId;
+    private long itemId;
+    private boolean isSold;
+
+    
+<span class="fc" id="L13">    public OfferDTO() {</span>
+<span class="fc" id="L14">    }</span>
+
+<span class="fc" id="L16">    public OfferDTO(double price, String status, long senderId, long receiverId, long itemId, long chatRoomId, boolean isSold) {</span>
+<span class="fc" id="L17">        this.price = price;</span>
+<span class="fc" id="L18">        this.status = status;</span>
+<span class="fc" id="L19">        this.senderId = senderId;</span>
+<span class="fc" id="L20">        this.receiverId = receiverId;</span>
+<span class="fc" id="L21">        this.itemId = itemId;</span>
+<span class="fc" id="L22">        this.chatRoomId = chatRoomId;</span>
+<span class="fc" id="L23">        this.isSold = isSold;</span>
+<span class="fc" id="L24">    }</span>
+
+    public double getPrice() {
+<span class="fc" id="L27">        return price;</span>
+    }
+
+    public void setPrice(double price) {
+<span class="fc" id="L31">        this.price = price;</span>
+<span class="fc" id="L32">    }</span>
+
+    public String getStatus() {
+<span class="fc" id="L35">        return status;</span>
+    }
+
+    public void setStatus(String status) {
+<span class="fc" id="L39">        this.status = status;</span>
+<span class="fc" id="L40">    }</span>
+
+    public long getSenderId() {
+<span class="fc" id="L43">        return senderId;</span>
+    }
+
+    public void setSenderId(long senderId) {
+<span class="fc" id="L47">        this.senderId = senderId;</span>
+<span class="fc" id="L48">    }</span>
+
+    public long getReceiverId() {
+<span class="fc" id="L51">        return receiverId;</span>
+    }
+
+    public void setReceiverId(long receiverId) {
+<span class="fc" id="L55">        this.receiverId = receiverId;</span>
+<span class="fc" id="L56">    }</span>
+
+    public long getItemId() {
+<span class="fc" id="L59">        return itemId;</span>
+    }
+
+    public void setItemId(long itemId) {
+<span class="fc" id="L63">        this.itemId = itemId;</span>
+<span class="fc" id="L64">    }</span>
+
+    public long getChatRoomId() {
+<span class="fc" id="L67">        return chatRoomId;</span>
+    }
+    public void setChatRoomId(long chatRoomId) {
+<span class="fc" id="L70">        this.chatRoomId = chatRoomId;</span>
+<span class="fc" id="L71">    }</span>
+
+    public boolean getIsSold() {
+<span class="fc" id="L74">        return isSold;</span>
+    }
+    public void setIsSold(boolean sold) {
+<span class="fc" id="L77">        isSold = sold;</span>
+<span class="fc" id="L78">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

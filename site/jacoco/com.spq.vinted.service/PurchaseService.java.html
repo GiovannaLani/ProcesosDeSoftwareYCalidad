@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PurchaseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">PurchaseService.java</span></div><h1>PurchaseService.java</h1><pre class="source lang-java linenums">/**
+ * @file PurchaseService.java
+ * @brief Clase de servicio para la gestión de compras.
+ */
+package com.spq.vinted.service;
+
+import com.spq.vinted.dto.PurchaseDTO;
+import com.spq.vinted.model.Purchase;
+import com.spq.vinted.model.User;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+/**
+ * @class PurchaseService
+ * @brief Clase de servicio para la gestión de compras.
+ */
+@Service
+public class PurchaseService {
+
+    private UserService userService;
+<span class="fc" id="L24">    private final Map&lt;Long, PurchaseDTO&gt; purchases = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L25">    private final Map&lt;Long, List&lt;Long&gt;&gt; userPurchases = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L26">    private long purchaseCounter = 1;</span>
+
+    /**
+     * @brief Constructor de la clase PurchaseService.
+     * @param userService Servicio de usuario.
+     */
+    @Autowired
+<span class="fc" id="L33">    public PurchaseService(UserService userService) {</span>
+<span class="fc" id="L34">        this.userService = userService;</span>
+<span class="fc" id="L35">    }</span>
+
+    /**
+     * @brief Método para crear una compra.
+     * @param token Token del usuario.
+     * @param purchase Compra a crear.
+     * @return Compra creada.
+     */
+    public List&lt;PurchaseDTO&gt; createMultiplePurchases(long token, List&lt;PurchaseDTO&gt; purchases) {
+<span class="fc" id="L44">        List&lt;PurchaseDTO&gt; createdPurchases = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (PurchaseDTO purchase : purchases) {</span>
+<span class="fc" id="L46">            PurchaseDTO createdPurchase = createPurchase(token, purchase);</span>
+<span class="fc" id="L47">            createdPurchases.add(createdPurchase);</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">        return createdPurchases;</span>
+    }
+
+    /**
+     * @brief Método para crear una compra.
+     * @param token Token del usuario.
+     * @param purchase Compra a crear.
+     * @return Compra creada.
+     */
+    public PurchaseDTO createPurchase(long token, PurchaseDTO purchase) {
+<span class="fc" id="L59">        purchase.setStatus(&quot;PENDING&quot;);</span>
+<span class="fc" id="L60">        purchase.setId(purchaseCounter);</span>
+<span class="fc" id="L61">        purchases.put(purchaseCounter, purchase);</span>
+<span class="fc" id="L62">        userPurchases.computeIfAbsent(token, k -&gt; new ArrayList&lt;&gt;()).add(purchaseCounter);</span>
+<span class="fc" id="L63">        purchaseCounter++;</span>
+<span class="fc" id="L64">        return purchase;</span>
+    }
+
+    /**
+     * @brief Método para procesar un pago.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @param paymentMethod Método de pago.
+     * @return true si el pago se procesa correctamente, false en caso contrario.
+     */
+    public boolean processPayment(long token, long purchaseId, String paymentMethod) {
+<span class="fc" id="L75">        PurchaseDTO purchase = purchases.get(purchaseId);</span>
+<span class="pc bpc" id="L76" title="2 of 4 branches missed.">        if (purchase != null &amp;&amp; userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {</span>
+<span class="fc" id="L77">            purchase.setPaymentMethod(paymentMethod);</span>
+<span class="fc" id="L78">            purchase.setStatus(&quot;COMPLETED&quot;);</span>
+<span class="fc" id="L79">            purchases.put(purchaseId, purchase);</span>
+<span class="fc" id="L80">            return true;</span>
+        }
+<span class="nc" id="L82">        return false;</span>
+    }
+
+    /**
+     * @brief Método para obtener una compra por su ID.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @return Compra encontrada.
+     * @throws RuntimeException Excepción lanzada si la compra no se encuentra o no está autorizada.
+     */
+    public PurchaseDTO getPurchaseById(long token, long purchaseId) {
+<span class="fc" id="L93">        System.out.println(&quot;Token: &quot; + token);</span>
+<span class="fc" id="L94">        System.out.println(&quot;Purchase ID: &quot; + purchaseId);</span>
+<span class="fc" id="L95">        System.out.println(&quot;Purchases: &quot; + purchases);</span>
+<span class="fc" id="L96">        PurchaseDTO purchase = purchases.get(purchaseId);</span>
+<span class="fc bfc" id="L97" title="All 4 branches covered.">        if (purchase != null &amp;&amp; userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {</span>
+<span class="fc" id="L98">            System.out.println(&quot;Purchase found: &quot; + purchase);</span>
+<span class="fc" id="L99">            return purchase;</span>
+        }
+<span class="fc" id="L101">        throw new RuntimeException(&quot;Purchase not found or not authorized.&quot;);</span>
+    }
+
+    /**
+     * @brief Método para obtener todas las compras de un usuario.
+     * @param token Token del usuario.
+     * @return Lista de compras del usuario.
+     */
+    public List&lt;PurchaseDTO&gt; getUserPurchases(long token) {
+<span class="fc" id="L110">        List&lt;Long&gt; userPurchaseIds = userPurchases.getOrDefault(token, Collections.emptyList());</span>
+<span class="fc" id="L111">        List&lt;PurchaseDTO&gt; userPurchasesList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        for (Long purchaseId : userPurchaseIds) {</span>
+<span class="fc" id="L113">            userPurchasesList.add(purchases.get(purchaseId));</span>
+<span class="fc" id="L114">        }</span>
+<span class="fc" id="L115">        return userPurchasesList;</span>
+    }
+
+    /**
+     * @brief Método para cancelar una compra.
+     * @param token Token del usuario.
+     * @param purchaseId ID de la compra.
+     * @throws RuntimeException Excepción lanzada si la compra no se encuentra o no está autorizada.
+     */
+    public void cancelPurchase(long token, long purchaseId) {
+<span class="pc bpc" id="L125" title="1 of 4 branches missed.">        if (purchases.containsKey(purchaseId) &amp;&amp; userPurchases.getOrDefault(token, Collections.emptyList()).contains(purchaseId)) {</span>
+<span class="fc" id="L126">            purchases.remove(purchaseId);</span>
+<span class="fc" id="L127">            userPurchases.get(token).remove(purchaseId);</span>
+        } else {
+<span class="fc" id="L129">            throw new RuntimeException(&quot;Purchase not found or not authorized.&quot;);</span>
+        }
+<span class="fc" id="L131">    }</span>
+
+    /**
+     * @brief Método para convertir un objeto PurchaseDTO a un objeto Purchase.
+     * @param purchaseDTO Objeto PurchaseDTO a convertir.
+     * @param token Token del usuario.
+     * @return Objeto Purchase convertido.
+     */
+    public Purchase fromDTO(PurchaseDTO purchaseDTO, Long token) {
+<span class="nc" id="L140">        System.out.println(&quot;PurchaseDTO2: &quot; + purchaseDTO+ &quot;buyer: &quot; + purchaseDTO.getBuyerUsername() + &quot; seller: &quot; + purchaseDTO.getSellerUsername());</span>
+<span class="nc" id="L141">        User buyer = userService.getUserByUsername(purchaseDTO.getBuyerUsername(),token);</span>
+<span class="nc" id="L142">        System.out.println(&quot;Buyer: &quot; + buyer);</span>
+<span class="nc" id="L143">        User seller = userService.getUserByUsername(purchaseDTO.getSellerUsername(),token);</span>
+<span class="nc" id="L144">        System.out.println(&quot;Seller: &quot; + seller);</span>
+<span class="nc" id="L145">        Purchase purchase = new Purchase();</span>
+<span class="nc" id="L146">        purchase.setId(purchaseDTO.getId());</span>
+<span class="nc" id="L147">        purchase.setItemId(purchaseDTO.getItemId());</span>
+<span class="nc" id="L148">        purchase.setStatus(purchaseDTO.getStatus());</span>
+<span class="nc" id="L149">        purchase.setBuyer(buyer);</span>
+<span class="nc" id="L150">        purchase.setSeller(seller);</span>
+<span class="nc" id="L151">        purchase.setPrice(purchaseDTO.getPrice());</span>
+<span class="nc" id="L152">        purchase.setPaymentMethod(purchaseDTO.getPaymentMethod());</span>
+<span class="nc" id="L153">        System.out.println(&quot;Purchase2: &quot; + purchase);</span>
+<span class="nc" id="L154">        return purchase;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

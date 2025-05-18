@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">MessageService.java</span></div><h1>MessageService.java</h1><pre class="source lang-java linenums">package com.spq.vinted.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
+import com.spq.vinted.dto.ChatMessageDTO;
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.OfferDTO;
+import com.spq.vinted.model.ChatRoom;
+import com.spq.vinted.model.Message;
+import com.spq.vinted.model.User;
+import com.spq.vinted.repository.ChatRoomRepository;
+import com.spq.vinted.repository.MessageRepository;
+import com.spq.vinted.repository.OfferRepository;
+import com.spq.vinted.repository.UserRepository;
+
+
+@Service
+<span class="fc" id="L23">public class MessageService {</span>
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private OfferRepository offerRepository;
+
+
+    public void sendMessage(long token, long chatRoomId, String content) {
+<span class="fc" id="L45">        User sender = userService.getUserByToken(token);</span>
+<span class="fc" id="L46">        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -&gt; new RuntimeException(&quot;ChatRoom not found&quot;));</span>
+
+<span class="fc" id="L48">        Message message = new Message();</span>
+<span class="fc" id="L49">        message.setChatRoom(chatRoom);</span>
+<span class="fc" id="L50">        message.setSender(sender);</span>
+<span class="fc" id="L51">        message.setContent(content);</span>
+<span class="fc" id="L52">        message.setTimestamp(LocalDateTime.now());</span>
+
+<span class="fc" id="L54">        messageRepository.save(message);</span>
+<span class="fc" id="L55">    }</span>
+
+    public List&lt;Message&gt; getMessagesForChatRoom(long chatRoomId) {
+<span class="fc" id="L58">        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -&gt; new RuntimeException(&quot;ChatRoom not found&quot;));</span>
+<span class="fc" id="L59">        return messageRepository.findByChatRoomOrderByTimestampAsc(chatRoom);</span>
+    }
+
+    public Message saveMessage(ChatMessageDTO chatMessage) {
+<span class="fc" id="L63">        User sender = userRepository.findById(String.valueOf(chatMessage.getSenderId())).orElseThrow(() -&gt; new RuntimeException(&quot;Sender not found&quot;));</span>
+        
+<span class="pc" id="L65">        ChatRoom chatRoom = chatRoomRepository.findById(chatMessage.getChatRoomId()).orElseThrow(() -&gt; new RuntimeException(&quot;ChatRoom not found&quot;));</span>
+
+<span class="fc" id="L67">        Message message = new Message();</span>
+<span class="fc" id="L68">        message.setChatRoom(chatRoom);</span>
+<span class="fc" id="L69">        message.setSender(sender);</span>
+<span class="fc" id="L70">        message.setContent(chatMessage.getContent());</span>
+<span class="fc" id="L71">        message.setTimestamp(LocalDateTime.now());</span>
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">        if(chatMessage.getType()!=null &amp;&amp; chatMessage.getType().equals(&quot;OFFER&quot;))</span>
+        {
+<span class="pc" id="L74">            message.setOffer(offerRepository.findById(Long.parseLong(chatMessage.getContent())).orElseThrow(() -&gt; new RuntimeException(&quot;Offer not found&quot;)));</span>
+        }else
+        {
+<span class="fc" id="L77">            message.setOffer(null);</span>
+        }
+<span class="fc" id="L79">        return messageRepository.save(message);</span>
+    }
+
+    public Message saveAndSendMessage(Message message) {
+<span class="fc" id="L83">        Message savedMessage = messageRepository.save(message);</span>
+        
+<span class="fc" id="L85">        ChatMessageDTO messageDTO = convertToDTO(savedMessage);</span>
+        
+<span class="fc" id="L87">        messagingTemplate.convertAndSend(&quot;/topic/chat/&quot; + message.getChatRoom().getId(), messageDTO);</span>
+        
+<span class="fc" id="L89">        return savedMessage;</span>
+    }
+    
+    private ChatMessageDTO convertToDTO(Message message) {
+<span class="fc" id="L93">        ChatMessageDTO dto = new ChatMessageDTO();</span>
+<span class="fc" id="L94">        dto.setSenderId(message.getSender().getId());</span>
+<span class="fc" id="L95">        dto.setContent(message.getContent());</span>
+<span class="fc" id="L96">        dto.setTimestamp(message.getTimestamp());</span>
+        
+<span class="pc bpc" id="L98" title="1 of 4 branches missed.">        if (message.getType() == Message.MessageType.OFFER &amp;&amp; message.getOffer() != null) {</span>
+<span class="fc" id="L99">            OfferDTO offerDTO = new OfferDTO();</span>
+<span class="fc" id="L100">            offerDTO.setPrice(message.getOffer().getPrice());</span>
+<span class="fc" id="L101">            offerDTO.setStatus(message.getOffer().getStatus().toString());</span>
+<span class="fc" id="L102">            offerDTO.setSenderId(message.getOffer().getSender().getId());</span>
+<span class="fc" id="L103">            offerDTO.setReceiverId(message.getOffer().getReceiver().getId());</span>
+            
+<span class="fc" id="L105">            ItemDTO itemDTO = ItemService.getDTOById(message.getOffer().getItem().getId());</span>
+<span class="fc" id="L106">            offerDTO.setItemId(itemDTO.getId()); </span>
+            
+
+<span class="fc" id="L109">            dto.setOffer(offerDTO);</span>
+        }
+
+<span class="fc" id="L112">        return dto;</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

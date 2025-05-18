@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Item.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">Item.java</span></div><h1>Item.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.spq.vinted.dto.ItemDTO;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.InheritanceType;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = &quot;dtype&quot;, discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = &quot;type&quot;)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Clothes.class, name = &quot;clothes&quot;),
+    @JsonSubTypes.Type(value = Electronics.class, name = &quot;electronics&quot;),
+    @JsonSubTypes.Type(value = Pet.class, name = &quot;pet&quot;),
+    @JsonSubTypes.Type(value = Entertainment.class, name = &quot;entertainment&quot;),
+    @JsonSubTypes.Type(value = Home.class, name = &quot;home&quot;)
+})
+public abstract class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private float price;
+
+<span class="fc" id="L56">    @ElementCollection(fetch = FetchType.EAGER)</span>
+    @CollectionTable(name = &quot;item_images&quot;, joinColumns = @JoinColumn(name = &quot;item_id&quot;))
+    @Column(name = &quot;image_url&quot;)
+    private List&lt;String&gt; images = new ArrayList&lt;&gt;();
+
+    @ManyToOne
+    @JoinColumn(name = &quot;seller_id&quot;)
+    @JsonIgnore
+    private User seller;
+
+<span class="fc" id="L66">    @ManyToMany(mappedBy = &quot;cartItems&quot;, fetch = FetchType.EAGER)</span>
+    private List&lt;User&gt; usersWithItemInCart = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L69">    @ManyToMany(mappedBy = &quot;wishlistItems&quot;, fetch = FetchType.EAGER)</span>
+    private List&lt;User&gt; usersWithItemInWishlist = new ArrayList&lt;&gt;();
+    
+<span class="fc" id="L72">    @OneToMany(mappedBy = &quot;item&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;ChatRoom&gt; chatRooms = new ArrayList&lt;&gt;();
+
+    @OneToOne(optional = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = &quot;shipment_id&quot;)
+    private Shipment shipment;
+    
+    @Column(nullable = false)
+    private boolean isSold;
+
+<span class="fc" id="L82">    public Item() {</span>
+<span class="fc" id="L83">    }</span>
+    
+<span class="fc" id="L85">    public Item(String title, String description, float price, User seller) {</span>
+<span class="fc" id="L86">        this.title = title;</span>
+<span class="fc" id="L87">        this.description = description;</span>
+<span class="fc" id="L88">        this.price = price;</span>
+<span class="fc" id="L89">        this.seller = seller;</span>
+<span class="fc" id="L90">        this.isSold = false;</span>
+<span class="fc" id="L91">    }</span>
+
+    public long getId() {
+<span class="fc" id="L94">        return id;</span>
+    }
+
+    public void setId(long id) {
+<span class="fc" id="L98">        this.id = id;</span>
+<span class="fc" id="L99">    }</span>
+
+    public String getTitle() {
+<span class="fc" id="L102">        return title;</span>
+    }
+
+    public void setTitle(String title) {
+<span class="fc" id="L106">        this.title = title;</span>
+<span class="fc" id="L107">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L110">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="fc" id="L114">        this.description = description;</span>
+<span class="fc" id="L115">    }</span>
+
+    public float getPrice() {
+<span class="fc" id="L118">        return price;</span>
+    }
+
+    public void setPrice(float price) {
+<span class="fc" id="L122">        this.price = price;</span>
+<span class="fc" id="L123">    }</span>
+
+    public List&lt;String&gt; getImages() {
+<span class="fc" id="L126">        return images;</span>
+    }
+
+    public void setImages(List&lt;String&gt; images) {
+<span class="fc" id="L130">        this.images = images;</span>
+<span class="fc" id="L131">    }</span>
+
+    public User getSeller() {
+<span class="fc" id="L134">        return seller;</span>
+    }
+
+    public void setSeller(User seller) {
+<span class="fc" id="L138">        this.seller = seller;</span>
+<span class="fc" id="L139">    }</span>
+    public List&lt;User&gt; getUsersWithItemInCart() {
+<span class="fc" id="L141">        return usersWithItemInCart;</span>
+    }
+
+    public boolean getIsSold() {
+<span class="fc" id="L145">        return isSold;</span>
+    }
+
+    public void setIsSold(boolean isSold) {
+<span class="fc" id="L149">        this.isSold = isSold;</span>
+<span class="fc" id="L150">    }</span>
+
+    public void setUsersWithItemInCart(List&lt;User&gt; usersWithItemInCart) {
+<span class="fc" id="L153">        this.usersWithItemInCart = usersWithItemInCart;</span>
+<span class="fc" id="L154">    }</span>
+
+    public List&lt;User&gt; getUsersWithItemInWishlist() {
+<span class="fc" id="L157">        return usersWithItemInWishlist;</span>
+    }
+    
+    public void setUsersWithItemInWishlist(List&lt;User&gt; usersWithItemInWishlist) {
+<span class="fc" id="L161">        this.usersWithItemInWishlist = usersWithItemInWishlist;</span>
+<span class="fc" id="L162">    }</span>
+
+    public abstract ItemDTO toDTO();
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (this == obj) return true;</span>
+<span class="fc bfc" id="L169" title="All 4 branches covered.">        if (obj == null || getClass() != obj.getClass()) return false;</span>
+        
+<span class="fc" id="L171">        Item item = (Item) obj;</span>
+        
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        return id == item.id;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

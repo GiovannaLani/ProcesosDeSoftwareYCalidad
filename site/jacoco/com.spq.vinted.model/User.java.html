@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+import com.spq.vinted.dto.UserDTO;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = &quot;users&quot;)
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    
+    @Column(unique = true, nullable = false)
+    private String email;
+    
+    @Column(nullable = false)
+    private String password;
+
+<span class="fc" id="L35">    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)</span>
+    @JoinTable(
+        name = &quot;user_cart&quot;,
+        joinColumns = @JoinColumn(name = &quot;user_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;item_id&quot;)
+    )
+    private List&lt;Item&gt; cartItems = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L43">    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)</span>
+    @JoinTable(
+        name = &quot;user_wishlist&quot;,
+        joinColumns = @JoinColumn(name = &quot;user_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;item_id&quot;)
+    )
+    private List&lt;Item&gt; wishlistItems = new ArrayList&lt;&gt;();
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String surname;
+
+    @Column
+    private String description;
+
+    @Column
+    private String profileImage;
+
+<span class="fc" id="L66">    @OneToMany(mappedBy = &quot;seller&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;Item&gt; itemsForSale = new ArrayList&lt;&gt;();
+    
+<span class="fc" id="L69">    @OneToMany(mappedBy = &quot;buyer&quot;)</span>
+    private List&lt;ChatRoom&gt; chatsComoComprador = new ArrayList&lt;&gt;();
+    
+<span class="fc" id="L72">    @ManyToMany</span>
+    @JoinTable(
+        name = &quot;user_following&quot;,
+        joinColumns = @JoinColumn(name = &quot;user_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;following_id&quot;)
+    )
+    private List&lt;User&gt; following = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L80">    @ManyToMany(mappedBy = &quot;following&quot;)</span>
+    private List&lt;User&gt; followers = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L83">    @OneToMany(mappedBy = &quot;seller&quot;)</span>
+    private List&lt;ChatRoom&gt; chatsComoVendedor = new ArrayList&lt;&gt;();
+<span class="fc" id="L85">    public User() {</span>
+<span class="fc" id="L86">    }</span>
+<span class="fc" id="L87">    public User(String email, String password, String username, String name, String surname) {</span>
+<span class="fc" id="L88">        this.email = email;</span>
+<span class="fc" id="L89">        this.password = password;</span>
+<span class="fc" id="L90">        this.username = username;</span>
+<span class="fc" id="L91">        this.name = name;</span>
+<span class="fc" id="L92">        this.surname = surname;</span>
+<span class="fc" id="L93">        this.cartItems = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L94">        this.wishlistItems = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L95">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L98">        return id;</span>
+    }
+    public void setId(Long id) {
+<span class="fc" id="L101">        this.id = id;</span>
+<span class="fc" id="L102">    }</span>
+    public String getEmail() {
+<span class="fc" id="L104">        return email;</span>
+    }
+    public void setEmail(String email) {
+<span class="fc" id="L107">        this.email = email;</span>
+<span class="fc" id="L108">    }</span>
+    public String getPassword() {
+<span class="fc" id="L110">        return password;</span>
+    }
+    public void setPassword(String password) {
+<span class="fc" id="L113">        this.password = password;</span>
+<span class="fc" id="L114">    }</span>
+    public List&lt;Item&gt; getCartItems() {
+<span class="fc" id="L116">        return cartItems;</span>
+    }
+    public void setCartItems(List&lt;Item&gt; cartItems) {
+<span class="fc" id="L119">        this.cartItems = cartItems;</span>
+<span class="fc" id="L120">    }</span>
+
+    public void addItemToCart(Item item) { 
+<span class="fc" id="L123">        this.cartItems.add(item);</span>
+<span class="fc" id="L124">    }</span>
+    public List&lt;Item&gt; getWishlistItems() {
+<span class="fc" id="L126">        return wishlistItems;</span>
+    }
+    public void setWishlistItems(List&lt;Item&gt; wishlistItems) {
+<span class="fc" id="L129">        this.wishlistItems = wishlistItems;</span>
+<span class="fc" id="L130">    }</span>
+    public void addItemToWishlist(Item item) { 
+<span class="fc" id="L132">        this.wishlistItems.add(item);</span>
+<span class="fc" id="L133">    }</span>
+    public String getUsername() {
+<span class="fc" id="L135">        return username;</span>
+    }
+    public void setUsername(String username) {
+<span class="fc" id="L138">        this.username = username;</span>
+<span class="fc" id="L139">    }</span>
+    public String getName() {
+<span class="fc" id="L141">        return name;</span>
+    }
+    public void setName(String name) {
+<span class="fc" id="L144">        this.name = name;</span>
+<span class="fc" id="L145">    }</span>
+    public String getSurname() {
+<span class="fc" id="L147">        return surname;</span>
+    }
+    public void setSurname(String surname) {
+<span class="fc" id="L150">        this.surname = surname;</span>
+<span class="fc" id="L151">    }</span>
+    public String getDescription() {
+<span class="fc" id="L153">        return description;</span>
+    }
+    public void setDescription(String description) {
+<span class="fc" id="L156">        this.description = description;</span>
+<span class="fc" id="L157">    }</span>
+    public String getProfileImage() {
+<span class="fc" id="L159">        return profileImage;</span>
+    }
+    public void setProfileImage(String profileImage) {
+<span class="fc" id="L162">        this.profileImage = profileImage;</span>
+<span class="fc" id="L163">    }</span>
+
+    public UserDTO toDTO() {
+<span class="fc" id="L166">        return new UserDTO(id, username, name, surname, description, profileImage);</span>
+    }
+    public List&lt;Item&gt; getItemsForSale() {
+<span class="fc" id="L169">        return itemsForSale;</span>
+    }
+    public void setItemsForSale(List&lt;Item&gt; itemsForSale) {
+<span class="fc" id="L172">        this.itemsForSale = itemsForSale;</span>
+<span class="fc" id="L173">    }</span>
+    public List&lt;User&gt; getFollowing() {
+<span class="fc" id="L175">        return following;</span>
+    }
+    public void setFollowing(List&lt;User&gt; following) {
+<span class="nc" id="L178">        this.following = following;</span>
+<span class="nc" id="L179">    }</span>
+    public List&lt;User&gt; getFollowers() {
+<span class="fc" id="L181">        return followers;</span>
+    }
+    public void setFollowers(List&lt;User&gt; followers) {
+<span class="fc" id="L184">        this.followers = followers;</span>
+<span class="fc" id="L185">    }</span>
+    public void follow(User user) {
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (!following.contains(user)) {</span>
+<span class="fc" id="L188">            following.add(user);</span>
+<span class="fc" id="L189">            user.getFollowers().add(this);</span>
+        }
+<span class="fc" id="L191">    }</span>
+    public void unfollow(User user) {
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        if (following.contains(user)) {</span>
+<span class="fc" id="L194">            following.remove(user);</span>
+<span class="fc" id="L195">            user.getFollowers().remove(this);</span>
+        }
+<span class="fc" id="L197">    }</span>
+    
+
+    @Override
+    public String toString() {
+<span class="fc" id="L202">        return &quot;User{&quot; +</span>
+                &quot;id=&quot; + id +
+                &quot;, email='&quot; + email + '\'' +
+                &quot;, password='&quot; + password + '\'' +
+                &quot;, cartItems=&quot; + cartItems +
+                &quot;, username='&quot; + username + '\'' +
+                &quot;, name='&quot; + name + '\'' +
+                &quot;, surname='&quot; + surname + '\'' +
+                &quot;, description='&quot; + description + '\'' +
+                &quot;, profileImage='&quot; + profileImage + '\'' +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">ItemService.java</span></div><h1>ItemService.java</h1><pre class="source lang-java linenums">package com.spq.vinted.service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.spq.vinted.dto.ClothesDTO;
+import com.spq.vinted.dto.ElectronicsDTO;
+import com.spq.vinted.dto.EntertainmentDTO;
+import com.spq.vinted.dto.HomeDTO;
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.PetDTO;
+import com.spq.vinted.model.Category;
+import com.spq.vinted.model.Clothes;
+import com.spq.vinted.model.Electronics;
+import com.spq.vinted.model.Entertainment;
+import com.spq.vinted.model.Home;
+import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Pet;
+import com.spq.vinted.repository.ItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.spq.vinted.model.User;
+import com.spq.vinted.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+
+
+@Service
+public class ItemService {
+    private UserService userService;
+    private final UserRepository userRepository;
+
+
+    
+    static ItemRepository itemRepository;
+    //ItemRepository itemRepository;
+    
+<span class="fc" id="L52">    public ItemService(ItemRepository itemRepository, UserRepository userRepository, UserService userService) {</span>
+<span class="fc" id="L53">        this.itemRepository = itemRepository;</span>
+<span class="fc" id="L54">        this.userRepository = userRepository;</span>
+<span class="fc" id="L55">        this.userService = userService;</span>
+<span class="fc" id="L56">    }</span>
+    public List&lt;Item&gt; getAllItems(Long token) {
+        try {
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            if (token == null) {</span>
+<span class="fc" id="L60">                return itemRepository.findAll();</span>
+            } else {
+<span class="fc" id="L62">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc" id="L63">                return itemRepository.findBySellerIdNot(userId);</span>
+            }
+<span class="fc" id="L65">        } catch (Exception e) {</span>
+<span class="fc" id="L66">            throw new RuntimeException(&quot;Failed to fetch items: &quot; + e.getMessage(), e);</span>
+        }
+    }
+
+    public Page&lt;Item&gt; getItems(Long token, int page, String type) {
+<span class="fc" id="L71">        Pageable pageable = PageRequest.of(page, 28);</span>
+
+<span class="fc" id="L73">        Map&lt;String, Class&lt;? extends Item&gt;&gt; typeMap = Map.of(</span>
+            &quot;Clothes&quot;, Clothes.class,
+            &quot;Electronics&quot;, Electronics.class,
+            &quot;Pet&quot;, Pet.class,
+            &quot;Entertainment&quot;, Entertainment.class,
+            &quot;Home&quot;, Home.class
+        );
+        
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        Class&lt;? extends Item&gt; itemType = (type != null) ? typeMap.get(type) : null;</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (token == null) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            if (itemType != null) {</span>
+<span class="fc" id="L85">                return itemRepository.findByType(itemType, pageable);</span>
+            }
+<span class="fc" id="L87">            return itemRepository.findByIsSoldFalse(pageable);</span>
+        } else {
+<span class="fc" id="L89">            Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">            if (itemType != null) {</span>
+<span class="fc" id="L91">                return itemRepository.findBySellerIdNotAndType(userId, itemType, pageable);</span>
+            }
+<span class="fc" id="L93">            return itemRepository.findBySellerIdNotAndIsSoldFalse(userId, pageable);</span>
+        }
+    }
+
+
+    public Item getItemById(long id) {
+<span class="fc" id="L99">        return itemRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Item not found&quot;));</span>
+    }
+
+    public List&lt;Clothes&gt; getClothes(){
+<span class="fc" id="L103">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Clothes).map(item -&gt; (Clothes) item).collect(Collectors.toList());</span>
+    }
+
+    public List&lt;Clothes&gt; getClothesByCategory(Category category){
+<span class="fc" id="L107">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Clothes).map(item -&gt; (Clothes) item).filter(clothes -&gt; clothes.getCategory().equals(category)).collect(Collectors.toList());</span>
+    }
+    public Page&lt;Clothes&gt; getClothesByCategory(Category category, int page, Long token) {
+<span class="fc" id="L110">        System.out.println(&quot;CATEGORY1&quot;);</span>
+<span class="fc" id="L111">        Pageable pageable = PageRequest.of(page, 28);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (token != null) {</span>
+<span class="fc" id="L113">                    System.out.println(&quot;CATEGORY2&quot;);</span>
+<span class="fc" id="L114">            Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc" id="L115">                    System.out.println(&quot;CATEGORY3&quot;);</span>
+
+<span class="fc" id="L117">            return itemRepository.findClothesByCategoryAndSellerIdNot(userId, category, pageable);</span>
+        }
+        try {
+<span class="fc" id="L120">                    System.out.println(&quot;CATEGORY4&quot;);</span>
+
+<span class="fc" id="L122">            return itemRepository.findClothesByCategory(category, pageable);</span>
+<span class="fc" id="L123">        } catch (Exception e) {</span>
+<span class="fc" id="L124">            throw new RuntimeException(&quot;Error fetching clothes by category: &quot; + e.getMessage(), e);</span>
+        }
+    }
+    public List&lt;Electronics&gt; getElectronics(){
+<span class="fc" id="L128">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Electronics).map(item -&gt; (Electronics) item).collect(Collectors.toList());</span>
+    }
+    public List&lt;Home&gt; getHomeItems(){
+<span class="fc" id="L131">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Home).map(item -&gt; (Home) item).collect(Collectors.toList());</span>
+    }
+    public List&lt;Pet&gt; getItemsForPet(){
+<span class="fc" id="L134">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Pet).map(item -&gt; (Pet) item).collect(Collectors.toList());</span>
+    }
+
+    public User getItemOwner(long itemId) {
+<span class="fc" id="L138">        Item item = itemRepository.findById(itemId).orElseThrow(() -&gt; new RuntimeException(&quot;Item not found&quot;));</span>
+<span class="fc" id="L139">        return item.getSeller();</span>
+    }    
+
+    public List&lt;Entertainment&gt; getItemsforEntertainment(){
+<span class="fc" id="L143">        return itemRepository.findAll().stream().filter(item -&gt; item instanceof Entertainment).map(item -&gt; (Entertainment) item).collect(Collectors.toList());</span>
+    }
+    public Item saveItem(Item item) {
+<span class="fc" id="L146">        return itemRepository.save(item);</span>
+    }
+   public void uploadItemImages(long id, List&lt;MultipartFile&gt; itemImages) throws IOException {
+<span class="fc" id="L149">    String uploadDir = &quot;uploads/items/&quot;;</span>
+<span class="fc" id="L150">    Item item = itemRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Item not found&quot;));</span>
+    
+<span class="fc" id="L152">    File uploadPath = new File(uploadDir);</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">    if (!uploadPath.exists()) {</span>
+<span class="fc" id="L154">        uploadPath.mkdirs(); </span>
+    }
+
+<span class="fc" id="L157">    List&lt;String&gt; imageNames = new ArrayList&lt;&gt;(); </span>
+    
+<span class="fc bfc" id="L159" title="All 2 branches covered.">    for (MultipartFile itemImage : itemImages) {</span>
+<span class="fc" id="L160">        String uniqueFileName = UUID.randomUUID().toString() + &quot;_&quot; + itemImage.getOriginalFilename();</span>
+<span class="fc" id="L161">        Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();</span>
+
+<span class="fc" id="L163">        Files.copy(itemImage.getInputStream(), filePath);</span>
+
+<span class="fc" id="L165">        imageNames.add(uniqueFileName); </span>
+<span class="fc" id="L166">    }</span>
+
+   
+<span class="fc" id="L169">    item.setImages(imageNames); </span>
+<span class="fc" id="L170">    itemRepository.save(item);}</span>
+    
+    public void addItemToCart(long token, long itemId) {
+<span class="fc" id="L173">        User user = userService.getUserByToken(token);</span>
+        
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L176">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L179">        Item item = itemRepository.findById(itemId)</span>
+<span class="fc" id="L180">                .orElseThrow(() -&gt; new RuntimeException(&quot;Artículo no encontrado&quot;));</span>
+    
+<span class="fc" id="L182">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="fc" id="L183">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if (user.getCartItems() == null) {</span>
+<span class="nc" id="L186">            user.setCartItems(new ArrayList&lt;&gt;());</span>
+        }
+    
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (!user.getCartItems().contains(item)) {</span>
+<span class="fc" id="L190">            user.getCartItems().add(item);</span>
+<span class="fc" id="L191">            item.getUsersWithItemInCart().add(user);</span>
+    
+<span class="fc" id="L193">            userRepository.save(user);</span>
+<span class="fc" id="L194">            itemRepository.save(item);</span>
+        }
+<span class="fc" id="L196">    }</span>
+    
+    public List&lt;Item&gt; getCartItems(long token) {
+<span class="fc" id="L199">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L201">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L204">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="pc" id="L205">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="fc" id="L207">        List&lt;Item&gt; cartItems = user.getCartItems();</span>
+<span class="pc bpc" id="L208" title="2 of 4 branches missed.">        if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="nc" id="L209">            return Collections.emptyList();</span>
+        }
+    
+<span class="fc" id="L212">        return cartItems;</span>
+    }
+
+    public void removeItemFromCart(long token, long itemId) {
+<span class="fc" id="L216">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L218">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L221">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="pc" id="L222">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="pc bpc" id="L224" title="1 of 4 branches missed.">        if (user.getCartItems() == null || user.getCartItems().isEmpty()) {</span>
+<span class="fc" id="L225">            throw new RuntimeException(&quot;El carrito está vacío.&quot;);</span>
+        }
+    
+<span class="fc" id="L228">        Item itemToRemove = user.getCartItems().stream()</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">                .filter(item -&gt; item.getId() == itemId)</span>
+<span class="fc" id="L230">                .findFirst()</span>
+<span class="fc" id="L231">                .orElseThrow(() -&gt; new RuntimeException(&quot;Artículo no encontrado en el carrito&quot;));</span>
+    
+<span class="fc" id="L233">        user.getCartItems().remove(itemToRemove);</span>
+<span class="fc" id="L234">        itemToRemove.getUsersWithItemInCart().remove(user);</span>
+    
+<span class="fc" id="L236">        itemRepository.save(itemToRemove);</span>
+<span class="fc" id="L237">        userRepository.save(user);</span>
+<span class="fc" id="L238">    }</span>
+
+    public void addItemToWishlist(long token, long itemId) {
+<span class="fc" id="L241">        User user = userService.getUserByToken(token);</span>
+        
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L244">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L247">        Item item = itemRepository.findById(itemId)</span>
+<span class="fc" id="L248">                .orElseThrow(() -&gt; new RuntimeException(&quot;Artículo no encontrado&quot;));</span>
+    
+<span class="fc" id="L250">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="fc" id="L251">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if (user.getWishlistItems() == null) {</span>
+<span class="nc" id="L254">            user.setWishlistItems(new ArrayList&lt;&gt;());</span>
+        }
+    
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        if (!user.getWishlistItems().contains(item)) {</span>
+<span class="fc" id="L258">            user.getWishlistItems().add(item);</span>
+<span class="fc" id="L259">            item.getUsersWithItemInWishlist().add(user);</span>
+    
+<span class="fc" id="L261">            userRepository.save(user);</span>
+<span class="fc" id="L262">            itemRepository.save(item);</span>
+        }
+<span class="fc" id="L264">    }</span>
+
+    public List&lt;Item&gt; getWishlistItems(long token) {
+<span class="fc" id="L267">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L269">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L272">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="pc" id="L273">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="fc" id="L275">        List&lt;Item&gt; wishlistItems = user.getWishlistItems();</span>
+<span class="pc bpc" id="L276" title="2 of 4 branches missed.">        if (wishlistItems == null || wishlistItems.isEmpty()) {</span>
+<span class="nc" id="L277">            return Collections.emptyList();</span>
+        }
+    
+<span class="fc" id="L280">        return wishlistItems;</span>
+    }
+
+    public void removeItemFromWishlist(long token, long itemId) {
+<span class="fc" id="L284">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L286">            throw new RuntimeException(&quot;Usuario no encontrado&quot;);</span>
+        }
+    
+<span class="fc" id="L289">        user = userRepository.findById(String.valueOf(user.getId()))</span>
+<span class="pc" id="L290">                .orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+    
+<span class="pc bpc" id="L292" title="1 of 4 branches missed.">        if (user.getWishlistItems() == null || user.getWishlistItems().isEmpty()) {</span>
+<span class="fc" id="L293">            throw new RuntimeException(&quot;La wishlist está vacía.&quot;);</span>
+        }
+    
+<span class="fc" id="L296">        Item itemToRemove = user.getWishlistItems().stream()</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">                .filter(item -&gt; item.getId() == itemId)</span>
+<span class="fc" id="L298">                .findFirst()</span>
+<span class="fc" id="L299">                .orElseThrow(() -&gt; new RuntimeException(&quot;Artículo no encontrado en la wishlist&quot;));</span>
+    
+<span class="fc" id="L301">        user.getWishlistItems().remove(itemToRemove);</span>
+<span class="fc" id="L302">        itemToRemove.getUsersWithItemInWishlist().remove(user);</span>
+    
+<span class="fc" id="L304">        itemRepository.save(itemToRemove);</span>
+<span class="fc" id="L305">        userRepository.save(user);</span>
+<span class="fc" id="L306">    }</span>
+
+    public List&lt;Item&gt; getUserItems(long userId) {
+<span class="fc" id="L309">        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc" id="L310">        return user.getItemsForSale();</span>
+    }
+
+    @Transactional
+    public void deleteItem(long token, long itemId) {
+<span class="fc" id="L315">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L317">            throw new RuntimeException(&quot;Not authorized&quot;);</span>
+        }
+
+<span class="fc" id="L320">        Item item = getItemById(itemId);</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">        if (item == null) {</span>
+<span class="nc" id="L322">            throw new RuntimeException(&quot;Item not found&quot;);</span>
+        }
+
+<span class="fc bfc" id="L325" title="All 2 branches covered.">        for (User u : item.getUsersWithItemInCart()) {</span>
+<span class="fc" id="L326">            u.getCartItems().remove(item);</span>
+<span class="fc" id="L327">            userRepository.save(u);</span>
+<span class="fc" id="L328">        }</span>
+<span class="fc" id="L329">        item.getUsersWithItemInCart().clear();</span>
+
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        for (User u : item.getUsersWithItemInWishlist()) {</span>
+<span class="fc" id="L332">            u.getWishlistItems().remove(item);</span>
+<span class="fc" id="L333">            userRepository.save(u);</span>
+<span class="fc" id="L334">        }</span>
+<span class="fc" id="L335">        item.getUsersWithItemInWishlist().clear();</span>
+<span class="fc" id="L336">        item.setIsSold(true);</span>
+<span class="fc" id="L337">        itemRepository.save(item);</span>
+
+<span class="fc" id="L339">        System.out.println(&quot;Item borrado correctamente.&quot;);</span>
+<span class="fc" id="L340">    }</span>
+    
+    public static ItemDTO getDTOById(Long itemId) {
+<span class="fc" id="L343">        Item item = itemRepository.findById(itemId).orElseThrow(() -&gt; new RuntimeException(&quot;Item not found with id: &quot; + itemId));</span>
+<span class="fc" id="L344">        return convertToDTO(item);</span>
+    }
+
+    public static ItemDTO convertToDTO(Item item) {
+        ItemDTO itemDTO;
+        
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        if (item instanceof Clothes) {</span>
+<span class="fc" id="L351">            Clothes clothesItem = (Clothes) item;</span>
+<span class="fc" id="L352">            ClothesDTO clothesDTO = new ClothesDTO();</span>
+<span class="fc" id="L353">            clothesDTO.setSize(clothesItem.getSize());</span>
+<span class="fc" id="L354">            clothesDTO.setCategory(clothesItem.getCategory());</span>
+<span class="fc" id="L355">            clothesDTO.setClothesType(clothesItem.getClothesType());</span>
+<span class="fc" id="L356">            clothesDTO.setId(clothesItem.getId());</span>
+<span class="fc" id="L357">            clothesDTO.setTitle(clothesItem.getTitle());</span>
+<span class="fc" id="L358">            clothesDTO.setDescription(clothesItem.getDescription());</span>
+<span class="fc" id="L359">            clothesDTO.setPrice(clothesItem.getPrice());</span>
+<span class="fc" id="L360">            clothesDTO.setSellerId(clothesItem.getSeller().getId());</span>
+<span class="fc" id="L361">            clothesDTO.setImages(clothesItem.getImages());</span>
+            
+<span class="fc" id="L363">            itemDTO = clothesDTO;</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">        } else if (item instanceof Electronics) {</span>
+<span class="fc" id="L365">            Electronics electronicsItem = (Electronics) item;</span>
+<span class="fc" id="L366">            ElectronicsDTO electronicsDTO = new ElectronicsDTO();</span>
+
+<span class="fc" id="L368">            electronicsDTO.setElectronicsType(electronicsItem.getElectronicsType());</span>
+<span class="fc" id="L369">            electronicsDTO.setId(electronicsItem.getId());</span>
+<span class="fc" id="L370">            electronicsDTO.setTitle(electronicsItem.getTitle());</span>
+<span class="fc" id="L371">            electronicsDTO.setDescription(electronicsItem.getDescription());</span>
+<span class="fc" id="L372">            electronicsDTO.setPrice(electronicsItem.getPrice());</span>
+<span class="fc" id="L373">            electronicsDTO.setSellerId(electronicsItem.getSeller().getId());</span>
+<span class="fc" id="L374">            electronicsDTO.setImages(electronicsItem.getImages());</span>
+
+<span class="fc" id="L376">            itemDTO = electronicsDTO;</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">        } else if (item instanceof Pet) {</span>
+<span class="fc" id="L378">            Pet petItem = (Pet) item;</span>
+<span class="fc" id="L379">            PetDTO petDTO = new PetDTO();</span>
+
+<span class="fc" id="L381">            petDTO.setSpecies(petItem.getSpecies());</span>
+<span class="fc" id="L382">            petDTO.setId(petItem.getId());</span>
+<span class="fc" id="L383">            petDTO.setTitle(petItem.getTitle());</span>
+<span class="fc" id="L384">            petDTO.setDescription(petItem.getDescription());</span>
+<span class="fc" id="L385">            petDTO.setPrice(petItem.getPrice());</span>
+<span class="fc" id="L386">            petDTO.setSellerId(petItem.getSeller().getId());</span>
+<span class="fc" id="L387">            petDTO.setImages(petItem.getImages());</span>
+
+<span class="fc" id="L389">            itemDTO = petDTO;</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">        } else if (item instanceof Entertainment) {</span>
+<span class="fc" id="L391">            Entertainment entertainmentItem = (Entertainment) item;</span>
+<span class="fc" id="L392">            EntertainmentDTO entertainmentDTO = new EntertainmentDTO();</span>
+
+
+<span class="fc" id="L395">            entertainmentDTO.setEntertainmentType(entertainmentItem.getEntertainmentType());</span>
+<span class="fc" id="L396">            entertainmentDTO.setId(entertainmentItem.getId());</span>
+<span class="fc" id="L397">            entertainmentDTO.setTitle(entertainmentItem.getTitle());</span>
+<span class="fc" id="L398">            entertainmentDTO.setDescription(entertainmentItem.getDescription());</span>
+<span class="fc" id="L399">            entertainmentDTO.setPrice(entertainmentItem.getPrice());</span>
+<span class="fc" id="L400">            entertainmentDTO.setSellerId(entertainmentItem.getSeller().getId());</span>
+<span class="fc" id="L401">            entertainmentDTO.setImages(entertainmentItem.getImages());</span>
+<span class="fc" id="L402">            itemDTO = entertainmentDTO;</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">        } else if (item instanceof Home) {</span>
+<span class="fc" id="L404">            Home homeItem = (Home) item;</span>
+<span class="fc" id="L405">            HomeDTO homeDTO = new HomeDTO();</span>
+
+<span class="fc" id="L407">            homeDTO.setHomeType(homeItem.getHomeType());</span>
+<span class="fc" id="L408">            homeDTO.setId(homeItem.getId());</span>
+<span class="fc" id="L409">            homeDTO.setTitle(homeItem.getTitle());</span>
+<span class="fc" id="L410">            homeDTO.setDescription(homeItem.getDescription());</span>
+<span class="fc" id="L411">            homeDTO.setPrice(homeItem.getPrice());</span>
+<span class="fc" id="L412">            homeDTO.setSellerId(homeItem.getSeller().getId());</span>
+<span class="fc" id="L413">            homeDTO.setImages(homeItem.getImages());</span>
+
+<span class="fc" id="L415">            itemDTO = homeDTO;</span>
+<span class="fc" id="L416">        } else {</span>
+<span class="fc" id="L417">            throw new IllegalArgumentException(&quot;Tipo de item desconocido: &quot; + item.getClass().getName());</span>
+        }
+
+<span class="fc" id="L420">        itemDTO.setId(item.getId());</span>
+<span class="fc" id="L421">        itemDTO.setTitle(item.getTitle());</span>
+<span class="fc" id="L422">        itemDTO.setDescription(item.getDescription());</span>
+<span class="fc" id="L423">        itemDTO.setPrice(item.getPrice());</span>
+<span class="fc" id="L424">        itemDTO.setSellerId(item.getSeller().getId());</span>
+        
+        // Si tienes imágenes, configúralas
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        if (item.getImages() != null) {</span>
+<span class="fc" id="L428">            itemDTO.setImages(item.getImages());</span>
+        }
+        
+<span class="fc" id="L431">        return itemDTO;</span>
+    }
+    
+    public List&lt;Item&gt; searchItems(Long token, String query) {
+<span class="fc bfc" id="L435" title="All 4 branches covered.">        if (query == null || query.isBlank()) return getAllItems(token);</span>
+<span class="fc" id="L436">        List&lt;Item&gt; items = itemRepository.findAll().stream()</span>
+<span class="fc" id="L437">                .filter(item -&gt; item.getTitle().toLowerCase().contains(query.toLowerCase()))</span>
+<span class="fc" id="L438">                .collect(Collectors.toList());</span>
+<span class="fc" id="L439">        System.out.println(&quot;2&quot;+items);</span>
+<span class="fc" id="L440">        return items;</span>
+    }
+    public Page&lt;Item&gt; searchItems(Long token, String query, int page, String type) {
+<span class="fc" id="L443">        Map&lt;String, Class&lt;? extends Item&gt;&gt; typeMap = Map.of(</span>
+            &quot;Clothes&quot;, Clothes.class,
+            &quot;Electronics&quot;, Electronics.class,
+            &quot;Pet&quot;, Pet.class,
+            &quot;Entertainment&quot;, Entertainment.class,
+            &quot;Home&quot;, Home.class
+        );
+
+<span class="fc" id="L451">        Pageable pageable = PageRequest.of(page, 28);</span>
+<span class="fc bfc" id="L452" title="All 2 branches covered.">        String searchQuery = (query != null) ? query : &quot;&quot;;</span>
+
+<span class="pc bpc" id="L454" title="1 of 6 branches missed.">        if ((searchQuery.isBlank()) &amp;&amp; (type == null || type.isBlank())) {</span>
+<span class="fc" id="L455">            return getItems(token, page, &quot;&quot;);</span>
+        }
+
+<span class="pc bpc" id="L458" title="1 of 4 branches missed.">        if (type != null &amp;&amp; !type.isBlank()) {</span>
+<span class="fc" id="L459">            Class&lt;? extends Item&gt; itemType = typeMap.get(type);</span>
+
+<span class="pc bpc" id="L461" title="1 of 2 branches missed.">            if (itemType == null) {</span>
+<span class="nc" id="L462">                return itemRepository.searchByQuery(searchQuery, pageable);</span>
+            }
+
+<span class="fc" id="L465">            return itemRepository.searchByTypeAndQuery(itemType, searchQuery, pageable);</span>
+        }
+
+<span class="fc" id="L468">        return itemRepository.searchByQuery(searchQuery, pageable);</span>
+    }
+
+
+
+    public List&lt;Item&gt; getRecommendedProducts(Item item) {
+<span class="fc bfc" id="L474" title="All 2 branches covered.">        if (item == null) {</span>
+<span class="fc" id="L475">            throw new IllegalArgumentException(&quot;El producto no puede ser nulo&quot;);</span>
+        }
+<span class="fc" id="L477">        System.out.println(&quot;caracola3&quot;);</span>
+<span class="fc" id="L478">        return itemRepository.findAll().stream()</span>
+<span class="fc bfc" id="L479" title="All 2 branches covered.">                .filter(i -&gt; i.getId() != item.getId())</span>
+<span class="fc" id="L480">                .filter(i -&gt; i.getClass().equals(item.getClass()))</span>
+<span class="fc" id="L481">                .filter(i -&gt; {</span>
+<span class="pc bpc" id="L482" title="1 of 4 branches missed.">                    if (i instanceof Clothes &amp;&amp; item instanceof Clothes) {</span>
+<span class="fc" id="L483">                        Clothes clothesItem = (Clothes) i;</span>
+<span class="fc" id="L484">                        Clothes currentClothes = (Clothes) item;</span>
+<span class="fc bfc" id="L485" title="All 2 branches covered.">                        return clothesItem.getCategory().equals(currentClothes.getCategory()) &amp;&amp;</span>
+<span class="fc bfc" id="L486" title="All 2 branches covered.">                            clothesItem.getClothesType().equals(currentClothes.getClothesType());</span>
+<span class="pc bpc" id="L487" title="1 of 4 branches missed.">                    } else if (i instanceof Electronics &amp;&amp; item instanceof Electronics) {</span>
+<span class="fc" id="L488">                        Electronics electronicsItem = (Electronics) i;</span>
+<span class="fc" id="L489">                        Electronics currentElectronics = (Electronics) item;</span>
+<span class="fc" id="L490">                        return electronicsItem.getElectronicsType().equals(currentElectronics.getElectronicsType());</span>
+<span class="pc bpc" id="L491" title="1 of 4 branches missed.">                    } else if (i instanceof Pet &amp;&amp; item instanceof Pet) {</span>
+<span class="fc" id="L492">                        Pet petItem = (Pet) i;</span>
+<span class="fc" id="L493">                        Pet currentPet = (Pet) item;</span>
+<span class="fc" id="L494">                        return petItem.getSpecies().equals(currentPet.getSpecies());</span>
+<span class="pc bpc" id="L495" title="1 of 4 branches missed.">                    } else if (i instanceof Entertainment &amp;&amp; item instanceof Entertainment) {</span>
+<span class="fc" id="L496">                        Entertainment entertainmentItem = (Entertainment) i;</span>
+<span class="fc" id="L497">                        Entertainment currentEntertainment = (Entertainment) item;</span>
+<span class="fc" id="L498">                        return entertainmentItem.getEntertainmentType().equals(currentEntertainment.getEntertainmentType());</span>
+<span class="pc bpc" id="L499" title="2 of 4 branches missed.">                    } else if (i instanceof Home &amp;&amp; item instanceof Home) {</span>
+<span class="fc" id="L500">                        Home homeItem = (Home) i;</span>
+<span class="fc" id="L501">                        Home currentHome = (Home) item;</span>
+<span class="fc" id="L502">                        return homeItem.getHomeType().equals(currentHome.getHomeType());</span>
+                    }
+<span class="nc" id="L504">                    return false;</span>
+                })
+<span class="fc" id="L506">                .limit(5)</span>
+<span class="fc" id="L507">                .collect(Collectors.toList());</span>
+    }
+
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

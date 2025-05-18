@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Shipment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">Shipment.java</span></div><h1>Shipment.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+
+import jakarta.persistence.ManyToOne;
+
+import jakarta.persistence.OneToOne;
+
+@Entity
+public class Shipment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = &quot;item_id&quot;)
+    private Item item;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = &quot;buyer_id&quot;)
+    private User buyer;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = &quot;seller_id&quot;)
+    private User Seller;
+
+    @Column(nullable = false)
+    private ShipmentStatus status;
+
+    @Column(nullable = false)
+    private LocalDateTime createdDate;
+
+<span class="fc" id="L45">    public Shipment() {</span>
+<span class="fc" id="L46">    }</span>
+
+<span class="fc" id="L48">    public Shipment(Item item, User buyer, User seller) {    </span>
+<span class="fc" id="L49">        this.item = item;</span>
+<span class="fc" id="L50">        this.buyer = buyer;</span>
+<span class="fc" id="L51">        this.status = ShipmentStatus.SHIPPED;</span>
+<span class="fc" id="L52">        this.createdDate = LocalDateTime.now();</span>
+<span class="fc" id="L53">        this.Seller = seller;</span>
+<span class="fc" id="L54">    }</span>
+
+    public Long getId() { 
+<span class="fc" id="L57">        return id; </span>
+    }
+
+    public void setId(Long id) { 
+<span class="fc" id="L61">        this.id = id; </span>
+<span class="fc" id="L62">    }</span>
+    
+    public Item getItem() { 
+<span class="fc" id="L65">        return item; </span>
+    }
+
+    public void setItem(Item item) { 
+<span class="fc" id="L69">        this.item = item; </span>
+<span class="fc" id="L70">    }</span>
+
+    public User getBuyer() { 
+<span class="fc" id="L73">        return buyer; </span>
+    }
+
+    public void setBuyer(User buyer) { 
+<span class="fc" id="L77">        this.buyer = buyer; </span>
+<span class="fc" id="L78">    }</span>
+
+    public ShipmentStatus getStatus() { 
+<span class="fc" id="L81">        return status; </span>
+    }
+
+    public void setStatus(ShipmentStatus status) { 
+<span class="fc" id="L85">        this.status = status; </span>
+<span class="fc" id="L86">    }</span>
+    
+    public User getSeller() { 
+<span class="nc" id="L89">        return Seller; </span>
+    }
+    public void setSeller(User seller) { 
+<span class="nc" id="L92">        this.Seller = seller; </span>
+<span class="nc" id="L93">    }</span>
+    public LocalDateTime getCreatedDate() { 
+<span class="nc" id="L95">        return createdDate; </span>
+    }
+    public void setCreatedDate(LocalDateTime createdDate) {
+<span class="nc" id="L98">        this.createdDate = createdDate;</span>
+<span class="nc" id="L99">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

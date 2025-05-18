@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">AdService.java</span></div><h1>AdService.java</h1><pre class="source lang-java linenums">package com.spq.vinted.service;
+
+import com.spq.vinted.model.Ad;
+import com.spq.vinted.repository.AdRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+<span class="fc" id="L19">public class AdService {</span>
+
+    @Autowired
+    private AdRepository adRepository;
+
+    public List&lt;Ad&gt; getAllAds() {
+<span class="fc" id="L25">        return adRepository.findAll();</span>
+    }
+
+    public Ad getAdById(long id) {
+<span class="fc" id="L29">        return adRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Ad not found&quot;));</span>
+    }
+
+    public Ad saveAd(Ad ad) {
+<span class="fc" id="L33">        return adRepository.save(ad);</span>
+    }
+
+    public String uploadAdImage(MultipartFile imageFile) throws IOException {
+<span class="fc" id="L37">        String uploadDir = &quot;uploads/ads/&quot;;</span>
+
+<span class="fc" id="L39">        File uploadPath = new File(uploadDir);</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (!uploadPath.exists()) {</span>
+<span class="fc" id="L41">            uploadPath.mkdirs();</span>
+        }
+
+<span class="fc" id="L44">        String uniqueFileName = UUID.randomUUID().toString() + &quot;_&quot; + imageFile.getOriginalFilename();</span>
+
+<span class="fc" id="L46">        Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();</span>
+
+<span class="fc" id="L48">        Files.copy(imageFile.getInputStream(), filePath);</span>
+
+<span class="fc" id="L50">        return uniqueFileName;</span>
+    }
+
+    public void uploadAdImage(long adId, MultipartFile imageFile) throws IOException {
+<span class="fc" id="L54">        String uploadDir = &quot;uploads/ads/&quot;;</span>
+<span class="fc" id="L55">        Ad ad = adRepository.findById(adId).orElseThrow(() -&gt; new RuntimeException(&quot;Ad not found&quot;));</span>
+
+<span class="fc" id="L57">        File uploadPath = new File(uploadDir);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (!uploadPath.exists()) {</span>
+<span class="nc" id="L59">            uploadPath.mkdirs();</span>
+        }
+
+<span class="fc" id="L62">        String uniqueFileName = UUID.randomUUID().toString() + &quot;_&quot; + imageFile.getOriginalFilename();</span>
+<span class="fc" id="L63">        Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();</span>
+
+<span class="fc" id="L65">        Files.copy(imageFile.getInputStream(), filePath);</span>
+
+<span class="fc" id="L67">        ad.setImageUrl(uniqueFileName);</span>
+<span class="fc" id="L68">        adRepository.save(ad);</span>
+<span class="fc" id="L69">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

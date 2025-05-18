@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Rating.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">Rating.java</span></div><h1>Rating.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import jakarta.persistence.*;
+
+@Entity
+<span class="fc" id="L6">public class Rating {</span>
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = &quot;rated_user_id&quot;, nullable = false)
+    private Long ratedUserId;
+
+    @Column(name = &quot;rating_user_id&quot;, nullable = false)
+    private Long ratingUserId;
+
+    @Column(nullable = false)
+    private int score;
+
+    @Column(length = 500)
+    private String comment;
+
+    public Long getId() {
+<span class="fc" id="L24">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L28">        this.id = id;</span>
+<span class="fc" id="L29">    }</span>
+
+    public Long getRatedUserId() {
+<span class="fc" id="L32">        return ratedUserId;</span>
+    }
+
+    public void setRatedUserId(Long ratedUserId) {
+<span class="fc" id="L36">        this.ratedUserId = ratedUserId;</span>
+<span class="fc" id="L37">    }</span>
+
+    public Long getRatingUserId() {
+<span class="fc" id="L40">        return ratingUserId;</span>
+    }
+
+    public void setRatingUserId(Long ratingUserId) {
+<span class="fc" id="L44">        this.ratingUserId = ratingUserId;</span>
+<span class="fc" id="L45">    }</span>
+
+    public int getScore() {
+<span class="fc" id="L48">        return score;</span>
+    }
+
+    public void setScore(int score) {
+<span class="fc" id="L52">        this.score = score;</span>
+<span class="fc" id="L53">    }</span>
+
+    public String getComment() {
+<span class="fc" id="L56">        return comment;</span>
+    }
+
+    public void setComment(String comment) {
+<span class="fc" id="L60">        this.comment = comment;</span>
+<span class="fc" id="L61">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

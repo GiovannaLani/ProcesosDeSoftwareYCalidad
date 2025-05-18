@@ -1,0 +1,6 @@
+var searchData=
+[
+  ['offer_0',['offer',['../classcom_1_1spq_1_1vinted_1_1model_1_1_offer.html#ab4539c94bcb26a06fc2704924442410c',1,'com.spq.vinted.model.Offer.Offer()'],['../classcom_1_1spq_1_1vinted_1_1model_1_1_offer.html#affce494b7986b4330b4919ccea1bb558',1,'com.spq.vinted.model.Offer.Offer(User sender, User receiver, Item item, Double price, OfferStatus status, ChatRoom chat)']]],
+  ['offerdto_1',['offerdto',['../classcom_1_1spq_1_1vinted_1_1dto_1_1_offer_d_t_o.html#ace4d4e03997ec0571da266fd085cd347',1,'com.spq.vinted.dto.OfferDTO.OfferDTO()'],['../classcom_1_1spq_1_1vinted_1_1dto_1_1_offer_d_t_o.html#a7250443605b9de6ecfd47d8c15f68968',1,'com.spq.vinted.dto.OfferDTO.OfferDTO(double price, String status, long senderId, long receiverId, long itemId, long chatRoomId, boolean isSold)']]],
+  ['offerreturnerdto_2',['offerreturnerdto',['../classcom_1_1spq_1_1vinted_1_1dto_1_1_offer_returner_d_t_o.html#ad5f677345f14f3db4e28335a8d68a16c',1,'com.spq.vinted.dto.OfferReturnerDTO.OfferReturnerDTO()'],['../classcom_1_1spq_1_1vinted_1_1dto_1_1_offer_returner_d_t_o.html#a8c8c2529d4548e9f718b6836e8d4a148',1,'com.spq.vinted.dto.OfferReturnerDTO.OfferReturnerDTO(long id, double price, double originalPrice, String status, long senderId, long receiverId, long itemId, long chatRoomId, boolean isSold)']]]
+];

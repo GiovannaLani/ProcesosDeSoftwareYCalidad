@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">Pet.java</span></div><h1>Pet.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.PetDTO;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = &quot;pets&quot;)
+public class Pet extends Item{
+    @Column(nullable = false)
+    private Species species;
+
+<span class="fc" id="L16">    public Pet() {</span>
+<span class="fc" id="L17">    }</span>
+
+    public Pet(String title, String description, float price, Species species, User seller) {
+<span class="fc" id="L20">        super(title, description, price, seller);</span>
+<span class="fc" id="L21">        this.species = species;</span>
+<span class="fc" id="L22">    }</span>
+
+    public Species getSpecies() {
+<span class="fc" id="L25">        return species;</span>
+    }
+    
+    public void setSpecies(Species species) {
+<span class="fc" id="L29">        this.species = species;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Override
+    public ItemDTO toDTO() {
+<span class="fc" id="L34">        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species, getImages(), getIsSold());</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

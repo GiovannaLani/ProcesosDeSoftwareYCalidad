@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.controller</a> &gt; <span class="el_source">ChatController.java</span></div><h1>ChatController.java</h1><pre class="source lang-java linenums">package com.spq.vinted.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+import com.spq.vinted.dto.ChatMessageDTO;
+import com.spq.vinted.service.MessageService;
+
+@Controller
+<span class="fc" id="L13">public class ChatController {</span>
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private MessageService messageService;
+
+    @MessageMapping(&quot;/chat.send&quot;)
+    public void sendMessage(@Payload ChatMessageDTO message) {
+        
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (message == null) {</span>
+<span class="fc" id="L25">            throw new IllegalArgumentException(&quot;Message cannot be null&quot;);</span>
+        }
+        
+<span class="fc" id="L28">        String destination = &quot;/topic/chat/&quot; + message.getChatRoomId();;</span>
+        
+<span class="fc" id="L30">        messagingTemplate.convertAndSend(destination, message);</span>
+<span class="fc" id="L31">        messageService.saveMessage(message);</span>
+<span class="fc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

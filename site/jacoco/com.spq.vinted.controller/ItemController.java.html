@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.controller</a> &gt; <span class="el_source">ItemController.java</span></div><h1>ItemController.java</h1><pre class="source lang-java linenums">package com.spq.vinted.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.net.MalformedURLException;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+
+import com.spq.vinted.dto.ClothesDTO;
+import com.spq.vinted.dto.ElectronicsDTO;
+import com.spq.vinted.dto.EntertainmentDTO;
+import com.spq.vinted.dto.HomeDTO;
+import com.spq.vinted.dto.ItemDTO;
+import com.spq.vinted.dto.PaginatedResponseDTO;
+import com.spq.vinted.dto.PetDTO;
+import com.spq.vinted.dto.UserDTO;
+import com.spq.vinted.model.Category;
+import com.spq.vinted.model.Clothes;
+import com.spq.vinted.model.Electronics;
+import com.spq.vinted.model.Entertainment;
+import com.spq.vinted.model.Home;
+import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Pet;
+import com.spq.vinted.model.User;
+import com.spq.vinted.service.ItemService;
+import com.spq.vinted.service.UserService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+
+@RestController
+@RequestMapping(&quot;/items&quot;)
+@Tag(name = &quot;Item Controller&quot;, description = &quot;API for managing items&quot;)
+public class ItemController {
+    private ItemService itemService;
+    private UserService userService;
+
+    public ItemController(ItemService itemService, UserService userService) {
+<span class="fc" id="L61">        super();</span>
+<span class="fc" id="L62">        this.itemService = itemService;</span>
+<span class="fc" id="L63">        this.userService = userService;</span>
+<span class="fc" id="L64">    }</span>
+
+    @PostMapping(&quot;/shoppingCart/add&quot;)
+    public ResponseEntity&lt;Void&gt; addItemToCart(@RequestParam(&quot;token&quot;) long token, @RequestParam(&quot;itemId&quot;) long itemId) {
+        try {
+<span class="fc" id="L69">            System.out.println(&quot;TOKEN&quot;+token);</span>
+<span class="fc" id="L70">            System.out.println(&quot;ITEMID&quot;+itemId);</span>
+<span class="fc" id="L71">            itemService.addItemToCart(token, itemId);</span>
+<span class="fc" id="L72">            return ResponseEntity.ok().build();</span>
+<span class="fc" id="L73">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L74">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+    
+
+    @GetMapping(&quot;/shoppingCart&quot;)
+    public ResponseEntity&lt;List&lt;ItemDTO&gt;&gt; getCart(@RequestParam(&quot;token&quot;) long token) {
+        try {
+<span class="fc" id="L82">            List&lt;Item&gt; cartItems = itemService.getCartItems(token);</span>
+<span class="fc" id="L83">            System.out.println(&quot;Cart items: &quot; + cartItems);</span>
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">            if (cartItems == null || cartItems.isEmpty()) {</span>
+<span class="fc" id="L85">                return ResponseEntity.ok(null);</span>
+            }
+<span class="fc" id="L87">            List&lt;ItemDTO&gt; cartItemDTOs = new ArrayList&lt;ItemDTO&gt;();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            for (Item item : cartItems) {</span>
+<span class="fc" id="L89">                cartItemDTOs.add(item.toDTO());</span>
+<span class="fc" id="L90">            }</span>
+<span class="fc" id="L91">            return ResponseEntity.ok(cartItemDTOs);</span>
+<span class="fc" id="L92">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L93">            e.printStackTrace();</span>
+<span class="fc" id="L94">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/shoppingCart/remove&quot;)
+    public ResponseEntity&lt;Void&gt; deleteItemFromCart(@RequestParam(&quot;token&quot;) long token, @RequestParam(&quot;itemId&quot;) long itemId) {
+        try {
+<span class="fc" id="L101">            itemService.removeItemFromCart(token, itemId);</span>
+<span class="fc" id="L102">            return ResponseEntity.ok().build();</span>
+<span class="fc" id="L103">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L104">            e.printStackTrace();</span>
+<span class="fc" id="L105">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/wishlist/add&quot;)
+    public ResponseEntity&lt;Void&gt; addItemToWishlist(@RequestParam(&quot;token&quot;) long token, @RequestParam(&quot;itemId&quot;) long itemId) {
+        try {
+<span class="fc" id="L112">            itemService.addItemToWishlist(token, itemId);</span>
+<span class="fc" id="L113">            return ResponseEntity.ok().build();</span>
+<span class="fc" id="L114">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L115">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/wishlist&quot;)
+    public ResponseEntity&lt;List&lt;ItemDTO&gt;&gt; getWishlist(@RequestParam(&quot;token&quot;) long token) {
+        try {
+<span class="fc" id="L122">            List&lt;Item&gt; wishlistItems = itemService.getWishlistItems(token);</span>
+<span class="pc bpc" id="L123" title="1 of 4 branches missed.">            if (wishlistItems == null || wishlistItems.isEmpty()) {</span>
+<span class="fc" id="L124">                return ResponseEntity.ok(null);</span>
+            }
+<span class="fc" id="L126">            List&lt;ItemDTO&gt; wishlistItemDTOs = new ArrayList&lt;ItemDTO&gt;();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">            for (Item item : wishlistItems) {</span>
+<span class="fc" id="L128">                wishlistItemDTOs.add(item.toDTO());</span>
+<span class="fc" id="L129">            }</span>
+<span class="fc" id="L130">            return ResponseEntity.ok(wishlistItemDTOs);</span>
+<span class="fc" id="L131">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L132">            e.printStackTrace();</span>
+<span class="fc" id="L133">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/wishlist/remove&quot;)
+    public ResponseEntity&lt;Void&gt; removeItemFromWishlist(@RequestParam(&quot;token&quot;) long token, @RequestParam(&quot;itemId&quot;) long itemId) {
+        try {
+<span class="fc" id="L140">            itemService.removeItemFromWishlist(token, itemId);</span>
+<span class="fc" id="L141">            return ResponseEntity.ok().build();</span>
+<span class="fc" id="L142">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L143">            e.printStackTrace();</span>
+<span class="fc" id="L144">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/itemData&quot;)
+    public ResponseEntity&lt;Long&gt; uploadItemData(
+            @RequestParam(&quot;token&quot;) long token,
+            @RequestBody ItemDTO itemDTO) {
+<span class="fc" id="L152">        User user = userService.getUserByToken(token);</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L154">            return ResponseEntity.status(403).build();</span>
+        }
+<span class="fc" id="L156">        Item savedItem = null;</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (itemDTO instanceof ClothesDTO clothes) {</span>
+<span class="fc" id="L158">            System.out.println(&quot;ClothesDTO: &quot; + clothes.getTitle() + &quot;, &quot; + clothes.getDescription() + &quot;, &quot; + clothes.getPrice() + &quot;, &quot; + clothes.getSize() + &quot;, &quot; + clothes.getClothesType() + &quot;, &quot; + clothes.getCategory());</span>
+<span class="fc" id="L159">            Clothes clothesItem = new Clothes(clothes.getTitle(), clothes.getDescription(), clothes.getPrice(),</span>
+<span class="fc" id="L160">                    clothes.getSize(), clothes.getClothesType(), clothes.getCategory(), user);</span>
+<span class="fc" id="L161">            savedItem = itemService.saveItem(clothesItem);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        } else if (itemDTO instanceof ElectronicsDTO electronics) {</span>
+<span class="fc" id="L163">            Electronics electronicsItem = new Electronics(electronics.getTitle(), electronics.getDescription(),</span>
+<span class="fc" id="L164">                    electronics.getPrice(), user, electronics.getElectronicsType());</span>
+<span class="fc" id="L165">            savedItem = itemService.saveItem(electronicsItem);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        } else if (itemDTO instanceof PetDTO pet) {</span>
+<span class="fc" id="L167">            Pet petItem = new Pet(pet.getTitle(), pet.getDescription(), pet.getPrice(), pet.getSpecies(), user);</span>
+<span class="fc" id="L168">            savedItem = itemService.saveItem(petItem);</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        } else if (itemDTO instanceof HomeDTO home) {</span>
+<span class="fc" id="L170">            Home homeItem = new Home(home.getTitle(), home.getDescription(), home.getPrice(), user, home.getHomeType());</span>
+<span class="fc" id="L171">            savedItem = itemService.saveItem(homeItem);</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        } else if (itemDTO instanceof EntertainmentDTO entertainment) {</span>
+<span class="fc" id="L173">            Entertainment entertainmentItem = new Entertainment(entertainment.getTitle(), entertainment.getDescription(), entertainment.getPrice(), user, entertainment.getEntertainmentType());</span>
+<span class="fc" id="L174">            savedItem = itemService.saveItem(entertainmentItem);</span>
+        }
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (savedItem == null) {</span>
+<span class="fc" id="L177">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+
+<span class="fc" id="L180">        return ResponseEntity.ok(savedItem.getId());</span>
+    }
+
+    @PutMapping(value = &quot;/itemImage&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity&lt;Void&gt; updateItemImage(
+            @RequestParam(&quot;itemId&quot;) long itemId,
+            @RequestPart(&quot;images&quot;) List&lt;MultipartFile&gt; images) {
+    
+        try {
+            
+<span class="fc" id="L190">            itemService.uploadItemImages(itemId, images);</span>
+<span class="fc" id="L191">            return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L192">        } catch (RuntimeException e) {</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">            if (&quot;Item not found&quot;.equals(e.getMessage())) {</span>
+<span class="fc" id="L194">                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
+            }
+<span class="fc" id="L196">            e.printStackTrace();</span>
+<span class="fc" id="L197">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="fc" id="L198">        } catch (IOException e) {</span>
+<span class="fc" id="L199">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+ 
+    @GetMapping(&quot;/items&quot;)
+    public ResponseEntity&lt;PaginatedResponseDTO&lt;ItemDTO&gt;&gt; getItems(
+            @RequestParam(value = &quot;token&quot;, required = false) Long token,
+            @RequestParam(value = &quot;page&quot;, defaultValue = &quot;0&quot;) int page,
+            @RequestParam(value = &quot;type&quot;, defaultValue = &quot;&quot;, required = false) String type) {
+
+        try {
+<span class="fc" id="L210">            Page&lt;Item&gt; items = itemService.getItems(token, page, type);</span>
+<span class="fc" id="L211">            Page&lt;ItemDTO&gt; itemDTOs = items.map(Item::toDTO);</span>
+
+<span class="fc" id="L213">            PaginatedResponseDTO&lt;ItemDTO&gt; response = new PaginatedResponseDTO&lt;&gt;(</span>
+<span class="fc" id="L214">                    itemDTOs.getContent(),</span>
+<span class="fc" id="L215">                    itemDTOs.getNumber(),</span>
+<span class="fc" id="L216">                    itemDTOs.getTotalPages()</span>
+            );
+
+<span class="fc" id="L219">            return ResponseEntity.ok(response);</span>
+
+<span class="fc" id="L221">        } catch (Exception e) {</span>
+<span class="fc" id="L222">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/item/{id}&quot;)
+    public ResponseEntity&lt;ItemDTO&gt; getItemById(@PathVariable long id) {
+        try {
+<span class="fc" id="L229">            Item item = itemService.getItemById(id);</span>
+<span class="fc" id="L230">            return ResponseEntity.ok(item.toDTO());</span>
+<span class="fc" id="L231">        } catch (Exception e) {</span>
+<span class="fc" id="L232">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+
+    @GetMapping(&quot;/clothes&quot;)
+    public ResponseEntity&lt;List&lt;ClothesDTO&gt;&gt; getClothes(@RequestParam(value = &quot;token&quot;, required = false) Long token) {
+        try {
+<span class="fc" id="L240">            List&lt;Clothes&gt; clothes = itemService.getClothes();</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            if(token != null) {</span>
+<span class="fc" id="L242">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">                clothes = clothes.stream().filter(item -&gt; !item.getSeller().getId().equals(userId)).collect(Collectors.toList());</span>
+            }
+<span class="fc" id="L245">            List&lt;ClothesDTO&gt; clothesDTOs = new ArrayList&lt;ClothesDTO&gt;();</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            for(Clothes c: clothes){</span>
+<span class="fc" id="L247">                clothesDTOs.add((ClothesDTO) c.toDTO());</span>
+<span class="fc" id="L248">            }</span>
+<span class="fc" id="L249">            return ResponseEntity.ok(clothesDTOs);</span>
+<span class="fc" id="L250">        } catch (Exception e) {</span>
+<span class="fc" id="L251">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/clothes/{category}&quot;)
+    public ResponseEntity&lt;PaginatedResponseDTO&lt;ClothesDTO&gt;&gt; getClothesByCategory(@PathVariable Category category,@RequestParam(value = &quot;token&quot;, required = false) Long token, @RequestParam(value = &quot;page&quot;, defaultValue = &quot;0&quot;) int page) {
+        try {
+<span class="fc" id="L258">            Page&lt;Clothes&gt; clothesPage = itemService.getClothesByCategory(category, page, token);</span>
+<span class="fc" id="L259">            List&lt;ClothesDTO&gt; clothesDTOs = clothesPage.stream()</span>
+<span class="fc" id="L260">                    .map(clothes -&gt; (ClothesDTO) clothes.toDTO())</span>
+<span class="fc" id="L261">                    .collect(Collectors.toList());</span>
+<span class="fc" id="L262">            PaginatedResponseDTO&lt;ClothesDTO&gt; result = new PaginatedResponseDTO&lt;&gt;(</span>
+                    clothesDTOs,
+<span class="fc" id="L264">                    clothesPage.getNumber(),</span>
+<span class="fc" id="L265">                    clothesPage.getTotalPages()</span>
+            );
+<span class="fc" id="L267">            return ResponseEntity.ok(result);</span>
+<span class="fc" id="L268">        } catch (Exception e) {</span>
+<span class="fc" id="L269">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/electronics&quot;)
+    public ResponseEntity&lt;List&lt;ElectronicsDTO&gt;&gt; getElectronics(@RequestParam(value = &quot;token&quot;, required = false) Long token) {
+        try {
+<span class="fc" id="L276">            List&lt;Electronics&gt; electronics = itemService.getElectronics();</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">            if(token != null) {</span>
+<span class="fc" id="L278">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">                electronics = electronics.stream().filter(item -&gt; !item.getSeller().getId().equals(userId)).collect(Collectors.toList());</span>
+            }
+<span class="fc" id="L281">            List&lt;ElectronicsDTO&gt; electronicsDTOs = new ArrayList&lt;ElectronicsDTO&gt;();</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">            for(Electronics e: electronics){</span>
+<span class="fc" id="L283">                electronicsDTOs.add((ElectronicsDTO) e.toDTO());</span>
+<span class="fc" id="L284">            }</span>
+<span class="fc" id="L285">            return ResponseEntity.ok(electronicsDTOs);</span>
+<span class="fc" id="L286">        } catch (Exception e) {</span>
+<span class="fc" id="L287">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/home&quot;)   
+    public ResponseEntity&lt;List&lt;HomeDTO&gt;&gt; getHomeItems(@RequestParam(value = &quot;token&quot;, required = false) Long token) {
+        try {
+<span class="fc" id="L294">            List&lt;Home&gt; homeItems = itemService.getHomeItems();</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">            if(token != null) {</span>
+<span class="fc" id="L296">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">                homeItems = homeItems.stream().filter(item -&gt; !item.getSeller().getId().equals(userId)).collect(Collectors.toList());</span>
+            }
+<span class="fc" id="L299">            List&lt;HomeDTO&gt; homeDTOs = new ArrayList&lt;HomeDTO&gt;();</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">            for(Home homeItem: homeItems){</span>
+<span class="fc" id="L301">                homeDTOs.add((HomeDTO) homeItem.toDTO());</span>
+<span class="fc" id="L302">            }</span>
+<span class="fc" id="L303">            return ResponseEntity.ok(homeDTOs);</span>
+<span class="fc" id="L304">        } catch (Exception e) {</span>
+<span class="fc" id="L305">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/pet&quot;)
+    public ResponseEntity&lt;List&lt;PetDTO&gt;&gt; getItemsForPet(@RequestParam(value = &quot;token&quot;, required = false) Long token) {
+        try {
+<span class="fc" id="L312">            List&lt;Pet&gt; petItems = itemService.getItemsForPet();</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">            if(token != null) {</span>
+<span class="fc" id="L314">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">                petItems = petItems.stream().filter(item -&gt; !item.getSeller().getId().equals(userId)).collect(Collectors.toList());</span>
+            }
+<span class="fc" id="L317">            List&lt;PetDTO&gt; petDTOs = new ArrayList&lt;PetDTO&gt;();</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">            for(Pet petItem: petItems){</span>
+<span class="fc" id="L319">                petDTOs.add((PetDTO) petItem.toDTO());</span>
+<span class="fc" id="L320">            }</span>
+<span class="fc" id="L321">            return ResponseEntity.ok(petDTOs);</span>
+<span class="fc" id="L322">        } catch (Exception e) {</span>
+<span class="fc" id="L323">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/entertainment&quot;)   
+    public ResponseEntity&lt;List&lt;EntertainmentDTO&gt;&gt; getItemsforEntertainment(@RequestParam(value = &quot;token&quot;, required = false) Long token) {
+        try {
+<span class="fc" id="L330">            List&lt;Entertainment&gt; entertainmentItems = itemService.getItemsforEntertainment();</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">            if(token != null) {</span>
+<span class="fc" id="L332">                Long userId = userService.getUserByToken(token).getId();</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">                entertainmentItems = entertainmentItems.stream().filter(item -&gt; !item.getSeller().getId().equals(userId)).collect(Collectors.toList());</span>
+            }
+<span class="fc" id="L335">            List&lt;EntertainmentDTO&gt; entertainmentDTOs = new ArrayList&lt;EntertainmentDTO&gt;();</span>
+<span class="fc bfc" id="L336" title="All 2 branches covered.">            for(Entertainment entertainmentItem: entertainmentItems){</span>
+<span class="fc" id="L337">                entertainmentDTOs.add((EntertainmentDTO) entertainmentItem.toDTO());</span>
+<span class="fc" id="L338">            }</span>
+<span class="fc" id="L339">            return ResponseEntity.ok(entertainmentDTOs);</span>
+<span class="fc" id="L340">        } catch (Exception e) {</span>
+<span class="fc" id="L341">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+    @GetMapping(&quot;/images/{nombreImagen}&quot;)
+	@ResponseBody
+	public ResponseEntity&lt;Resource&gt; showImagen(@PathVariable String nombreImagen) throws MalformedURLException {
+<span class="fc" id="L347">		Path rutaArchivo = Paths.get(&quot;uploads/items&quot;).resolve(nombreImagen).toAbsolutePath();</span>
+<span class="fc" id="L348">		Resource recurso = new UrlResource(rutaArchivo.toUri());</span>
+
+<span class="pc bpc" id="L350" title="3 of 4 branches missed.">		if (recurso.exists() &amp;&amp; recurso.isReadable()) {</span>
+<span class="nc" id="L351">			return ResponseEntity.ok()</span>
+<span class="nc" id="L352">				.contentType(MediaType.IMAGE_JPEG)</span>
+<span class="nc" id="L353">				.body(recurso);</span>
+		} else {
+<span class="fc" id="L355">			return ResponseEntity.notFound().build();</span>
+		}
+	}
+
+    @GetMapping(&quot;/{itemId}/owner&quot;)
+    public ResponseEntity&lt;User&gt; getItemOwner(@PathVariable long itemId) {
+        try {
+<span class="fc" id="L362">            User owner = itemService.getItemOwner(itemId);</span>
+<span class="fc" id="L363">            return ResponseEntity.ok(owner);</span>
+<span class="fc" id="L364">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L365">            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
+        }
+    }    
+
+    @GetMapping(&quot;/userItems/{userId}&quot;)
+    public ResponseEntity&lt;List&lt;ItemDTO&gt;&gt; getUserItems(@PathVariable long userId) {
+        try {
+<span class="fc" id="L372">            System.out.println(&quot;User ID: &quot; + userId);</span>
+<span class="fc" id="L373">            List&lt;Item&gt; items = itemService.getUserItems(userId);</span>
+<span class="fc" id="L374">            List&lt;ItemDTO&gt; itemDTOs = new ArrayList&lt;ItemDTO&gt;();</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">            for(Item item: items){</span>
+<span class="fc" id="L376">                System.out.println(&quot;Item: &quot; + item.getTitle() + &quot;, &quot; + item.getDescription() + &quot;, &quot; + item.getPrice());</span>
+<span class="fc" id="L377">                itemDTOs.add(item.toDTO());</span>
+<span class="fc" id="L378">            }</span>
+<span class="fc" id="L379">            return ResponseEntity.ok(itemDTOs);</span>
+<span class="fc" id="L380">        } catch (Exception e) {</span>
+<span class="fc" id="L381">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/seller/{itemId}&quot;)
+    public ResponseEntity&lt;UserDTO&gt; getSeller(@PathVariable long itemId) {
+        try {
+<span class="fc" id="L388">            System.out.println(&quot;algo&quot;);</span>
+<span class="fc" id="L389">            Item item = itemService.getItemById(itemId);</span>
+<span class="fc" id="L390">            UserDTO seller = item.getSeller().toDTO();</span>
+<span class="fc" id="L391">            return ResponseEntity.ok(seller);</span>
+<span class="fc" id="L392">        } catch (Exception e) {</span>
+<span class="fc" id="L393">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @DeleteMapping(&quot;/delete/{itemId}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteItem(@RequestParam(&quot;token&quot;) long token, @PathVariable long itemId) {
+        try {
+<span class="nc" id="L400">            System.out.println(&quot;Deleting item with ID: &quot; + itemId);</span>
+<span class="nc" id="L401">            itemService.deleteItem(token, itemId);</span>
+<span class="nc" id="L402">            return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L403">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L404">            System.err.println(&quot;Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L405">            e.printStackTrace();</span>
+
+<span class="nc bnc" id="L407" title="All 2 branches missed.">            if (&quot;Item not found&quot;.equals(e.getMessage())) {</span>
+<span class="nc" id="L408">                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">            } else if (&quot;Not authorized&quot;.equals(e.getMessage())) {</span>
+<span class="nc" id="L410">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+<span class="nc" id="L412">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/search&quot;)
+    public ResponseEntity&lt;PaginatedResponseDTO&lt;ItemDTO&gt;&gt; searchItems(
+        @RequestParam(value = &quot;token&quot;, required = false) Long token,
+        @RequestParam(value = &quot;search_text&quot;,required = false) String query,
+        @RequestParam(value = &quot;page&quot;, defaultValue = &quot;0&quot;) int page,
+        @RequestParam(value = &quot;type&quot;, defaultValue = &quot;&quot;, required = false) String type) {
+        try {
+<span class="fc" id="L423">            Page&lt;Item&gt; items = itemService.searchItems(token, query, page, type);</span>
+<span class="fc" id="L424">            List&lt;ItemDTO&gt; itemDTOs = items.stream()</span>
+<span class="fc" id="L425">                                      .map(Item::toDTO)</span>
+<span class="fc" id="L426">                                      .collect(Collectors.toList());</span>
+<span class="fc" id="L427">            PaginatedResponseDTO&lt;ItemDTO&gt; result = new PaginatedResponseDTO&lt;&gt;(</span>
+                itemDTOs,
+<span class="fc" id="L429">                items.getNumber(),</span>
+<span class="fc" id="L430">                items.getTotalPages()</span>
+            );
+<span class="fc" id="L432">            return ResponseEntity.ok(result);</span>
+<span class="fc" id="L433">        } catch (Exception e) {</span>
+<span class="fc" id="L434">            return ResponseEntity.badRequest().build();</span>
+        }
+    }
+
+    @GetMapping(&quot;/productDetails/{id}&quot;)
+    public ResponseEntity&lt;List&lt;ItemDTO&gt;&gt; getProductDetails(@PathVariable Long id, @RequestParam String token) {
+<span class="fc" id="L440">        System.out.println(&quot;caracola&quot;);</span>
+        try {
+<span class="fc" id="L442">            Item item = itemService.getItemById(id);</span>
+<span class="fc" id="L443">            List&lt;Item&gt; recommendedItems = itemService.getRecommendedProducts(item);</span>
+<span class="fc" id="L444">            System.out.println(&quot;caracola2&quot;);</span>
+<span class="fc" id="L445">            System.out.println(&quot;Recommended items: &quot; + recommendedItems);</span>
+    
+<span class="fc" id="L447">            return ResponseEntity.ok(</span>
+<span class="fc" id="L448">                recommendedItems.stream().map(Item::toDTO).collect(Collectors.toList())</span>
+            );
+<span class="fc" id="L450">        } catch (Exception e) {</span>
+<span class="fc" id="L451">            e.printStackTrace();</span>
+<span class="fc" id="L452">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);</span>
+        }
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

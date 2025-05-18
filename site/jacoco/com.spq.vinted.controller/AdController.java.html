@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.controller</a> &gt; <span class="el_source">AdController.java</span></div><h1>AdController.java</h1><pre class="source lang-java linenums">/**
+ * @file AdController.java
+ * @brief Controller para la gestión de anuncios.
+ */
+package com.spq.vinted.controller;
+
+import com.spq.vinted.dto.AdDTO;
+import com.spq.vinted.model.Ad;
+import com.spq.vinted.service.AdService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+/**
+ * @class AdController
+ * @brief Controlador para la gestión de anuncios.
+ * 
+ * 
+ */
+@RestController
+@RequestMapping(&quot;/ads&quot;)
+<span class="fc" id="L35">public class AdController {</span>
+
+
+    /**
+     * @brief Servicio para la gestión de anuncios.
+     * @param adService Servicio para la gestión de anuncios.
+     */
+    @Autowired
+    private AdService adService;
+
+
+    /**
+     * @brief Método para obtener todos los anuncios.
+     * 
+     * @return ResponseEntity&lt;List&lt;Ad&gt;&gt; Lista de anuncios.
+     * @throws Exception Excepción lanzada si ocurre un error al obtener los anuncios.
+     */
+    @GetMapping
+    public ResponseEntity&lt;List&lt;Ad&gt;&gt; getAllAds() {
+        try {
+<span class="fc" id="L55">            List&lt;Ad&gt; ads = adService.getAllAds();</span>
+<span class="fc" id="L56">            return ResponseEntity.ok(ads);</span>
+<span class="fc" id="L57">        } catch (Exception e) {</span>
+<span class="fc" id="L58">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);</span>
+        }
+    }
+
+    /**
+     * @brief Método para obtener un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity&lt;Ad&gt; Anuncio encontrado.
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Ad&gt; getAdById(@PathVariable long id) {
+        try {
+<span class="fc" id="L71">            Ad ad = adService.getAdById(id);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">            if (ad == null) {</span>
+<span class="fc" id="L73">                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);</span>
+            }
+<span class="fc" id="L75">            return ResponseEntity.ok(ad);</span>
+<span class="fc" id="L76">        } catch (Exception e) {</span>
+<span class="fc" id="L77">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);</span>
+        }
+    }
+
+    /**
+     * @brief Método para obtener la imagen de un anuncio.
+     * 
+     * @param filename Nombre del archivo de la imagen.
+     * @return ResponseEntity&lt;Resource&gt; Imagen del anuncio.
+     * @throws MalformedURLException Excepción lanzada si la URL es incorrecta.
+     */
+    @GetMapping(&quot;/images/{filename:.+}&quot;)
+    @ResponseBody
+    public ResponseEntity&lt;Resource&gt; getAdImage(@PathVariable String filename) throws MalformedURLException {
+<span class="fc" id="L91">        Path imagePath = Paths.get(&quot;uploads/ads&quot;).resolve(filename).toAbsolutePath();</span>
+<span class="fc" id="L92">        Resource resource = new UrlResource(imagePath.toUri());</span>
+
+<span class="pc bpc" id="L94" title="3 of 4 branches missed.">        if (resource.exists() &amp;&amp; resource.isReadable()) {</span>
+<span class="nc" id="L95">            return ResponseEntity.ok()</span>
+<span class="nc" id="L96">                .contentType(MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM))</span>
+<span class="nc" id="L97">                .body(resource);</span>
+        } else {
+<span class="fc" id="L99">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+
+
+    /**
+     * @brief Método para eliminar un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity&lt;Void&gt; Respuesta de la eliminación.
+     */
+    @PostMapping(&quot;/adData&quot;)
+    public ResponseEntity&lt;Long&gt; uploadAdData(
+            @RequestParam(&quot;token&quot;) long token,
+            @RequestBody AdDTO adDTO) {
+<span class="fc" id="L114">        Ad ad = new Ad(adDTO.getTitle(), adDTO.getDescription(), null); </span>
+<span class="fc" id="L115">        Ad savedAd = adService.saveAd(ad);</span>
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (savedAd == null) {</span>
+<span class="fc" id="L118">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();</span>
+        }
+<span class="fc" id="L120">        return ResponseEntity.ok(savedAd.getId());</span>
+    }
+
+    /**
+     * @brief Método para eliminar un anuncio por su ID.
+     * 
+     * @param id ID del anuncio.
+     * @return ResponseEntity&lt;Void&gt; Respuesta de la eliminación.
+     */
+    @PutMapping(value = &quot;/adImage&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity&lt;Void&gt; updateAdImage(
+            @RequestParam(&quot;adId&quot;) long adId,
+            @RequestPart(&quot;image&quot;) MultipartFile imageFile) {
+
+        try {
+<span class="fc" id="L135">            adService.uploadAdImage(adId, imageFile);</span>
+<span class="fc" id="L136">            return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L137">        } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if (&quot;Ad not found&quot;.equals(e.getMessage())) {</span>
+<span class="fc" id="L139">                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
+            }
+<span class="nc" id="L141">            e.printStackTrace();</span>
+<span class="nc" id="L142">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="fc" id="L143">        } catch (IOException e) {</span>
+<span class="fc" id="L144">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

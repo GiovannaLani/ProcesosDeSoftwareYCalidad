@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.spq.vinted.service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.spq.vinted.dto.RatingDTO;
+import com.spq.vinted.dto.RatingInfoDTO;
+import com.spq.vinted.dto.UserDTO;
+import com.spq.vinted.model.Item;
+import com.spq.vinted.model.Rating;
+import com.spq.vinted.model.User;
+import com.spq.vinted.repository.ItemRepository;
+import com.spq.vinted.repository.RatingRepository;
+import com.spq.vinted.repository.UserRepository;
+
+@Service
+public class UserService {
+    private Map&lt;Long, User&gt; activeUsers;
+	private UserRepository userRepository;
+	private final ItemRepository itemRepository;
+	private final RatingRepository ratingRepository;
+	
+<span class="fc" id="L37">	public UserService(UserRepository userRepository, ItemRepository itemRepository, RatingRepository ratingRepository) {</span>
+<span class="fc" id="L38">		activeUsers = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L39">		this.userRepository = userRepository;</span>
+<span class="fc" id="L40">		this.itemRepository = itemRepository;</span>
+<span class="fc" id="L41">		this.ratingRepository = ratingRepository;</span>
+<span class="fc" id="L42">	}</span>
+	
+	public void createUser(String email, String password, String username, String name, String surname) {
+<span class="fc" id="L45">		User newUser = new User(email, password, username, name, surname);</span>
+<span class="pc" id="L46">		userRepository.findByEmail(email).ifPresent(u -&gt; {throw new RuntimeException(&quot;User already exists&quot;);});</span>
+<span class="pc" id="L47">		userRepository.findByUsername(username).ifPresent(u -&gt; {throw new RuntimeException(&quot;Username already exists&quot;);});</span>
+<span class="fc" id="L48">		userRepository.save(newUser);</span>
+<span class="fc" id="L49">	}</span>
+	
+	public long logIn(String email, String password) {
+<span class="pc" id="L52">		User user = userRepository.findByEmail(email).orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">		if (!user.getPassword().equals(password)) {</span>
+<span class="fc" id="L54">			throw new RuntimeException(&quot;Invalid credentials&quot;);</span>
+		}		
+<span class="fc" id="L56">		long token = System.currentTimeMillis();</span>
+<span class="fc" id="L57">		activeUsers.put(token, user);</span>
+<span class="fc" id="L58">		return token;</span>
+	}
+	
+	public void LogOut(long token) {
+<span class="fc" id="L62">		User loggedOutUser = activeUsers.remove(token);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">		if (loggedOutUser == null) {</span>
+<span class="fc" id="L64">			throw new RuntimeException(&quot;Token not found in active users list&quot;);</span>
+		}
+<span class="fc" id="L66">	}</span>
+	
+	public User getUserByToken(long token) {
+<span class="fc" id="L69">		System.out.println(&quot;Active users: &quot;);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		for (Map.Entry&lt;Long, User&gt; entry : activeUsers.entrySet()) {</span>
+<span class="fc" id="L71">			System.out.println(&quot;Token: &quot; + entry.getKey() + &quot;, User: &quot; + entry.getValue());</span>
+<span class="fc" id="L72">		}</span>
+<span class="fc" id="L73">		User user = activeUsers.get(token);</span>
+<span class="fc" id="L74">		return user;</span>
+	}
+	public User getUserById(long id) {
+<span class="pc" id="L77">		User user = userRepository.findById(String.valueOf(id)).orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc" id="L78">		return user;</span>
+	}
+
+	public void deleteUser(long token) {
+<span class="fc" id="L82">		User user = activeUsers.get(token);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		if (user == null) {</span>
+<span class="fc" id="L84">			throw new RuntimeException(&quot;Token not found in active users list&quot;);</span>
+		}
+<span class="fc" id="L86">		userRepository.delete(user);</span>
+<span class="fc" id="L87">		activeUsers.remove(token);</span>
+<span class="fc" id="L88">	}</span>
+	public void editUser(long token, String name, String surname, String description, MultipartFile profileImage) {
+<span class="fc" id="L90">		User user = activeUsers.get(token);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">		if (user == null) {</span>
+<span class="fc" id="L92">			throw new RuntimeException(&quot;User not found&quot;);</span>
+		}
+	
+<span class="fc" id="L95">		user.setName(name);</span>
+<span class="fc" id="L96">		user.setSurname(surname);</span>
+<span class="fc" id="L97">		user.setDescription(description);</span>
+	
+<span class="pc bpc" id="L99" title="1 of 4 branches missed.">		if (profileImage != null &amp;&amp; !profileImage.isEmpty()) {</span>
+			try {
+<span class="fc" id="L101">				System.out.println(&quot;imag: &quot;+profileImage.getOriginalFilename());</span>
+<span class="fc" id="L102">				String oldImage = user.getProfileImage();</span>
+<span class="pc bpc" id="L103" title="1 of 4 branches missed.">			if (oldImage != null &amp;&amp; !oldImage.isEmpty()) {</span>
+<span class="fc" id="L104">				File oldFile = new File(&quot;uploads/profiles/&quot; + oldImage);</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">				if (oldFile.exists()) {</span>
+<span class="nc" id="L106">					oldFile.delete();</span>
+				}
+			}
+<span class="fc" id="L109">				String profileImageUrl = saveProfileImage(profileImage);</span>
+<span class="fc" id="L110">				user.setProfileImage(profileImageUrl);</span>
+<span class="fc" id="L111">			} catch (IOException e) {</span>
+<span class="fc" id="L112">				System.out.println(&quot;Error al subir la imagen de perfil&quot;);</span>
+<span class="fc" id="L113">				throw new RuntimeException(&quot;Error al subir la imagen de perfil&quot;, e);</span>
+<span class="fc" id="L114">			}</span>
+		}
+	
+<span class="fc" id="L117">		userRepository.save(user);</span>
+<span class="fc" id="L118">	}</span>
+	public void editUserData(long token, String name, String surname, String description) {
+<span class="fc" id="L120">		User user = activeUsers.get(token);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		if (user == null) {</span>
+<span class="fc" id="L122">			throw new RuntimeException(&quot;User not found&quot;);</span>
+		}
+	
+<span class="fc" id="L125">		user.setName(name);</span>
+<span class="fc" id="L126">		user.setSurname(surname);</span>
+<span class="fc" id="L127">		user.setDescription(description);</span>
+	
+<span class="fc" id="L129">		userRepository.save(user);</span>
+<span class="fc" id="L130">	}</span>
+	public void editProfileImage(long token, MultipartFile profileImage) {
+<span class="fc" id="L132">		User user = activeUsers.get(token);</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">		if (user == null) {</span>
+<span class="nc" id="L134">			throw new RuntimeException(&quot;User not found&quot;);</span>
+		}
+	
+		try {
+<span class="fc" id="L138">			String oldImage = user.getProfileImage();</span>
+<span class="pc bpc" id="L139" title="1 of 4 branches missed.">			if (oldImage != null &amp;&amp; !oldImage.isEmpty()) {</span>
+<span class="fc" id="L140">				File oldFile = new File(&quot;uploads/profiles/&quot; + oldImage);</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">				if (oldFile.exists()) {</span>
+<span class="nc" id="L142">					oldFile.delete();</span>
+				}
+			}
+<span class="fc" id="L145">			String profileImageUrl = saveProfileImage(profileImage);</span>
+<span class="fc" id="L146">			user.setProfileImage(profileImageUrl);</span>
+<span class="nc" id="L147">		} catch (IOException e) {</span>
+<span class="nc" id="L148">			System.out.println(&quot;Error al subir la imagen de perfil&quot;);</span>
+<span class="nc" id="L149">			throw new RuntimeException(&quot;Error al subir la imagen de perfil&quot;, e);</span>
+<span class="fc" id="L150">		}</span>
+	
+<span class="fc" id="L152">		userRepository.save(user);</span>
+<span class="fc" id="L153">	}</span>
+	
+	private String saveProfileImage(MultipartFile profileImage) throws IOException {
+<span class="fc" id="L156">		String uploadDir = &quot;uploads/profiles/&quot;;</span>
+		
+<span class="fc" id="L158">		File uploadPath = new File(uploadDir);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">		if (!uploadPath.exists()) {</span>
+<span class="fc" id="L160">			uploadPath.mkdirs();</span>
+		}
+	
+<span class="fc" id="L163">		String uniqueFileName = UUID.randomUUID().toString() + &quot;_&quot; + profileImage.getOriginalFilename();</span>
+	
+<span class="fc" id="L165">		Path filePath = Paths.get(uploadDir).resolve(uniqueFileName).toAbsolutePath();</span>
+	
+<span class="fc" id="L167">		Files.copy(profileImage.getInputStream(), filePath);</span>
+	
+<span class="fc" id="L169">		return uniqueFileName;</span>
+	}
+
+	public Long getUserIdByToken(Long token) {
+<span class="fc" id="L173">		User user = activeUsers.get(token);</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">		return user != null ? user.getId() : null;</span>
+	}
+
+	//cambiar
+	public void saveUser(User user) {
+<span class="fc" id="L179">        userRepository.save(user);</span>
+<span class="fc" id="L180">    }</span>
+
+	public void followUser(Long userId, Long targetUserId) {
+<span class="fc" id="L183">		User user = userRepository.findById(String.valueOf(userId))</span>
+<span class="pc" id="L184">				.orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+<span class="fc" id="L185">		User targetUser = userRepository.findById(String.valueOf(targetUserId))</span>
+<span class="pc" id="L186">				.orElseThrow(() -&gt; new RuntimeException(&quot;Usuario objetivo no encontrado&quot;));</span>
+	
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">		if (!user.getFollowing().contains(targetUser)) {</span>
+<span class="fc" id="L189">			user.getFollowing().add(targetUser);</span>
+<span class="fc" id="L190">			userRepository.save(user);</span>
+		}
+<span class="fc" id="L192">	}</span>
+
+    public void unfollowUser(Long userId, Long targetUserId) {
+<span class="fc" id="L195">		User user = userRepository.findById(String.valueOf(userId))</span>
+<span class="fc" id="L196">				.orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+<span class="fc" id="L197">		User targetUser = userRepository.findById(String.valueOf(targetUserId))</span>
+<span class="fc" id="L198">				.orElseThrow(() -&gt; new RuntimeException(&quot;Usuario objetivo no encontrado&quot;));</span>
+	
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">		if (user.getFollowing().contains(targetUser)) {</span>
+<span class="fc" id="L201">			user.getFollowing().remove(targetUser);</span>
+<span class="fc" id="L202">			userRepository.save(user);</span>
+		}
+<span class="fc" id="L204">	}</span>
+
+	public List&lt;User&gt; getFollowers(Long userId) {
+<span class="pc" id="L207">        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+<span class="fc" id="L208">        return user.getFollowers();</span>
+    }
+
+    public List&lt;User&gt; getFollowing(Long userId) {
+<span class="pc" id="L212">        User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado&quot;));</span>
+<span class="fc" id="L213">        return user.getFollowing();</span>
+    }
+	public User getUserByUsername(String username, Long token) {
+<span class="fc" id="L216">		return userRepository.findByUsername(username)</span>
+<span class="fc" id="L217">				.orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+	}
+
+	public List&lt;Item&gt; getUserItems(Long userId, Long token) {
+<span class="pc" id="L221">		User user = userRepository.findById(String.valueOf(userId)).orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc" id="L222">		List&lt;Item&gt; items = user.getItemsForSale();</span>
+<span class="fc" id="L223">		return items;</span>
+	}
+
+	public void addRating(RatingDTO ratingDTO) {
+<span class="fc" id="L227">		Rating rating = new Rating();</span>
+<span class="fc" id="L228">		rating.setRatedUserId(ratingDTO.getRatedUserId());</span>
+<span class="fc" id="L229">		rating.setRatingUserId(ratingDTO.getRatingUserId());</span>
+<span class="fc" id="L230">		rating.setScore(ratingDTO.getScore());</span>
+<span class="fc" id="L231">		rating.setComment(ratingDTO.getComment());</span>
+<span class="fc" id="L232">		System.out.println(&quot;cosasverdes1 &quot; + rating.getRatingUserId() + rating.getRatedUserId() + rating.getScore() + &quot; &quot; + rating.getComment());</span>
+<span class="fc" id="L233">		ratingRepository.save(rating);</span>
+<span class="fc" id="L234">	}</span>
+	
+	public List&lt;RatingInfoDTO&gt; getRatingsForUser(long userId) {
+<span class="fc" id="L237">		List&lt;Rating&gt; ratings = ratingRepository.findByRatedUserId(userId);</span>
+	
+<span class="fc" id="L239">		return ratings.stream()</span>
+<span class="fc" id="L240">				.map(rating -&gt; new RatingInfoDTO(</span>
+<span class="fc" id="L241">						rating.getScore(),</span>
+<span class="fc" id="L242">						rating.getComment(),</span>
+<span class="fc" id="L243">						rating.getRatingUserId(),</span>
+<span class="fc" id="L244">						userRepository.findById(String.valueOf(rating.getRatingUserId())).map(User::getProfileImage).orElse(null),</span>
+<span class="fc" id="L245">						userRepository.findById(String.valueOf(rating.getRatingUserId())).map(User::getUsername).orElse(null)</span>
+				))
+<span class="fc" id="L247">				.collect(Collectors.toList());</span>
+	}
+	public Page&lt;User&gt; searchUsers(Long token, String query, int page) {
+<span class="fc" id="L250">		Pageable pageable = PageRequest.of(page, 28);</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">		String searchQuery = (query != null) ? query.trim().toLowerCase() : &quot;&quot;;</span>
+
+<span class="fc bfc" id="L253" title="All 2 branches covered.">		if (searchQuery.isBlank()) {</span>
+<span class="fc" id="L254">			return userRepository.findAll(pageable);</span>
+		}
+
+<span class="fc" id="L257">		return userRepository.searchByQuery(searchQuery, pageable);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

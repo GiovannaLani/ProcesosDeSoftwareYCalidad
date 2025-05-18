@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['findallbybuyerid_0',['findAllByBuyerId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_shipment_repository.html#a76a91f603ad8366d1a723b8c5282bbfb',1,'com::spq::vinted::repository::ShipmentRepository']]],
+  ['findbybuyeridorsellerid_1',['findByBuyerIdOrSellerId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_chat_room_repository.html#a748c3fc2eebb5d9e08c228410fae6aea',1,'com::spq::vinted::repository::ChatRoomRepository']]],
+  ['findbybuyerusername_2',['findByBuyerUsername',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_purchase_repository.html#a71063858383c7db5bee8af62c7d161e9',1,'com::spq::vinted::repository::PurchaseRepository']]],
+  ['findbychatidandstatus_3',['findByChatIdAndStatus',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_offer_repository.html#aed1d65d9fa8e7f2eacddcba95bf9a8ce',1,'com::spq::vinted::repository::OfferRepository']]],
+  ['findbychatroomid_4',['findByChatRoomId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_message_repository.html#a51539320c1b45f01defc23cb1f025443',1,'com::spq::vinted::repository::MessageRepository']]],
+  ['findbychatroomorderbytimestampasc_5',['findByChatRoomOrderByTimestampAsc',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_message_repository.html#a9da6d975c8db060f1eef2d03f7eeda92',1,'com::spq::vinted::repository::MessageRepository']]],
+  ['findbyemail_6',['findByEmail',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_user_repository.html#ae2431c279346310b0701064a1a613df5',1,'com::spq::vinted::repository::UserRepository']]],
+  ['findbyissoldfalse_7',['findByIsSoldFalse',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a8851b5582cff54f4026874403bd38e89',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbyitemandbuyerandseller_8',['findByItemAndBuyerAndSeller',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_chat_room_repository.html#aa8b18346057038f9ccd27e73aafc5148',1,'com::spq::vinted::repository::ChatRoomRepository']]],
+  ['findbyitemidandsenderid_9',['findByItemIdAndSenderId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_offer_repository.html#a34e9f3988f67d482bb673f6d3db9bf9c',1,'com::spq::vinted::repository::OfferRepository']]],
+  ['findbyofferid_10',['findByOfferId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_message_repository.html#af244307939288f89e370bc5929c11f84',1,'com::spq::vinted::repository::MessageRepository']]],
+  ['findbyrateduserid_11',['findByRatedUserId',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_rating_repository.html#a7e36e3f59068a0e4364982568669adfc',1,'com::spq::vinted::repository::RatingRepository']]],
+  ['findbyseller_12',['findBySeller',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a3edda764a29daa403f389be8c3522038',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbyselleridnot_13',['findBySellerIdNot',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#ade8a4492d5b6a8cbd80190c2643905cf',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbyselleridnotandissoldfalse_14',['findBySellerIdNotAndIsSoldFalse',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a51e0372da6228f783725f63335e7d0a8',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbyselleridnotandtype_15',['findBySellerIdNotAndType',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a3acbe1009903287d2da07c3cb501ae82',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbysellerusername_16',['findBySellerUsername',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_purchase_repository.html#af24fc44d06911fcbb1383d73d904f388',1,'com::spq::vinted::repository::PurchaseRepository']]],
+  ['findbystatusnot_17',['findByStatusNot',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_shipment_repository.html#a237bcb40671d717a464950681ce56821',1,'com::spq::vinted::repository::ShipmentRepository']]],
+  ['findbytype_18',['findByType',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a842c8018a2d8ca46d6d7f5d36eb7596a',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findbyusername_19',['findByUsername',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_user_repository.html#a33f25a80a105b8b272843d5feba73bac',1,'com::spq::vinted::repository::UserRepository']]],
+  ['findclothesbycategory_20',['findClothesByCategory',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#a525a4547f01491b7e01fe713adbf5fe0',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['findclothesbycategoryandselleridnot_21',['findClothesByCategoryAndSellerIdNot',['../interfacecom_1_1spq_1_1vinted_1_1repository_1_1_item_repository.html#ae826ee1ad88803fb14d697dbe2e8e5da',1,'com::spq::vinted::repository::ItemRepository']]],
+  ['follow_22',['follow',['../classcom_1_1spq_1_1vinted_1_1model_1_1_user.html#a827c24c4eb6ce5e797a32dce8e2c6381',1,'com::spq::vinted::model::User']]],
+  ['followuser_23',['followuser',['../classcom_1_1spq_1_1vinted_1_1controller_1_1_user_controller.html#ae6c2235a207f0dbc08d7a1683bf6bde0',1,'com.spq.vinted.controller.UserController.followUser()'],['../classcom_1_1spq_1_1vinted_1_1service_1_1_user_service.html#ab5787dde1c9a79f1dfb48dce85a5fef5',1,'com.spq.vinted.service.UserService.followUser()']]],
+  ['fromdto_24',['fromDTO',['../classcom_1_1spq_1_1vinted_1_1service_1_1_purchase_service.html#a752c259ea25d4cd4a6952558267ecf16',1,'com::spq::vinted::service::PurchaseService']]]
+];

@@ -1,0 +1,25 @@
+var classcom_1_1spq_1_1vinted_1_1model_1_1_item =
+[
+    [ "Item", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a3ef659e2f1ffae186290f8a1b241e743", null ],
+    [ "Item", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a6fa3e0d3da5c929fc3671e3aabe982bb", null ],
+    [ "equals", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a68389fe7bd043b3cdc5ce0909fbfe369", null ],
+    [ "getDescription", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a578443df422b1fcbd90d9aaa54a6b241", null ],
+    [ "getId", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a57149e344a2f882ee0ba2e33c75493ea", null ],
+    [ "getImages", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#ae8630aa8991059feb0e2fd5e0f2c584a", null ],
+    [ "getIsSold", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a046ce1658ffb06b7ea654165e16d38a3", null ],
+    [ "getPrice", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a766801bdd26a7a9dd05c27646c1c90cb", null ],
+    [ "getSeller", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a3bb61b06af4bdb97d241d69230a99d4b", null ],
+    [ "getTitle", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#ad226a8bc7117ce3bb43522fff3ad65f5", null ],
+    [ "getUsersWithItemInCart", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a65dff69423395413be94a92bcf058b40", null ],
+    [ "getUsersWithItemInWishlist", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a09e41592434775ac71637c302ad531c3", null ],
+    [ "setDescription", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a745c39f602504317a1bdcb2cddd7b61b", null ],
+    [ "setId", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a20dd281f9627cea7168809f6c5201338", null ],
+    [ "setImages", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a81a9c6e5ea9fc602d444720387173ff6", null ],
+    [ "setIsSold", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a116ac1f3c01cdb0df4e2eb3af7e2ed42", null ],
+    [ "setPrice", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a1b11dffe86b7d7f766ddc57dd8891e43", null ],
+    [ "setSeller", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#aa6b0dd7540d19523eeee745d36a8679f", null ],
+    [ "setTitle", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a2b0606d87cd49b16a3c90e8b4dd700e6", null ],
+    [ "setUsersWithItemInCart", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#af3e1efd8c72aea2c50a16fe5ca1eea9f", null ],
+    [ "setUsersWithItemInWishlist", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a23ae02935d58eb92b3482d1337786f2c", null ],
+    [ "toDTO", "classcom_1_1spq_1_1vinted_1_1model_1_1_item.html#a65c68735423c32f6d1e76b137d7f2322", null ]
+];

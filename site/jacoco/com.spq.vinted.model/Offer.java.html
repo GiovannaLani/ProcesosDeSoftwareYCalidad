@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang=""><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Offer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">viinted</a> &gt; <a href="index.source.html" class="el_package">com.spq.vinted.model</a> &gt; <span class="el_source">Offer.java</span></div><h1>Offer.java</h1><pre class="source lang-java linenums">package com.spq.vinted.model;
+
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Entity
+public class Offer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = &quot;sender_id&quot;)
+    private User sender;
+    
+    @ManyToOne
+    @JoinColumn(name = &quot;receiver_id&quot;)
+    private User receiver;
+    
+    @ManyToOne
+    @JoinColumn(name = &quot;Item_id&quot;)
+    private Item item;
+    
+    @Column(nullable = false)
+    private Double price;
+    
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OfferStatus status;
+    
+    @ManyToOne
+    @JoinColumn(name = &quot;chat_id&quot;)
+    private ChatRoom chat;
+    
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
+<span class="fc" id="L46">    public enum OfferStatus {</span>
+<span class="fc" id="L47">        PENDING, ACCEPTED, REJECTED</span>
+    }
+    
+    
+<span class="fc" id="L51">    public Offer() {</span>
+<span class="fc" id="L52">    }</span>
+
+<span class="fc" id="L54">    public Offer(User sender, User receiver, Item item, Double price, OfferStatus status, ChatRoom chat) {</span>
+<span class="fc" id="L55">        this.sender = sender;</span>
+<span class="fc" id="L56">        this.receiver = receiver;</span>
+<span class="fc" id="L57">        this.item = item;</span>
+<span class="fc" id="L58">        this.price = price;</span>
+<span class="fc" id="L59">        this.status = status;</span>
+<span class="fc" id="L60">        this.chat = chat;</span>
+<span class="fc" id="L61">        this.createdAt = LocalDateTime.now();</span>
+<span class="fc" id="L62">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L65">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L69">        this.id = id;</span>
+<span class="fc" id="L70">    }</span>
+
+    public User getSender() {
+<span class="fc" id="L73">        return sender;</span>
+    }
+
+    public void setSender(User sender) {
+<span class="fc" id="L77">        this.sender = sender;</span>
+<span class="fc" id="L78">    }</span>
+
+    public User getReceiver() {
+<span class="fc" id="L81">        return receiver;</span>
+    }
+
+
+    public void setReceiver(User receiver) {
+<span class="fc" id="L86">        this.receiver = receiver;</span>
+<span class="fc" id="L87">    }</span>
+
+    public Item getItem() {
+<span class="fc" id="L90">        return item;</span>
+    }
+
+    public void setItem(Item item) {
+<span class="fc" id="L94">        this.item = item;</span>
+<span class="fc" id="L95">    }</span>
+
+    public Double getPrice() {
+<span class="fc" id="L98">        return price;</span>
+    }
+
+
+    public void setPrice(Double price) {
+<span class="fc" id="L103">        this.price = price;</span>
+<span class="fc" id="L104">    }</span>
+
+    public OfferStatus getStatus() {
+<span class="fc" id="L107">        return status;</span>
+    }
+
+    public void setStatus(OfferStatus status) {
+<span class="fc" id="L111">        this.status = status;</span>
+<span class="fc" id="L112">    }</span>
+
+    public ChatRoom getChat() {
+<span class="fc" id="L115">        return chat;</span>
+    }
+    public void setChat(ChatRoom chat) {
+<span class="fc" id="L118">        this.chat = chat;</span>
+<span class="fc" id="L119">    }</span>
+
+    public LocalDateTime getCreatedAt() {
+<span class="fc" id="L122">        return createdAt;</span>
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="fc" id="L126">        this.createdAt = createdAt;</span>
+<span class="fc" id="L127">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L131">        return &quot;Offer{&quot; +</span>
+                &quot;id=&quot; + id +
+<span class="fc" id="L133">                &quot;, sender=&quot; + sender.getId() +</span>
+<span class="fc" id="L134">                &quot;, receiver=&quot; + receiver.getId() +</span>
+<span class="fc" id="L135">                &quot;, item=&quot; + item.getId() +</span>
+                &quot;, price=&quot; + price +
+                &quot;, status=&quot; + status +
+                &quot;, chat=&quot; + chat +
+                &quot;, createdAt=&quot; + createdAt +
+                '}';
+    }
+}
+
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
