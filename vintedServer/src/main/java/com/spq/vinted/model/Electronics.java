@@ -27,6 +27,6 @@ public class Electronics extends Item {
 
     @Override
     public ItemDTO toDTO() {
-        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getElectronicsType(), getImages());
+        return new ElectronicsDTO(getId(), getTitle(), getDescription(), getPrice(), getElectronicsType(), getImages(), getIsSold());
     }
 }

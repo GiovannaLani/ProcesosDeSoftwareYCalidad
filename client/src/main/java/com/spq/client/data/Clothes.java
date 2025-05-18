@@ -9,8 +9,8 @@ public class Clothes extends Item {
     private ClothesType clothesType;
 
     
-    public Clothes(String title, String description, float price, ClothesSize size, Category category, ClothesType type) {
-        super(title, description, price); 
+    public Clothes(String title, String description, float price, ClothesSize size, Category category, ClothesType type, boolean isSold) {
+        super(title, description, price, isSold); 
         this.size = size;
         this.clothesType = type;
         this.category = category;

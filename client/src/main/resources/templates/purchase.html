@@ -285,6 +285,7 @@
 					</div>
 	
 					<form th:if="${offer != null}" th:action="@{/createMultiplePurchase}" method="POST">
+						<input type="hidden" name="itemIds" th:value="${offer.itemId}">
 						<h4 class="mtext-105 cl2 txt-center p-b-30">
 							Confirmar Compra
 						</h4>

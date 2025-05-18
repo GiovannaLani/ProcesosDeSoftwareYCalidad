@@ -33,7 +33,7 @@ public class ChatRoomInfoDTOTest {
         float itemPrice = 29.99f;
 
         ChatRoomInfoDTO chatRoomInfoDTO = new ChatRoomInfoDTO(id, buyerId, buyerName, sellerId, 
-                sellerName, itemId, itemName, itemImage, itemPrice);
+                sellerName, itemId, itemName, itemImage, itemPrice, false);
 
         assertEquals(id, chatRoomInfoDTO.getId());
         assertEquals(buyerId, chatRoomInfoDTO.getBuyerId());

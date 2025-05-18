@@ -32,6 +32,10 @@ public class Shipment {
     @JoinColumn(name = "buyer_id")
     private User buyer;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "seller_id")
+    private User Seller;
+
     @Column(nullable = false)
     private ShipmentStatus status;
 
@@ -41,11 +45,12 @@ public class Shipment {
     public Shipment() {
     }
 
-    public Shipment(Item item, User buyer) {    
+    public Shipment(Item item, User buyer, User seller) {    
         this.item = item;
         this.buyer = buyer;
         this.status = ShipmentStatus.SHIPPED;
         this.createdDate = LocalDateTime.now();
+        this.Seller = seller;
     }
 
     public Long getId() { 
@@ -80,10 +85,15 @@ public class Shipment {
         this.status = status; 
     }
     
-        public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public User getSeller() { 
+        return Seller; 
     }
-
+    public void setSeller(User seller) { 
+        this.Seller = seller; 
+    }
+    public LocalDateTime getCreatedDate() { 
+        return createdDate; 
+    }
     public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }

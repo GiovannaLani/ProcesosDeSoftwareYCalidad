@@ -8,5 +8,6 @@ public record Offer (
     Long senderId,
     Long receiverId,
     Long itemId,
-    Long chatRoomId
+    Long chatRoomId,
+    boolean isSold
 ){}

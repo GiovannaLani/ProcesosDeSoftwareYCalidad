@@ -114,7 +114,9 @@ class ShipmentControllerTest {
             id,
             ShipmentStatus.SHIPPED,
             buyerDTO,
-            itemDTO
+            itemDTO,
+            id,
+            id+1
         );
     }
 }

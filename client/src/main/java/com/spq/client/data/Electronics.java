@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class Electronics extends Item {
     
     ElectronicsType electronicsType;
-    public Electronics(String title, String description, float price, ElectronicsType type) {
-        super(title, description, price);
+    public Electronics(String title, String description, float price, ElectronicsType type, boolean isSold) {
+        super(title, description, price, isSold);
         this.electronicsType = type;
     }
     public ElectronicsType getElectronicsType() {

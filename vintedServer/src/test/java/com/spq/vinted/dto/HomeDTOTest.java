@@ -31,7 +31,7 @@ public class HomeDTOTest {
         HomeType type = HomeType.FURNITURE;
         List<String> images = Arrays.asList("sofa1.jpg", "sofa2.jpg");
 
-        HomeDTO homeDTO = new HomeDTO(id, title, description, price, type, images);
+        HomeDTO homeDTO = new HomeDTO(id, title, description, price, type, images, false);
 
         assertEquals(id, homeDTO.getId());
         assertEquals(title, homeDTO.getTitle());

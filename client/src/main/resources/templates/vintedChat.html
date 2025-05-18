@@ -246,7 +246,8 @@
 							data-item-id=${chatRoom.itemId},
 							data-item-name=${chatRoom.itemName}, 
 							data-item-img=${chatRoom.itemImage != null} ? @{${itemImageBaseUrl + chatRoom.itemImage}} : @{'/images/icons/profile-default.png'}, 
-							data-item-price=${chatRoom.itemPrice}">								
+							data-item-price=${chatRoom.itemPrice},
+							data-item-is-sold=${chatRoom.itemIsSold}">								
 	 							<div class="m-r-10 web_ui__Cell__image">
 									<div class="web_ui__Image__image web_ui__Image__large web_ui__Image__cover web_ui__Image__rounded web_ui__Image__scaled">
 										<img role="img" alt="" class="web_ui__Image__content" th:src="${chatRoom.itemImage != null} ? @{${itemImageBaseUrl + chatRoom.itemImage}} : @{'/images/icons/profile-default.png'}">
@@ -311,9 +312,6 @@
 										</div>
 									</div>
 									<div class="web_ui__Cell__suffix" data-testid="hero-message--suffix">
-										<button id="ratingButton" type="button" class="button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated">
-												Valorar
-										</button>
 										<div id="item-button-id" class="u-flexbox" style="display: none;">
 											
 											<button type="button" id="offerButton" class="m-r-10 button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated">
@@ -323,7 +321,7 @@
 											<div class="m-r-20"></div>
 											<form id="buyForm" th:action="@{/shoppingCart/add(token=${token}, redirectUrl=${currentUrl})}" method="post">
 												<input type="hidden" name="itemId" id="buyFormItemId" />
-												<button type="submit" class="button-green">Comprar</button>
+												<button id ="item-buy-button-id" type="submit" class="button-green">Comprar</button>
 											</form>
 										</div>
 									</div>
@@ -727,34 +725,7 @@
     </div>
 </div>
 
-<!-- Pop up valorar -->
-<div id="ratingModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span id="raitingClose">&times;</span>
-            <h2>Valorar usuario</h2>
-        </div>
-        <div class="modal-body">
-            <div class="star-rating">
-				<span class="star" data-index="0">&#9733;</span>
-				<span class="star" data-index="1">&#9733;</span>
-				<span class="star" data-index="2">&#9733;</span>
-				<span class="star" data-index="3">&#9733;</span>
-				<span class="star" data-index="4">&#9733;</span>
-            </div>
-			<div class="rating-form">
-				<label for="ratingInput">Comentario:</label>
-					<div class="web_ui__InputBar__input web_ui__InputBar__input-bar" style="padding: 10px;">
-					<textarea id="ratingInput" name="composerInput" placeholder="Escribir mensaje" data-testid="composer--input" class="web_ui__InputBar__value" autocomplete="off" style="height: 26px !important;"></textarea>
-				</div>
-			
-			</div>
-        </div>
-        <div class="modal-footer">
-            <button id="submitRatingBtn" class="button-green">Enviar valoración</button>
-        </div>
-    </div>
-</div>
+
 
 <script>
 
@@ -1179,11 +1150,18 @@ function respondToOffer(offerId, status) {
 	const link = document.getElementById("chatReceiverName");
 	link.href = `/userProfile/${otherUserId}?token=${getTokenFromURL()}`;
 	document.getElementById("chatReceiverName").textContent = recieverName;
-
+	
+	const buyProductButton = document.getElementById("item-buy-button-id");
 	document.getElementById("itemMessage").style.display = "flex";
 	const itemName = chatRoomElement.getAttribute("data-item-name");
 	const itemImg = chatRoomElement.getAttribute("data-item-img");
 	const itemPrice = chatRoomElement.getAttribute("data-item-price");
+	const itemIsSold = chatRoomElement.getAttribute("data-item-is-sold");
+	if (itemIsSold === "true") {
+		buyProductButton.style.display = "none";
+	} else {
+		buyProductButton.style.display = "flex";
+	}
 
 	document.getElementById("heroItemName").textContent = itemName;
 	document.getElementById("heroItemPrice").textContent = itemPrice + " €";
@@ -1255,7 +1233,8 @@ function respondToOffer(offerId, status) {
 					const isOfferSender = Number(offer.senderId) === Number(userId);
 
 					if (isOfferSender) {
-						const canBuy = offer.status === "ACCEPTED";
+						const canBuy = offer.status === "ACCEPTED" && !offer.isSold;
+						const isSold = offer.isSold;
 						const container = document.createElement("div");
 						container.className = "conversation-message-container-user";
 						container.innerHTML = `
@@ -1267,6 +1246,7 @@ function respondToOffer(offerId, status) {
 											<div class="offer-header">
 												<span class="offer-price">${offer.price.toFixed(2)} €</span>
 												<span class="offer-original">${offer.originalPrice.toFixed(2)} €</span>
+
 											</div>
 											<div class="offer-status">${getOfferStatusText(offer.status)}</div>
 											${canBuy ? `
@@ -1277,6 +1257,9 @@ function respondToOffer(offerId, status) {
 														</a>
 												
 												</div>
+											` : ''}
+											${isSold ? `
+												<span class="offer-status">PRODUCTO VENDIDO</span>
 											` : ''}
 										</div>
 									</div>

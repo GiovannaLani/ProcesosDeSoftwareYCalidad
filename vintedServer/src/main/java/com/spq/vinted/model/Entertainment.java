@@ -28,7 +28,7 @@ public class Entertainment extends Item {
 
     @Override
     public ItemDTO toDTO() {
-        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getEntertainmentType(), getImages());
+        return new EntertainmentDTO(getId(), getTitle(), getDescription(), getPrice(), getEntertainmentType(), getImages(), getIsSold());
     }
 
 }

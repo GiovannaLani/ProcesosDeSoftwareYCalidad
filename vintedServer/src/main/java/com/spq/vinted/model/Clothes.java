@@ -54,6 +54,6 @@ public class Clothes extends Item {
 
     @Override
     public ItemDTO toDTO() {
-        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getClothesType(), getCategory(), getImages());
+        return new ClothesDTO(getId(), getTitle(), getDescription(), getPrice(), getSize(), getClothesType(), getCategory(), getImages(), getIsSold());
     }
 }

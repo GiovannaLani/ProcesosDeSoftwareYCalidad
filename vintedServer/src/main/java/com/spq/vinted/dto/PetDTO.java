@@ -11,8 +11,8 @@ public class PetDTO extends ItemDTO {
     public PetDTO() {
     }
 
-    public PetDTO(long id, String title, String description, float price, Species species,List<String> images) {
-        super(id, title, description, price, images);
+    public PetDTO(long id, String title, String description, float price, Species species,List<String> images, boolean isSold) {
+        super(id, title, description, price, images, isSold);
         this.species = species;
     }
     public Species getSpecies() {

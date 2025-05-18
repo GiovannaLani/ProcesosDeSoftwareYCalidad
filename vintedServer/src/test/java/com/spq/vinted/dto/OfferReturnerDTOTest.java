@@ -29,7 +29,7 @@ public class OfferReturnerDTOTest {
         long itemId = 300L;
         long chatRoomId = 400L;
 
-        OfferReturnerDTO offerReturnerDTO = new OfferReturnerDTO(id, price,originalPrice, status, senderId, receiverId, itemId, chatRoomId);
+        OfferReturnerDTO offerReturnerDTO = new OfferReturnerDTO(id, price,originalPrice, status, senderId, receiverId, itemId, chatRoomId, false);
 
         assertEquals(1L, offerReturnerDTO.getId());
         assertEquals(price, offerReturnerDTO.getPrice());

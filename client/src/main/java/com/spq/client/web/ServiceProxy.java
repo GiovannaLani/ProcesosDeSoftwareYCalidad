@@ -438,11 +438,11 @@ public class ServiceProxy implements IVintedServiceProxy {
 		String url = apiBaseUrl + "/items/itemData?token=" + token;
 		
 		Item item = switch (category.toLowerCase()) {
-			case "clothes" -> new Clothes(title, description, price, ClothesSize.L, Category.WOMAN, ClothesType.SWEATER);
-			case "electronics" -> new Electronics(title, description, price, ElectronicsType.DEVICE);
-			case "home" -> new Home(title, description, price, HomeType.DECORATION);
-			case "pet" -> new Pet(title, description, price, Species.valueOf(species.toUpperCase()));
-			case "entertainment" -> new Entertainment(title, description, price, EntertainmentType.BOOK);
+			case "clothes" -> new Clothes(title, description, price, ClothesSize.L, Category.WOMAN, ClothesType.SWEATER, false);
+			case "electronics" -> new Electronics(title, description, price, ElectronicsType.DEVICE, false);
+			case "home" -> new Home(title, description, price, HomeType.DECORATION, false);
+			case "pet" -> new Pet(title, description, price, Species.valueOf(species.toUpperCase()), false);
+			case "entertainment" -> new Entertainment(title, description, price, EntertainmentType.BOOK, false);
 			default -> throw new RuntimeException("Invalid category");
 		};
 		

@@ -23,11 +23,12 @@ public abstract class ItemDTO {
     private float price;
     private long sellerId;
     private List<String> images = new ArrayList<>();
+    private boolean isSold;
     
     public ItemDTO() {
     }
 
-    public ItemDTO(long id, String title, String description, float price, List<String> images) {
+    public ItemDTO(long id, String title, String description, float price, List<String> images, boolean isSold) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -80,6 +81,12 @@ public abstract class ItemDTO {
 
     public void setSellerId(long sellerId) {
         this.sellerId = sellerId;
+    }
+    public boolean isSold() {
+        return isSold;
+    }
+    public void setSold(boolean sold) {
+        isSold = sold;
     }
 }
 

@@ -7,19 +7,20 @@ public class OfferDTO {
     private long receiverId;
     private long chatRoomId;
     private long itemId;
-    
+    private boolean isSold;
 
     
     public OfferDTO() {
     }
 
-    public OfferDTO(double price, String status, long senderId, long receiverId, long itemId, long chatRoomId) {
+    public OfferDTO(double price, String status, long senderId, long receiverId, long itemId, long chatRoomId, boolean isSold) {
         this.price = price;
         this.status = status;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.itemId = itemId;
         this.chatRoomId = chatRoomId;
+        this.isSold = isSold;
     }
 
     public double getPrice() {
@@ -69,4 +70,10 @@ public class OfferDTO {
         this.chatRoomId = chatRoomId;
     }
 
+    public boolean getIsSold() {
+        return isSold;
+    }
+    public void setIsSold(boolean sold) {
+        isSold = sold;
+    }
 }

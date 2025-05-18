@@ -9,8 +9,8 @@ public class EntertainmentDTO extends ItemDTO {
     public EntertainmentDTO() {
     }
 
-    public EntertainmentDTO(long id, String title, String description, float price, EntertainmentType type,List<String> images) {
-        super(id, title, description, price,images);
+    public EntertainmentDTO(long id, String title, String description, float price, EntertainmentType type,List<String> images, boolean isSold) {
+        super(id, title, description, price,images, isSold);
         this.entertainmentType = type;
     }
     public EntertainmentType getEntertainmentType() {

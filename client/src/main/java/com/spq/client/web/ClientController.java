@@ -709,6 +709,7 @@ public class ClientController {
 			@RequestParam("token") Long token,
 			@RequestParam("itemIds") List<Long> itemIds,
 			@RequestParam("paymentMethod") String paymentMethod,
+			@RequestParam(value = "offerId", required = false) Long offerId,
 			RedirectAttributes redirectAttributes) {
 		try {
 			System.out.println("Token: " + token);
@@ -732,8 +733,8 @@ public class ClientController {
 					return "redirect:/login";
 				}
 	
-               
-                float finalPrice = item.getPrice() * 1.15f;
+				float basePrice = (offerId != null ? vintedService.getOfferById(offerId).price().floatValue() : item.getPrice());
+                float finalPrice = basePrice * 1.15f;
 
 				Purchase purchase = new Purchase(
 						null,

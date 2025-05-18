@@ -11,8 +11,8 @@ public class ElectronicsDTO extends ItemDTO {
     }
 
     
-    public ElectronicsDTO(long id, String title, String description, float price, ElectronicsType type,List<String> images) {
-        super(id, title, description, price,images);
+    public ElectronicsDTO(long id, String title, String description, float price, ElectronicsType type,List<String> images, boolean isSold) {
+        super(id, title, description, price,images, isSold);
         this.electronicsType = type;
     }
 

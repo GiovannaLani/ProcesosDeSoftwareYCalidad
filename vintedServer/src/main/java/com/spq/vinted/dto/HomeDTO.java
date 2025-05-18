@@ -9,8 +9,8 @@ public class HomeDTO extends ItemDTO {
     public HomeDTO() {
     }
 
-    public HomeDTO(long id, String title, String description, float price, HomeType type, List<String> images) {
-        super(id, title, description, price,images);
+    public HomeDTO(long id, String title, String description, float price, HomeType type, List<String> images, boolean isSold) {
+        super(id, title, description, price,images, isSold);
         this.homeType = type;
     }
     public HomeType getHomeType() {

@@ -37,7 +37,7 @@ public class ClothesDTOTest {
         Category category = Category.MAN;
         List<String> images = Arrays.asList("image1.jpg", "image2.jpg");
 
-        ClothesDTO clothesDTO = new ClothesDTO(id, title, description, price, size, type, category, images);
+        ClothesDTO clothesDTO = new ClothesDTO(id, title, description, price, size, type, category, images, false);
 
         assertEquals(id, clothesDTO.getId());
         assertEquals(title, clothesDTO.getTitle());

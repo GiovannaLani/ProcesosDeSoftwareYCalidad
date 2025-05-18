@@ -9,13 +9,13 @@ public class OfferReturnerDTO {
     private long receiverId;
     private long chatRoomId;
     private long itemId;
-    
+    private boolean isSold;
 
     
     public OfferReturnerDTO() {
     }
 
-    public OfferReturnerDTO(long id, double price, double originalPrice, String status, long senderId, long receiverId, long itemId, long chatRoomId) {
+    public OfferReturnerDTO(long id, double price, double originalPrice, String status, long senderId, long receiverId, long itemId, long chatRoomId, boolean isSold) {
         this.id = id;
         this.price = price;
         this.originalPrice = originalPrice;
@@ -24,6 +24,7 @@ public class OfferReturnerDTO {
         this.receiverId = receiverId;
         this.itemId = itemId;
         this.chatRoomId = chatRoomId;
+        this.isSold = isSold;
     }
 
     public long getId() {
@@ -83,6 +84,12 @@ public class OfferReturnerDTO {
     }
     public void setChatRoomId(long chatRoomId) {
         this.chatRoomId = chatRoomId;
+    }
+    public boolean getIsSold() {
+        return isSold;
+    }
+    public void setIsSold(boolean sold) {
+        isSold = sold;
     }
 
 }

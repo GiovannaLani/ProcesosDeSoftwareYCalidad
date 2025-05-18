@@ -9,5 +9,6 @@ public record ChatRoomInfo (
     Long itemId,
     String itemName,
     String itemImage,
-    float itemPrice
+    float itemPrice,
+    boolean itemIsSold
 ){}

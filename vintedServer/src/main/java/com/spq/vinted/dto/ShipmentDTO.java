@@ -10,7 +10,7 @@ public class ShipmentDTO {
 
     private Long id;
     private ShipmentStatus status;
-    
+    private Long sellerId;
     private Long buyerId;
     
     private ItemDTO item;
@@ -19,14 +19,15 @@ public class ShipmentDTO {
     private LocalDateTime createdDate;
 
     public ShipmentDTO() {}
-    
 
-    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item, LocalDateTime createdDate) {
+    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item, LocalDateTime createdDate, Long sellerId, Long buyerId) {
         this.id = id;
         this.status = status;
         this.buyer = buyer;
         this.item = item;
         this.createdDate = createdDate;
+        this.buyerId = buyerId;
+        this.sellerId = sellerId;
     }
 
     public Long getId() { return id; }
@@ -46,4 +47,7 @@ public class ShipmentDTO {
 
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
+
+    public Long getSellerId() { return sellerId; }
+    public void setSellerId(Long sellerId) { this.sellerId = sellerId; }
 }

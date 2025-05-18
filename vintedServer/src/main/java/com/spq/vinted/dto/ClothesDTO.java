@@ -16,8 +16,8 @@ public class ClothesDTO extends ItemDTO {
 
     }
 
-    public ClothesDTO(long id, String title, String description, float price, ClothesSize size, ClothesType type, Category category,List<String> images) {
-        super(id, title, description, price,images); 
+    public ClothesDTO(long id, String title, String description, float price, ClothesSize size, ClothesType type, Category category,List<String> images, boolean isSold) {
+        super(id, title, description, price,images, isSold); 
         this.size = size;
         this.clothesType = type;
         this.category = category;

@@ -10,11 +10,12 @@ public class ChatRoomInfoDTO {
     private String itemName;
     private String itemImage;
     private float itemPrice;
-    
+    private boolean itemIsSold;
+
     public ChatRoomInfoDTO() {
     }
 
-    public ChatRoomInfoDTO(long id, long buyerId, String buyerName, long sellerId, String sellerName, long itemId, String itemName, String itemImage, float itemPrice) {
+    public ChatRoomInfoDTO(long id, long buyerId, String buyerName, long sellerId, String sellerName, long itemId, String itemName, String itemImage, float itemPrice, boolean itemIsSold) {
         this.id = id;
         this.buyerId = buyerId;
         this.buyerName = buyerName;
@@ -24,6 +25,7 @@ public class ChatRoomInfoDTO {
         this.itemName = itemName;
         this.itemImage = itemImage;
         this.itemPrice = itemPrice;
+        this.itemIsSold = itemIsSold;
     }
 
     public long getId() {
@@ -94,5 +96,11 @@ public class ChatRoomInfoDTO {
     }
     public void setItemPrice(float itemPrice) {
         this.itemPrice = itemPrice;
+    }
+    public boolean getItemIsSold() {
+        return itemIsSold;
+    }
+    public void setItemIsSold(boolean itemIsSold) {
+        this.itemIsSold = itemIsSold;
     }
 }

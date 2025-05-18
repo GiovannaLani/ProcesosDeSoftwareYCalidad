@@ -37,7 +37,8 @@ public class ChatRoomController {
             chatRoom.getItem().getId(),
             chatRoom.getItem().getTitle(),
             chatRoom.getItem().getImages().get(0),
-            chatRoom.getItem().getPrice()
+            chatRoom.getItem().getPrice(),
+            chatRoom.getItem().getIsSold()
         );
         return ResponseEntity.ok(chatRoomInfoDTO);
     }
@@ -54,7 +55,8 @@ public class ChatRoomController {
                 chatRoom.getItem().getId(),
                 chatRoom.getItem().getTitle(),
                 chatRoom.getItem().getImages().get(0),
-                chatRoom.getItem().getPrice()
+                chatRoom.getItem().getPrice(),
+                chatRoom.getItem().getIsSold()
             )
         ).toList();
         return ResponseEntity.ok(chatRooms);
