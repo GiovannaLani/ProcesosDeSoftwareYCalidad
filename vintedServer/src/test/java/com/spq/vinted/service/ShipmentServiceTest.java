@@ -1,8 +1,10 @@
 package com.spq.vinted.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -197,8 +199,9 @@ class ShipmentServiceTest {
             ShipmentStatus.SHIPPED,
             buyerDTO,
             itemDTO,
+            LocalDateTime.now(),
             id,
-            id + 100
+            id+1
         );
     }
 }

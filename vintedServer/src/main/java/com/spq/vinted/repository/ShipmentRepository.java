@@ -11,6 +11,5 @@ import com.spq.vinted.model.ShipmentStatus;
 @Repository
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     List<Shipment> findAllByBuyerId(Long buyerId);
-
     List<Shipment> findByStatusNot(ShipmentStatus delivered);
 }
