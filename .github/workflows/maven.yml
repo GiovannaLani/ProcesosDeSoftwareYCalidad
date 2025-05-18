@@ -17,14 +17,12 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: spq
-          MYSQL_USER: spq
-          MYSQL_PASSWORD: spq
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: restapidb
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uspq -pspq"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -47,13 +45,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Install Doxygen
-        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
-
       - name: Wait for MySQL to be ready
         run: |
           echo "Waiting for MySQL..."
-          until mysqladmin ping -h 127.0.0.1 -uspq -pspq --silent; do
+          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
             sleep 2
           done
           echo "MySQL is ready!"
@@ -61,7 +56,7 @@ jobs:
       - name: Run DB initialization script
         run: |
           echo "Running DB setup..."
-          mysql -h 127.0.0.1 -uroot -pspq < vintedServer/src/main/resources/dbsetup.sql
+          mysql -h 127.0.0.1 -uroot -proot < vintedServer/src/main/resources/dbsetup.sql
 
       - name: Run Unit tests and generate coverage report
         run: mvn test jacoco:report
@@ -74,6 +69,9 @@ jobs:
       - name: Run Performance Tests
         run: mvn -Pperformance integration-test
         working-directory: vintedServer
+
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
       - name: Generate Maven Site
         run: mvn site
@@ -94,17 +92,16 @@ jobs:
       - name: Copy site output to docs/site and docs/doxygen folder to docs/doxygen
         run: |
           mkdir -p docs
+          rm -rf docs/site
           mkdir -p docs/site
-          mkdir -p docs/doxygen
           cp -r vintedServer/target/site/* docs/site/
-          cp -r vintedServer/target/doxygen/* docs/doxygen/
+          rm -rf docs/doxygen
+          mkdir -p docs/doxygen
+          cp -r vintedServer/target/doxygen/html/* docs/doxygen/
 
-      - name: Commit and push docs
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add -f docs
-          git commit -m "Update Maven site [CI skip]" || echo "No changes to commit"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs
+          branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
