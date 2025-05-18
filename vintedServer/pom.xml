@@ -29,6 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<doxygen.config.file>${basedir}/src/main/resources/Doxyfile</doxygen.config.file>
 		<server.hostname>127.0.0.1</server.hostname>
 		<server.port>8080</server.port>
 		<jacoco.version>0.8.12</jacoco.version>
@@ -172,6 +173,25 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
+			<!-- Documentación Doxygen -->
+			<plugin>
+				<groupId>com.soebes.maven.plugins</groupId>
+				<artifactId>doxygen-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<executions>
+					<execution>
+						<id>generate-doxygen-site</id>
+						<phase>site</phase> <!-- important: run during site phase -->
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<configurationFile>${doxygen.config.file}</configurationFile>
+				</configuration>
+			</plugin>
+
 			<!-- Configures exec:java command to launch client-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -208,6 +228,51 @@
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.21.0</version>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+
+					<!-- Copy Maven Site content into docs/site/ -->
+					<execution>
+						<id>copy-maven-site-to-docs</id>
+						<phase>post-site</phase> <!-- After site generation -->
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/docs/site</outputDirectory> 
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/site</directory> <!-- source -->
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+
+					<!-- Copy Doxygen content into docs/doxygen/ -->
+					<execution>
+						<id>copy-doxygen-site-to-docs</id>
+						<phase>post-site</phase> <!-- After doxygen generation too -->
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/docs/doxygen</outputDirectory> 
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/doxygen/html</directory> <!-- source -->
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 	<profiles>
@@ -340,6 +405,8 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+
+			
 		</plugins>
 	</reporting>
 </project>
