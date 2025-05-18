@@ -321,7 +321,7 @@
 											<div class="m-r-20"></div>
 											<form id="buyForm" th:action="@{/shoppingCart/add(token=${token}, redirectUrl=${currentUrl})}" method="post">
 												<input type="hidden" name="itemId" id="buyFormItemId" />
-												<button id ="item-buy-button-id" type="submit" class="button-green">Comprar</button>
+												<button id ="item-buy-button-id" type="submit" class="button-green" style="align-items: center;">Comprar</button>
 											</form>
 										</div>
 									</div>
@@ -736,13 +736,10 @@ let currentItemPrice = null;
 
 
 const offerModal = document.getElementById('offerModal');
-const ratingModal = document.getElementById('ratingModal');
 const closeModalBtn = document.getElementById('offerClose');
 const offerPriceInput = document.getElementById('offerPrice');
 const offerPriceWithProtection = document.getElementById('offerPriceWithProtection');
 const submitOfferBtn = document.getElementById('submitOfferBtn');
-const submitRatingBtn = document.getElementById('submitRatingBtn');
-const closeRatingModalBtn = document.getElementById('raitingClose');
 // listeners botones
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -760,22 +757,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     
     submitOfferBtn.addEventListener('click', submitOffer);
-
-
-	const ratingButton = document.getElementById('ratingButton');
-    if (ratingButton) {
-        ratingButton.addEventListener('click', openRatingModal);
-    }
-    closeRatingModalBtn.addEventListener('click', closeRatingModal);
-    
-    window.addEventListener('click', function(event) {
-        if (event.target === ratingModal) {
-            closeRatingModal();
-        }
-    });
-    
-    
-    submitRatingBtn.addEventListener('click', submitRating);
 });
 
 //modal = pop-up
@@ -796,18 +777,8 @@ function openOfferModal() {
     offerModal.style.display = 'block';
 }
 
-function openRatingModal() {
-    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);    
-
-    ratingModal.style.display = 'block';
-}
-
 function closeOfferModal() {
     offerModal.style.display = 'none';
-}
-
-function closeRatingModal() {
-    ratingModal.style.display = 'none';
 }
 
 function submitOffer() {
@@ -877,50 +848,6 @@ function submitOffer() {
 		console.error('Error:', error);
 		alert('No se pudo enviar la oferta. ' + error.message);
 	});
-}
-
-function submitRating() {
-    const chatRoomElement = document.querySelector(`[onclick*="loadChat(${currentChatRoomId})"]`);
-    const ratedUserId = chatRoomElement ? chatRoomElement.getAttribute("data-other-user-id") : null;
-    const ratingUserId = userId;
-    const score = selectedRating;
-    const ratingInput = document.getElementById('ratingInput').value.trim();
-    const token = userToken;
-
-    if (!score) {
-        alert("Selecciona una puntuación antes de enviar.");
-        return;
-    }
-
-    const ratingData = {
-        ratedUserId: parseInt(ratedUserId),
-        ratingUserId: parseInt(ratingUserId),
-        score: score,
-        comment: ratingInput
-    };
-
-    console.log("Enviando valoración:", JSON.stringify(ratingData));
-
-    fetch(`/chatrooms/rateUser?token=${token}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(ratingData)  // Enviamos un JSON válido
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error al enviar la valoración: ${response.status}`);
-        }
-        return response.text();
-    })
-    .then(data => {
-        console.log('Valoración enviada:', data);
-        closeRatingModal();
-    })
-    .catch(error => {
-        console.error('Error al enviar la valoración:', error);
-    });
 }
 
 
@@ -1390,35 +1317,7 @@ function respondToOffer(offerId, status) {
 		});
 	});
 	</script>
-	<script>
-		const stars = document.querySelectorAll('.star');
-		let selectedRating = 0;
-
-		function updateStars(rating) {
-		stars.forEach((star, index) => {
-			star.classList.toggle('selected', index < rating);
-		});
-		}
-
-		stars.forEach((star, index) => {
-		star.addEventListener('click', () => {
-			if (selectedRating === index + 1) {
-			selectedRating = 0;
-			} else {
-			selectedRating = index + 1;
-			}
-			updateStars(selectedRating);
-		});
-
-		star.addEventListener('mouseover', () => {
-			updateStars(index + 1);
-		});
-
-		star.addEventListener('mouseout', () => {
-			updateStars(selectedRating);
-		});
-		});
-	</script>
+	
 
 
 <style>
