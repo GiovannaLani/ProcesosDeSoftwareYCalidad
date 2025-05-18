@@ -61,7 +61,7 @@ jobs:
       - name: Run DB initialization script
         run: |
           echo "Running DB setup..."
-          mysql -h 127.0.0.1 -uspq -pspq < vintedServer/src/main/resources/dbsetup.sql
+          mysql -h 127.0.0.1 -uroot -pspq < vintedServer/src/main/resources/dbsetup.sql
 
       - name: Run Unit tests and generate coverage report
         run: mvn test jacoco:report
