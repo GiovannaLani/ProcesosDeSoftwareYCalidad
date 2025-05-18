@@ -37,8 +37,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.reset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -498,6 +500,23 @@ class ItemServiceTest {
         assertEquals(2, result.size());
         assertEquals("Clothes Item 1", result.get(0).getTitle());
         assertEquals("Clothes Item 2", result.get(1).getTitle());
+
+        Category category = Category.BOY; 
+        int page = 0;
+        Long token = null; 
+
+        Pageable expectedPageable = PageRequest.of(page, 28);
+
+        when(itemRepository.findClothesByCategory(category, expectedPageable))
+            .thenThrow(new RuntimeException("DB error"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            itemService.getClothesByCategory(category, page, token);
+        });
+
+        assertTrue(exception.getMessage().contains("Error fetching clothes by category"));
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertEquals("DB error", exception.getCause().getMessage());
     }
 
     @Test
@@ -728,53 +747,6 @@ class ItemServiceTest {
         });
         assertEquals("Artículo no encontrado en la wishlist", itemNotFoundException.getMessage());
     }
-
-    // @Test
-    // void testDeleteItem() {
-    //     User user = new User();
-    //     user.setId(1L);
-    //     user.setCartItems(new ArrayList<>());
-
-    //     User otherUser = new User();
-    //     otherUser.setId(2L);
-    //     otherUser.setCartItems(new ArrayList<>());
-
-    //     Item item = new Clothes();
-    //     item.setId(100L);
-    //     item.setUsersWithItemInCart(new ArrayList<>(List.of(user, otherUser)));
-
-    //     user.getCartItems().add(item);
-    //     otherUser.getCartItems().add(item);
-
-    //     when(userService.getUserByToken(1L)).thenReturn(user);
-    //     when(itemRepository.findById(100L)).thenReturn(Optional.of(item));
-    //     when(userRepository.findById("1")).thenReturn(Optional.of(user));
-    //     when(userRepository.findById("2")).thenReturn(Optional.of(otherUser));
-
-    //     itemService.deleteItem(1L, 100L);
-
-    //     assertFalse(user.getCartItems().contains(item), "El item debería haberse eliminado del carrito del owner");
-    //     assertFalse(otherUser.getCartItems().contains(item), "El item debería haberse eliminado del carrito de otros usuarios");
-    //     assertTrue(item.getUsersWithItemInCart().isEmpty(), "La lista de usuarios con el item en el carrito debería estar vacía");
-
-    //     verify(userRepository, times(1)).save(user);
-    //     verify(userRepository, times(1)).save(otherUser);
-    //     verify(itemRepository, times(1)).save(item);
-    //     verify(itemRepository, times(1)).delete(item);
-
-    //     when(userService.getUserByToken(999L)).thenReturn(null);
-    //     RuntimeException unauthorizedException = assertThrows(RuntimeException.class, () -> {
-    //         itemService.deleteItem(999L, 100L);
-    //     });
-    //     assertEquals("Not authorized", unauthorizedException.getMessage());
-
-    //     when(userService.getUserByToken(1L)).thenReturn(user);
-    //     when(itemRepository.findById(404L)).thenReturn(Optional.empty());
-    //     RuntimeException itemNotFoundException = assertThrows(RuntimeException.class, () -> {
-    //         itemService.deleteItem(1L, 404L);
-    //     });
-    //     assertEquals("Item not found", itemNotFoundException.getMessage());
-    // }
 
     @Test
     void testGetUserItems() {
@@ -1299,5 +1271,286 @@ void testGetRecommendedProducts_LimitFive() {
     assertEquals(5, result.size(), "Debe devolver como máximo 5 recomendados");
     assertFalse(result.contains(baseItem));
 }
+
+
+@Test
+void testGetClothesByCategory_WithToken() {
+    Category category = Category.WOMAN;
+    int page = 0;
+    long token = 123L;
+    long userId = 99L;
+
+    Pageable pageable = PageRequest.of(page, 28);
+    User mockUser = new User();
+    mockUser.setId(userId);
+
+    List<Clothes> clothesList = List.of(new Clothes());
+    Page<Clothes> expectedPage = new PageImpl<>(clothesList);
+
+    when(userService.getUserByToken(token)).thenReturn(mockUser);
+    when(itemRepository.findClothesByCategoryAndSellerIdNot(userId, category, pageable)).thenReturn(expectedPage);
+
+    Page<Clothes> result = itemService.getClothesByCategory(category, page, token);
+
+    assertEquals(expectedPage, result);
+}
+
+@Test
+void testGetClothesByCategory_WithoutToken() {
+    Category category = Category.MAN;
+    int page = 1;
+
+    Pageable pageable = PageRequest.of(page, 28);
+    List<Clothes> clothesList = List.of(new Clothes());
+    Page<Clothes> expectedPage = new PageImpl<>(clothesList);
+
+    when(itemRepository.findClothesByCategory(category, pageable)).thenReturn(expectedPage);
+
+    Page<Clothes> result = itemService.getClothesByCategory(category, page, null);
+
+    assertEquals(expectedPage, result);
+}
+
+@Test
+void testDeleteItem_Successful() {
+    long token = 1L;
+    long itemId = 10L;
+
+    User user = new User();
+    Clothes clothes = new Clothes();
+    clothes.setId(1L);
+    clothes.setTitle("Test Clothes");
+    clothes.setUsersWithItemInCart(new ArrayList<>());
+    clothes.setUsersWithItemInWishlist(new ArrayList<>());
+
+    when(userService.getUserByToken(token)).thenReturn(user);
+    when(itemRepository.findById(itemId)).thenReturn(Optional.of(clothes));
+
+    itemService.deleteItem(token, itemId);
+
+    verify(itemRepository).save(clothes);
+}
+
+@Test
+void testDeleteItem_NotAuthorized() {
+    long token = 1L;
+    when(userService.getUserByToken(token)).thenReturn(null);
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () ->
+        itemService.deleteItem(token, 10L)
+    );
+
+    assertEquals("Not authorized", exception.getMessage());
+}
+
+@Test
+void testDeleteItem_ItemNotFound() {
+    long token = 1L;
+    User user = new User();
+
+    when(userService.getUserByToken(token)).thenReturn(user);
+    when(itemRepository.findById(10L)).thenReturn(Optional.empty());
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () ->
+        itemService.deleteItem(token, 10L)
+    );
+
+    assertEquals("Item not found", exception.getMessage());
+}
+
+@Test
+void testDeleteItem_ItemNotFound_ShouldThrowException() {
+    long token = 123L;
+    long itemId = 456L;
+
+    User mockUser = new User();
+    when(userService.getUserByToken(token)).thenReturn(mockUser);
+    when(itemRepository.findById(itemId)).thenReturn(Optional.empty()); 
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        itemService.deleteItem(token, itemId);
+    });
+
+    assertEquals("Item not found", exception.getMessage());
+}
+
+
+@Test
+void testDeleteItem_RemovesFromCartAndSavesUsers() {
+    long token = 1L;
+    long itemId = 2L;
+
+    User user = new User();
+    Clothes item = new Clothes();
+    item.setId(itemId);
+
+    List<Item> cartItems = new ArrayList<>();
+    cartItems.add(item);
+    user.setCartItems(cartItems);
+
+    List<User> usersWithItemInCart = new ArrayList<>();
+    usersWithItemInCart.add(user);
+    item.setUsersWithItemInCart(usersWithItemInCart);
+
+    when(userService.getUserByToken(token)).thenReturn(user);
+    when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+    itemService.deleteItem(token, itemId);
+
+    assertFalse(user.getCartItems().contains(item));
+    verify(userRepository).save(user);
+}
+
+
+@Test
+void testDeleteItem_RemovesFromWishlistAndSavesUsers() {
+    long token = 1L;
+    long itemId = 2L;
+
+    User user = new User();
+    Clothes item = new Clothes();
+    item.setId(itemId);
+
+    List<Item> wishlistItems = new ArrayList<>();
+    wishlistItems.add(item);
+    user.setWishlistItems(wishlistItems);
+
+    List<User> usersWithItemInWishlist = new ArrayList<>();
+    usersWithItemInWishlist.add(user);
+    item.setUsersWithItemInWishlist(usersWithItemInWishlist);
+
+    when(userService.getUserByToken(token)).thenReturn(user);
+    when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+    itemService.deleteItem(token, itemId);
+
+    assertFalse(user.getWishlistItems().contains(item));
+    verify(userRepository).save(user);
+}
+
+
+
+@Test
+void testGetRecommendedProducts_ClothesMatching() {
+    Clothes inputItem = new Clothes();
+    inputItem.setId(1L);
+    inputItem.setCategory(Category.WOMAN);
+    inputItem.setClothesType(ClothesType.TSHIRT);
+
+    Clothes matchingItem = new Clothes();
+    matchingItem.setId(2L);
+    matchingItem.setCategory(Category.WOMAN);
+    matchingItem.setClothesType(ClothesType.TSHIRT);
+
+    Clothes nonMatchingItem = new Clothes();
+    nonMatchingItem.setId(3L);
+    nonMatchingItem.setCategory(Category.MAN);
+    nonMatchingItem.setClothesType(ClothesType.TSHIRT);
+
+    when(itemRepository.findAll()).thenReturn(List.of(inputItem, matchingItem, nonMatchingItem));
+
+    List<Item> result = itemService.getRecommendedProducts(inputItem);
+
+    assertEquals(1, result.size());
+    assertEquals(matchingItem, result.get(0));
+}
+
+@Test
+void testGetRecommendedProducts_NullInput() {
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        itemService.getRecommendedProducts(null)
+    );
+
+    assertEquals("El producto no puede ser nulo", exception.getMessage());
+}
+
+@Test
+void testGetRecommendedProducts_ElectronicsMatching() {
+    Electronics inputItem = new Electronics();
+    inputItem.setId(1L);
+    inputItem.setElectronicsType(ElectronicsType.DEVICE);
+
+    Electronics matchingItem = new Electronics();
+    matchingItem.setId(2L);
+    matchingItem.setElectronicsType(ElectronicsType.DEVICE);
+
+    Electronics nonMatchingItem = new Electronics();
+    nonMatchingItem.setId(3L);
+    nonMatchingItem.setElectronicsType(ElectronicsType.VIDEOGAME);
+
+    when(itemRepository.findAll()).thenReturn(List.of(inputItem, matchingItem, nonMatchingItem));
+
+    List<Item> result = itemService.getRecommendedProducts(inputItem);
+
+    assertEquals(1, result.size());
+    assertEquals(matchingItem, result.get(0));
+}
+
+@Test
+void testGetRecommendedProducts_PetMatching() {
+    Pet inputItem = new Pet();
+    inputItem.setId(1L);
+    inputItem.setSpecies(Species.DOG);
+
+    Pet matchingItem = new Pet();
+    matchingItem.setId(2L);
+    matchingItem.setSpecies(Species.DOG);
+
+    Pet nonMatchingItem = new Pet();
+    nonMatchingItem.setId(3L);
+    nonMatchingItem.setSpecies(Species.CAT);
+
+    when(itemRepository.findAll()).thenReturn(List.of(inputItem, matchingItem, nonMatchingItem));
+
+    List<Item> result = itemService.getRecommendedProducts(inputItem);
+
+    assertEquals(1, result.size());
+    assertEquals(matchingItem, result.get(0));
+}
+
+@Test
+void testGetRecommendedProducts_EntertainmentMatching() {
+    Entertainment inputItem = new Entertainment();
+    inputItem.setId(1L);
+    inputItem.setEntertainmentType(EntertainmentType.BOOK);
+
+    Entertainment matchingItem = new Entertainment();
+    matchingItem.setId(2L);
+    matchingItem.setEntertainmentType(EntertainmentType.BOOK);
+
+    Entertainment nonMatchingItem = new Entertainment();
+    nonMatchingItem.setId(3L);
+    nonMatchingItem.setEntertainmentType(EntertainmentType.GAME);
+
+    when(itemRepository.findAll()).thenReturn(List.of(inputItem, matchingItem, nonMatchingItem));
+
+    List<Item> result = itemService.getRecommendedProducts(inputItem);
+
+    assertEquals(1, result.size());
+    assertEquals(matchingItem, result.get(0));
+}
+
+@Test
+void testGetRecommendedProducts_HomeMatching() {
+    Home inputItem = new Home();
+    inputItem.setId(1L);
+    inputItem.setHomeType(HomeType.FURNITURE);
+
+    Home matchingItem = new Home();
+    matchingItem.setId(2L);
+    matchingItem.setHomeType(HomeType.FURNITURE);
+
+    Home nonMatchingItem = new Home();
+    nonMatchingItem.setId(3L);
+    nonMatchingItem.setHomeType(HomeType.DECORATION);
+
+    when(itemRepository.findAll()).thenReturn(List.of(inputItem, matchingItem, nonMatchingItem));
+
+    List<Item> result = itemService.getRecommendedProducts(inputItem);
+
+    assertEquals(1, result.size());
+    assertEquals(matchingItem, result.get(0));
+}
+
 
 }
