@@ -967,7 +967,7 @@ public class ClientController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Error al añadir el artículo a la wishlist.");
 			e.printStackTrace();
 		}
-		return "redirect:" + redirectUrl;
+		return "redirect:" + redirectUrl +"?token=" + token;
 	}
 	
 
