@@ -243,7 +243,7 @@
 							</div>
 							<div class="summary-row">
 								<span>Precio del artículo:</span>
-								<span th:text="${#numbers.formatDecimal(purchase.price / 1.05, 1, 2)}"></span> €
+								<span th:text="${#numbers.formatDecimal(purchase.price, 1, 2)}"></span> €
 							</div>
 							<div class="summary-row highlight-fees">
 								<span>Gastos de gestión:</span>

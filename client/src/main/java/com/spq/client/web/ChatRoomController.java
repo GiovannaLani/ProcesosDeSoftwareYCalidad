@@ -61,6 +61,7 @@ public class ChatRoomController {
     @GetMapping("/offers/{offerId}")
     public ResponseEntity<Offer> getOfferById(@PathVariable Long offerId) {
         Offer offer = vintedService.getOfferById(offerId);
+        System.out.println("Offer: " + offer + "issold: " + offer.isSold());
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 

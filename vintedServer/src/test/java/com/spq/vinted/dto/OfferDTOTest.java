@@ -26,7 +26,7 @@ public class OfferDTOTest {
         long itemId = 300L;
         long chatRoomId = 400L;
 
-        OfferDTO offerDTO = new OfferDTO(price, status, senderId, receiverId, itemId, chatRoomId);
+        OfferDTO offerDTO = new OfferDTO(price, status, senderId, receiverId, itemId, chatRoomId, false);
 
         assertEquals(price, offerDTO.getPrice());
         assertEquals(status, offerDTO.getStatus());

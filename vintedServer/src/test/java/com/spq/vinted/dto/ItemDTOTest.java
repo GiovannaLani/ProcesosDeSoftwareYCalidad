@@ -15,7 +15,7 @@ public class ItemDTOTest {
         }
 
         public TestItemDTO(long id, String title, String description, float price, List<String> images) {
-            super(id, title, description, price, images);
+            super(id, title, description, price, images,false);
         }
     }
 

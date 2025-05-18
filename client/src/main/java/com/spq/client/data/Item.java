@@ -22,10 +22,12 @@ public abstract class Item {
     private String description;
     private float price;
     private List<String> images = new ArrayList<>();
-    Item(String title, String description, float price) {
+    private boolean isSold;
+    Item(String title, String description, float price, boolean isSold) {
         this.title = title;
         this.description = description;
         this.price = price;
+        this.isSold = isSold;
     }
 
     public long getId() { return id; }  
@@ -47,5 +49,7 @@ public abstract class Item {
         JsonTypeName annotation = this.getClass().getAnnotation(JsonTypeName.class);
         return annotation != null ? annotation.value() : "unknown";
     }
+    public boolean isSold() { return isSold; }
+    public void setSold(boolean isSold) { this.isSold = isSold; }
 }
 

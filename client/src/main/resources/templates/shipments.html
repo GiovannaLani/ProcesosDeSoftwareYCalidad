@@ -295,6 +295,15 @@
 
 												<td class="align-middle text-center">
 													<span th:text="${shipment.status.getDisplayName}"> </span>
+													<button id="ratingButton"
+														type="button" 
+														class="button-white web_ui__Button__button web_ui__Button__filled web_ui__Button__medium web_ui__Button__primary web_ui__Button__truncated" 
+														    th:attr="data-seller-id=${shipment.sellerId != null ? shipment.sellerId : -1}, data-buyer-id=${shipment.buyerId != null ? shipment.buyerId : -1}">
+
+														Valorar
+													</button>
+
+
 												</td>
 											</tr>
 										</tbody>
@@ -458,7 +467,34 @@
 			</div>
 		</div>
 	</footer>
-
+	<!-- Pop up valorar -->
+<div id="ratingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="raitingClose">&times;</span>
+            <h2>Valorar usuario</h2>
+        </div>
+        <div class="modal-body">
+            <div class="star-rating">
+				<span class="star" data-index="0">&#9733;</span>
+				<span class="star" data-index="1">&#9733;</span>
+				<span class="star" data-index="2">&#9733;</span>
+				<span class="star" data-index="3">&#9733;</span>
+				<span class="star" data-index="4">&#9733;</span>
+            </div>
+			<div class="rating-form">
+				<label for="ratingInput">Comentario:</label>
+					<div class="web_ui__InputBar__input web_ui__InputBar__input-bar" style="padding: 10px;">
+					<textarea id="ratingInput" name="composerInput" placeholder="Escribir mensaje" data-testid="composer--input" class="web_ui__InputBar__value" autocomplete="off" style="height: 26px !important;"></textarea>
+				</div>
+			
+			</div>
+        </div>
+        <div class="modal-footer">
+            <button id="submitRatingBtn" class="button-green">Enviar valoración</button>
+        </div>
+    </div>
+</div>
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
@@ -603,5 +639,394 @@
     }
 </style>
 
+<script th:inline="javascript">
+let userId = /*[[${loggedUserId}]]*/ '${loggedUserId}';
+let userToken = /*[[${token}]]*/ '${token}';
+;
+
+let currentItemId = null;
+let currentItemName = null;
+let currentItemImage = null;
+let currentItemPrice = null;
+
+
+const ratingModal = document.getElementById('ratingModal');
+const submitRatingBtn = document.getElementById('submitRatingBtn');
+const closeRatingModalBtn = document.getElementById('raitingClose');
+// listeners botones
+document.addEventListener('DOMContentLoaded', function() {
+    
+	const ratingButton = document.getElementById('ratingButton');
+    if (ratingButton) {
+        ratingButton.addEventListener('click', openRatingModal);
+    }
+    closeRatingModalBtn.addEventListener('click', closeRatingModal);
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === ratingModal) {
+            closeRatingModal();
+        }
+    });
+    
+    
+    submitRatingBtn.addEventListener('click', submitRating);
+});
+
+
+function openRatingModal() {
+    ratingModal.style.display = 'block';
+}
+
+function closeRatingModal() {
+    ratingModal.style.display = 'none';
+}
+
+
+function submitRating() {
+    const ratedUserId = currentRatedUserId;
+	console.log("ID usuario valorado:", ratedUserId);
+    const ratingUserId = userId;
+	console.log("ID usuario que valora:", ratingUserId);
+    const score = selectedRating;
+    const ratingInput = document.getElementById('ratingInput').value.trim();
+    const token = userToken;
+
+    if (!score) {
+        alert("Selecciona una puntuación antes de enviar.");
+        return;
+    }
+
+    const ratingData = {
+        ratedUserId: ratedUserId,
+        ratingUserId: ratingUserId,
+        score: score,
+        comment: ratingInput
+    };
+
+    console.log("Enviando valoración:", JSON.stringify(ratingData));
+
+    fetch(`/chatrooms/rateUser?token=${token}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(ratingData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al enviar la valoración: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(data => {
+        console.log('Valoración enviada:', data);
+        closeRatingModal();
+    })
+    .catch(error => {
+        console.error('Error al enviar la valoración:', error);
+    });
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    const ratingButtons = document.querySelectorAll('.button-white');
+
+    ratingButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const sellerId = parseInt(this.dataset.sellerId);
+            const buyerId = parseInt(this.dataset.buyerId);
+
+            console.log("ID vendedor:", sellerId);
+            console.log("ID comprador:", buyerId);
+
+            if (isNaN(sellerId) || isNaN(buyerId)) {
+                console.error("Error: sellerId o buyerId es NaN");
+                return;
+            }
+
+            // Determinar a quién se está valorando
+            currentRatedUserId = (userId == buyerId) ? sellerId : buyerId;
+
+            openRatingModal();
+        });
+    });
+
+    submitRatingBtn.addEventListener('click', submitRating);
+});
+
+
+</script>
+<style>
+
+/*Provisional*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  margin-bottom: 20px;
+}
+
+.close, #raitingClose, #offerClose {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}
+
+.item-details {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.modal-item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.offer-form {
+  margin-bottom: 20px;
+}
+
+.offer-form input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.price-with-protection {
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.modal-footer {
+  text-align: center;
+}
+
+.offer-message {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 10px 0;
+}
+
+.offer-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.offer-price {
+  font-weight: bold;
+  font-size: 18px;
+  color: #09b1ba;
+}
+
+.offer-original {
+  text-decoration: line-through;
+  color: #666;
+  margin-left: 10px;
+}
+
+.offer-status {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.offer-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.button-accept {
+  background-color: #09b1ba;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.button-reject {
+  background-color: white;
+  color: #09b1ba;
+  border: 1px solid #09b1ba;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 48%;
+}
+
+.button-counter {
+  background-color: white;
+  color: #09b1ba;
+  border: 1px solid #09b1ba;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 48%;
+}
+
+.offer-timestamp {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+
+.offer-container-sender,
+.offer-container-receiver {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 5px 0;
+  min-width: 200px;
+}
+
+.offer-container-sender {
+  background-color: #e8f5e9; 
+}
+
+.offer-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.offer-price {
+  font-weight: bold;
+  font-size: 18px;
+  color: #09b1ba;
+}
+
+.offer-original {
+  text-decoration: line-through;
+  color: #666;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.offer-status {
+  text-align: center;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.offer-buttons {
+  margin-top: 10px;
+}
+
+.offer-buttons button {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.offer-buttons-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.offer-timestamp {
+  text-align: center;
+  color: #d0d0d0;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.star-rating {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.star {
+    font-size: 30px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color 0.3s;
+}
+
+.star.selected, .star:hover {
+    color: #09b1ba;
+}
+
+</style>
+	<script>
+		const stars = document.querySelectorAll('.star');
+		let selectedRating = 0;
+
+		function updateStars(rating) {
+		stars.forEach((star, index) => {
+			star.classList.toggle('selected', index < rating);
+		});
+		}
+
+		stars.forEach((star, index) => {
+		star.addEventListener('click', () => {
+			if (selectedRating === index + 1) {
+			selectedRating = 0;
+			} else {
+			selectedRating = index + 1;
+			}
+			updateStars(selectedRating);
+		});
+
+		star.addEventListener('mouseover', () => {
+			updateStars(index + 1);
+		});
+
+		star.addEventListener('mouseout', () => {
+			updateStars(selectedRating);
+		});
+		});
+	</script>
 </body>
 </html>

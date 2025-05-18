@@ -31,7 +31,7 @@ public class Pet extends Item{
 
     @Override
     public ItemDTO toDTO() {
-        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species, getImages());
+        return new PetDTO(getId(), getTitle(), getDescription(), getPrice(), species, getImages(), getIsSold());
     }
     
 }

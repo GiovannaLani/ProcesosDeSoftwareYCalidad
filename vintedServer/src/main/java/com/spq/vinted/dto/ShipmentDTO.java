@@ -8,7 +8,7 @@ public class ShipmentDTO {
 
     private Long id;
     private ShipmentStatus status;
-    
+    private Long sellerId;
     private Long buyerId;
     
     private ItemDTO item;
@@ -17,11 +17,13 @@ public class ShipmentDTO {
     public ShipmentDTO() {}
     
 
-    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item) {
+    public ShipmentDTO(Long id, ShipmentStatus status, UserDTO buyer, ItemDTO item, Long buyerId, Long sellerId) {
         this.id = id;
         this.status = status;
         this.buyer = buyer;
         this.item = item;
+        this.buyerId = buyerId;
+        this.sellerId = sellerId;
     }
 
     public Long getId() { return id; }
@@ -38,4 +40,7 @@ public class ShipmentDTO {
     
     public UserDTO getBuyer() { return buyer; }
     public void setBuyer(UserDTO buyer) { this.buyer = buyer; }
+
+    public Long getSellerId() { return sellerId; }
+    public void setSellerId(Long sellerId) { this.sellerId = sellerId; }
 }

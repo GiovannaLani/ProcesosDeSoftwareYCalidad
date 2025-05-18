@@ -29,6 +29,6 @@ public class Home extends Item {
 
     @Override
     public ItemDTO toDTO() {
-        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getHomeType(), getImages());
+        return new HomeDTO(getId(), getTitle(), getDescription(), getPrice(), getHomeType(), getImages(), getIsSold());
     }
 }

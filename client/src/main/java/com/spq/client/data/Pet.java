@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName("pet")
 public class Pet extends Item {
     public Species species;
-    public Pet(String title, String description, float price, Species species) {
-        super(title, description, price);
+    public Pet(String title, String description, float price, Species species, boolean isSold) {
+        super(title, description, price, isSold);
         this.species = species;
     }
     public Species getSpecies() {

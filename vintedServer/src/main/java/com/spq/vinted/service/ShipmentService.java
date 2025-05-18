@@ -55,13 +55,17 @@ public class ShipmentService {
         System.out.println("purchases: " + purchase);
         User user = userService.getUserByToken(token);
         Item item = itemService.getItemById(purchase.getItemId());
-        
+        if(item.getPrice()!= purchase.getPrice()){
+            item.setPrice(purchase.getPrice());
+        }
         // Crear envío
         Shipment shipment = new Shipment();
         shipment.setItem(item);
         System.out.println("item: " + item);
         shipment.setBuyer(user);
         System.out.println("buyer: " + user);
+        shipment.setSeller(purchase.getSeller());
+        System.out.println("seller: " + purchase.getSeller());
         shipment.setStatus(status);
         System.out.println("shipment: " + shipment.getBuyer() + " " + shipment.getItem() + " " + shipment.getStatus());
         return shipmentRepository.save(shipment);
@@ -75,6 +79,7 @@ public class ShipmentService {
         dto.setItem(itemDTO);
         dto.setBuyerId(shipment.getBuyer().getId());
         dto.setBuyer(shipment.getBuyer().toDTO());
+        dto.setSellerId(shipment.getSeller().getId());
         return dto;
     }
 

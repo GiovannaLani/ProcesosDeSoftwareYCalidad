@@ -31,7 +31,7 @@ public class ElectronicsDTOTest {
         ElectronicsType type = ElectronicsType.DEVICE;
         List<String> images = Arrays.asList("phone1.jpg", "phone2.jpg");
 
-        ElectronicsDTO electronicsDTO = new ElectronicsDTO(id, title, description, price, type, images);
+        ElectronicsDTO electronicsDTO = new ElectronicsDTO(id, title, description, price, type, images,false);
 
         assertEquals(id, electronicsDTO.getId());
         assertEquals(title, electronicsDTO.getTitle());

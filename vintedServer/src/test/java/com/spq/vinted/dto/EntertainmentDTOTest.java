@@ -31,7 +31,7 @@ public class EntertainmentDTOTest {
         EntertainmentType type = EntertainmentType.GAME;
         List<String> images = Arrays.asList("game1.jpg", "game2.jpg");
 
-        EntertainmentDTO entertainmentDTO = new EntertainmentDTO(id, title, description, price, type, images);
+        EntertainmentDTO entertainmentDTO = new EntertainmentDTO(id, title, description, price, type, images, false);
 
         assertEquals(id, entertainmentDTO.getId());
         assertEquals(title, entertainmentDTO.getTitle());

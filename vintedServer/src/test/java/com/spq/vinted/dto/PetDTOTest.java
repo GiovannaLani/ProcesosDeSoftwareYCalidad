@@ -31,7 +31,7 @@ public class PetDTOTest {
         Species species = Species.DOG;
         List<String> images = Arrays.asList("dog1.jpg", "dog2.jpg");
 
-        PetDTO petDTO = new PetDTO(id, title, description, price, species, images);
+        PetDTO petDTO = new PetDTO(id, title, description, price, species, images, false);
 
         assertEquals(id, petDTO.getId());
         assertEquals(title, petDTO.getTitle());

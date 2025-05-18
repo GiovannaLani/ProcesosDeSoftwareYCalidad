@@ -75,7 +75,7 @@ public class OfferController {
     }
 
     private OfferReturnerDTO convertToOfferReturnerDTO(Offer offer) {
-        return new OfferReturnerDTO(offer.getId(), offer.getPrice(), offer.getItem().getPrice(), offer.getStatus().toString(), offer.getSender().getId(), offer.getReceiver().getId(), offer.getItem().getId(), offer.getChat().getId());
+        return new OfferReturnerDTO(offer.getId(), offer.getPrice(), offer.getItem().getPrice(), offer.getStatus().toString(), offer.getSender().getId(), offer.getReceiver().getId(), offer.getItem().getId(), offer.getChat().getId(), offer.getItem().getIsSold());
     }
 }
 

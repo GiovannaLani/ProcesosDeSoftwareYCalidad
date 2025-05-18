@@ -76,7 +76,7 @@ class OfferControllerTest {
 
     @Test
     void testCreateOffer() throws Exception {
-        OfferDTO offerDTO = new OfferDTO(2.0,"hola", 3L, 4L, 8L, 5L);
+        OfferDTO offerDTO = new OfferDTO(2.0,"hola", 3L, 4L, 8L, 5L, false);
 
         Mockito.when(offerService.createOffer(anyLong(), anyLong(), anyLong(), anyLong(), any()))
                 .thenReturn(offer);
