@@ -1,7 +1,6 @@
 package com.spq.vinted.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -21,8 +19,6 @@ import com.spq.vinted.model.Item;
 import com.spq.vinted.model.Shipment;
 import com.spq.vinted.model.ShipmentStatus;
 import com.spq.vinted.model.User;
-import com.spq.vinted.service.ShipmentService;
-import com.spq.vinted.service.UserService;
 
 class ShipmentServiceTest {
 
@@ -200,7 +196,9 @@ class ShipmentServiceTest {
             id,
             ShipmentStatus.SHIPPED,
             buyerDTO,
-            itemDTO
+            itemDTO,
+            id,
+            id + 100
         );
     }
 }

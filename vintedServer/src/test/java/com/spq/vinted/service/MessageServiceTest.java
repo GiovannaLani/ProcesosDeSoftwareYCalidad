@@ -21,7 +21,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.spq.vinted.dto.ChatMessageDTO;
 import com.spq.vinted.dto.ClothesDTO;
-import com.spq.vinted.dto.ItemDTO;
 import com.spq.vinted.model.ChatRoom;
 import com.spq.vinted.model.Clothes;
 import com.spq.vinted.model.Item;

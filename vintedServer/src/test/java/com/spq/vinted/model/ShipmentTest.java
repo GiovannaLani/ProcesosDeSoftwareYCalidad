@@ -1,6 +1,5 @@
 package com.spq.vinted.model;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +26,8 @@ class ShipmentTest {
     void testParameterizedConstructor() {
         Item item = new Clothes();
         User buyer = new User();
-        Shipment shipment = new Shipment(item, buyer);
+        User seller = new User();
+        Shipment shipment = new Shipment(item, buyer, seller);
         
         assertEquals(item, shipment.getItem());
         assertEquals(buyer, shipment.getBuyer());
