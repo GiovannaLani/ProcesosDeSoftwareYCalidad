@@ -1,6 +1,7 @@
 package com.spq.vinted.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -545,6 +546,28 @@ public class UserServiceTest {
         Exception exception = assertThrows(RuntimeException.class, () -> userService.unfollowUser(userId, targetUserId));
         assertEquals("Usuario objetivo no encontrado", exception.getMessage()); 
         verify(userRepository, times(0)).save(any(User.class));
+    }
+
+    @Test
+    void testUnfollowUser_RemovesFollowingAndSaves() {
+        long userId = 1L;
+        long targetUserId = 2L;
+
+        User user = new User("user1@example.com", "password", "user1", "User", "One");
+        user.setId(userId);
+
+        User targetUser = new User("user2@example.com", "password", "user2", "User", "Two");
+        targetUser.setId(targetUserId);
+
+        user.getFollowing().add(targetUser);
+
+        when(userRepository.findById(String.valueOf(userId))).thenReturn(Optional.of(user));
+        when(userRepository.findById(String.valueOf(targetUserId))).thenReturn(Optional.of(targetUser));
+
+        userService.unfollowUser(userId, targetUserId);
+
+        assertFalse(user.getFollowing().contains(targetUser));
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test
