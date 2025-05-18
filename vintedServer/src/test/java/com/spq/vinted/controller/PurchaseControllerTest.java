@@ -3,6 +3,9 @@ package com.spq.vinted.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spq.vinted.dto.PurchaseDTO;
 import com.spq.vinted.service.PurchaseService;
+import com.spq.vinted.service.ShipmentService;
+import com.spq.vinted.service.UserService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,8 +34,15 @@ class PurchaseControllerTest {
     @MockBean
     private PurchaseService purchaseService;
 
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private ShipmentService shipmentService;
+
     @Autowired
     private ObjectMapper objectMapper;
+
 
     private PurchaseDTO purchaseDTO;
 

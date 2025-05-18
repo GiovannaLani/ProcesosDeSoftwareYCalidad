@@ -20,18 +20,12 @@ import com.spq.vinted.model.Species;
 import com.spq.vinted.model.User;
 import com.spq.vinted.repository.ItemRepository;
 import com.spq.vinted.repository.UserRepository;
-import com.spq.vinted.service.ItemService;
-import com.spq.vinted.service.UserService;
-import com.spq.vinted.controller.ItemController;
-import com.spq.vinted.model.User;
 import com.spq.vinted.model.Category;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -55,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1053,11 +1046,11 @@ class ItemServiceTest {
         Clothes clothes = new Clothes();
         clothes.setId(1L);
         clothes.setTitle("Test Clothes");
-
+        clothes.setIsSold(false);
         List<Item> items = List.of(clothes);
         Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
 
-        when(itemRepository.findAll(pageable)).thenReturn(itemPage);
+        when(itemRepository.findByIsSoldFalse(any(Pageable.class))).thenReturn(itemPage);
 
         Page<Item> result = itemService.searchItems(null, null, page, null);
         assertEquals(1, result.getTotalElements());
@@ -1133,24 +1126,24 @@ class ItemServiceTest {
         assertEquals("Gaming Laptop", result.getContent().get(0).getTitle());
     }
     @Test
-void testGetItems_NoToken_NoType() {
-    int page = 0;
-    Pageable pageable = PageRequest.of(page, 28);
+    void testGetItems_NoToken_NoType() {
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, 28);
 
-    Clothes clothes = new Clothes();
-    clothes.setId(1L);
-    clothes.setTitle("Test Clothes");
+        Clothes clothes = new Clothes();
+        clothes.setId(1L);
+        clothes.setTitle("Test Clothes");
+        clothes.setIsSold(false);
+        List<Item> items = List.of(clothes);
+        Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
 
-    List<Item> items = List.of(clothes);
-    Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+        when(itemRepository.findByIsSoldFalse(pageable)).thenReturn(itemPage);
 
-    when(itemRepository.findAll(pageable)).thenReturn(itemPage);
+        Page<Item> result = itemService.getItems(null, page, null);
 
-    Page<Item> result = itemService.getItems(null, page, null);
-
-    assertEquals(1, result.getTotalElements());
-    assertEquals("Test Clothes", result.getContent().get(0).getTitle());
-}
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Test Clothes", result.getContent().get(0).getTitle());
+    }
 @Test
 void testGetItems_WithToken_NoType() {
     int page = 0;
@@ -1169,7 +1162,7 @@ void testGetItems_WithToken_NoType() {
     List<Item> items = List.of(clothes);
     Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
 
-    when(itemRepository.findBySellerIdNot(userId, pageable)).thenReturn(itemPage);
+    when(itemRepository.findBySellerIdNotAndIsSoldFalse(userId, pageable)).thenReturn(itemPage);
 
     Page<Item> result = itemService.getItems(token, page, null);
 

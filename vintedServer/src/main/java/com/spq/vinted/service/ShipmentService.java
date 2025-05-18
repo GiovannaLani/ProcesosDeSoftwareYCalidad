@@ -50,6 +50,7 @@ public class ShipmentService {
     public Shipment createShipment(Long purchaseIds, ShipmentStatus status,Long token) {
         System.out.println("purchaseIds: " + purchaseIds);
         PurchaseDTO purchaseDTO = purchaseService.getPurchaseById(token, purchaseIds);
+        System.out.println("purchaseDTO: " + purchaseDTO);
         Purchase purchase = purchaseService.fromDTO(purchaseDTO,token);
         System.out.println("purchases: " + purchase);
         User user = userService.getUserByToken(token);

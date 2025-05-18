@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.data.domain.Page;
 
 import com.spq.client.data.Ad;
 import com.spq.client.data.Category;
@@ -23,7 +21,6 @@ import com.spq.client.data.Offer;
 import com.spq.client.data.PaginatedResponse;
 import com.spq.client.data.Pet;
 import com.spq.client.data.Purchase;
-import com.spq.client.data.Rating;
 import com.spq.client.data.Shipment;
 import com.spq.client.data.RatingInfo;
 import com.spq.client.data.Clothes;
@@ -223,8 +220,7 @@ public class ClientController {
 			Model model) {
 		try {
 			if (token == null) {
-				model.addAttribute("errorMessage", "El token es obligatorio para acceder a esta página.");
-				return "error";
+				return "redirect:/login";
 			}
 	
 			Item item = vintedService.getItemById(id);
@@ -539,7 +535,7 @@ public class ClientController {
 
 	@GetMapping("/shoppingCart")
 	public String showCart(
-			@RequestParam("token") Long token,
+			@RequestParam(value = "token", required = false) Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (token == null) {
@@ -562,7 +558,7 @@ public class ClientController {
 
 	@GetMapping("/wishlist")
 	public String showWishlist(
-			@RequestParam("token") Long token,
+			@RequestParam(value = "token", required = false) Long token,
 			@RequestParam(value = "redirectUrl", required = false) String redirectUrl,
 			Model model) {
 		if (token == null) {
@@ -884,7 +880,7 @@ public class ClientController {
 					try {
 						Purchase purchase = vintedService.getPurchaseById(token, purchaseId);
 						if (purchase != null) {
-							//vintedService.deleteItem(token, purchase.itemId());
+							vintedService.deleteItem(token, purchase.itemId());
 						}
 					} catch (RuntimeException e) {
 						redirectAttributes.addFlashAttribute("warningMessage", "Pago realizado, pero no se pudo eliminar un artículo.");

@@ -19,16 +19,20 @@ import org.springframework.data.repository.query.Param;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findBySellerIdNot(Long userId);
     List<Item> findBySeller(User seller);
-    Page<Item> findAll(Pageable pageable);
-    Page<Item> findBySellerIdNot(Long sellerId, Pageable pageable);
-    @Query("SELECT i FROM Item i WHERE TYPE(i) = :type")
+    Page<Item> findBySellerIdNotAndIsSoldFalse(Long sellerId, Pageable pageable);
+    Page<Item> findByIsSoldFalse(Pageable pageable);
+    
+    @Query("SELECT i FROM Item i WHERE TYPE(i) = :type AND i.isSold = false")
     Page<Item> findByType(@Param("type") Class<? extends Item> type, Pageable pageable);
-
-    @Query("SELECT i FROM Item i WHERE i.seller.id <> :sellerId AND TYPE(i) = :type")
+    @Query("SELECT i FROM Item i WHERE i.seller.id <> :sellerId AND TYPE(i) = :type AND i.isSold = false")
     Page<Item> findBySellerIdNotAndType(@Param("sellerId") Long sellerId, @Param("type") Class<? extends Item> type, Pageable pageable);
-    @Query("SELECT c FROM Clothes c WHERE c.category = :category")
+    
+    @Query("SELECT c FROM Clothes c WHERE c.category = :category AND c.isSold = false")
     Page<Clothes> findClothesByCategory(@Param("category") Category category, Pageable pageable);
-    @Query("SELECT i FROM Item i WHERE TYPE(i) = :type AND LOWER(i.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+    @Query(" SELECT c FROM Clothes c WHERE c.seller.id <> :sellerId AND c.category = :category AND c.isSold = false")
+    Page<Clothes> findClothesByCategoryAndSellerIdNot(@Param("sellerId") Long sellerId, @Param("category") Category category, Pageable pageable);
+    
+    @Query("SELECT i FROM Item i WHERE TYPE(i) = :type AND LOWER(i.title) LIKE LOWER(CONCAT('%', :query, '%')) AND i.isSold = false")
     Page<Item> searchByTypeAndQuery(@Param("type") Class<? extends Item> type, @Param("query") String query, Pageable pageable);
     @Query("SELECT i FROM Item i WHERE LOWER(i.title) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Item> searchByQuery(@Param("query") String query, Pageable pageable);

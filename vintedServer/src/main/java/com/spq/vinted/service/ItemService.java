@@ -79,21 +79,18 @@ public class ItemService {
         );
         
         Class<? extends Item> itemType = (type != null) ? typeMap.get(type) : null;
-        if (itemType == null && type != null) {
-            return itemRepository.findAll(pageable);
-        }
 
         if (token == null) {
             if (itemType != null) {
                 return itemRepository.findByType(itemType, pageable);
             }
-            return itemRepository.findAll(pageable);
+            return itemRepository.findByIsSoldFalse(pageable);
         } else {
             Long userId = userService.getUserByToken(token).getId();
             if (itemType != null) {
                 return itemRepository.findBySellerIdNotAndType(userId, itemType, pageable);
             }
-            return itemRepository.findBySellerIdNot(userId, pageable);
+            return itemRepository.findBySellerIdNotAndIsSoldFalse(userId, pageable);
         }
     }
 
@@ -109,9 +106,19 @@ public class ItemService {
     public List<Clothes> getClothesByCategory(Category category){
         return itemRepository.findAll().stream().filter(item -> item instanceof Clothes).map(item -> (Clothes) item).filter(clothes -> clothes.getCategory().equals(category)).collect(Collectors.toList());
     }
-    public Page<Clothes> getClothesByCategory(Category category, int page) {
+    public Page<Clothes> getClothesByCategory(Category category, int page, Long token) {
+        System.out.println("CATEGORY1");
         Pageable pageable = PageRequest.of(page, 28);
+        if (token != null) {
+                    System.out.println("CATEGORY2");
+            Long userId = userService.getUserByToken(token).getId();
+                    System.out.println("CATEGORY3");
+
+            return itemRepository.findClothesByCategoryAndSellerIdNot(userId, category, pageable);
+        }
         try {
+                    System.out.println("CATEGORY4");
+
             return itemRepository.findClothesByCategory(category, pageable);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching clothes by category: " + e.getMessage(), e);
@@ -303,35 +310,34 @@ public class ItemService {
         return user.getItemsForSale();
     }
 
-    // @Transactional
-    // public void deleteItem(long token, long itemId) {
-    //     User user = userService.getUserByToken(token);
-    //     if (user == null) {
-    //         throw new RuntimeException("Not authorized");
-    //     }
+    @Transactional
+    public void deleteItem(long token, long itemId) {
+        User user = userService.getUserByToken(token);
+        if (user == null) {
+            throw new RuntimeException("Not authorized");
+        }
 
-    //     Item item = getItemById(itemId);
-    //     if (item == null) {
-    //         throw new RuntimeException("Item not found");
-    //     }
+        Item item = getItemById(itemId);
+        if (item == null) {
+            throw new RuntimeException("Item not found");
+        }
 
-    //     for (User u : item.getUsersWithItemInCart()) {
-    //         u.getCartItems().remove(item);
-    //         userRepository.save(u);
-    //     }
-    //     item.getUsersWithItemInCart().clear();
+        for (User u : item.getUsersWithItemInCart()) {
+            u.getCartItems().remove(item);
+            userRepository.save(u);
+        }
+        item.getUsersWithItemInCart().clear();
 
-    //     for (User u : item.getUsersWithItemInWishlist()) {
-    //         u.getWishlistItems().remove(item);
-    //         userRepository.save(u);
-    //     }
-    //     item.getUsersWithItemInWishlist().clear();
+        for (User u : item.getUsersWithItemInWishlist()) {
+            u.getWishlistItems().remove(item);
+            userRepository.save(u);
+        }
+        item.getUsersWithItemInWishlist().clear();
+        item.setIsSold(true);
+        itemRepository.save(item);
 
-    //     itemRepository.save(item);
-    //     itemRepository.delete(item);
-
-    //     System.out.println("Item borrado correctamente.");
-    // }
+        System.out.println("Item borrado correctamente.");
+    }
     
     public static ItemDTO getDTOById(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found with id: " + itemId));

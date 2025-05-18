@@ -284,7 +284,7 @@
 						</div>
 					</div>
 	
-					<form th:if="${offer != null}" th:action="@{/createPurchase/{itemId}(itemId=${item.id})}" method="POST">
+					<form th:if="${offer != null}" th:action="@{/createMultiplePurchase}" method="POST">
 						<h4 class="mtext-105 cl2 txt-center p-b-30">
 							Confirmar Compra
 						</h4>

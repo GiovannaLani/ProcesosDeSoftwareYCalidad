@@ -391,7 +391,7 @@
                     <div class="block2-pic hov-img0">
                         <a th:href="@{/item/{id}(id=${item.id}, token=${token})}">
                             <img th:src="${item.images != null and not #lists.isEmpty(item.images)} ? @{${itemImageBaseUrl + item.images[0]}} : @{'/images/icons/profile-default.png'}"
-                                 alt="IMG-PRODUCT">
+                                 alt="IMG-PRODUCT" style="height: 250px; object-fit: cover;">
                         </a>
                     </div>
                     <div class="block2-txt flex-w flex-t p-t-14">
@@ -412,7 +412,7 @@
                 <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ad">
                     <div class="block2" style="background:rgba(0,119,130,1); padding: 10px;">
                         <div class="block2-pic hov-img0">
-							<img th:src="${ads[(iterStat.index + 1) / 2 - 1].imageUrl != null} ? @{${adsImageBaseUrl + ads[(iterStat.index + 1) / 2 - 1].imageUrl}} : @{'/images/icons/profile-default.png'}">
+							<img th:src="${ads[(iterStat.index + 1) / 2 - 1].imageUrl != null} ? @{${adsImageBaseUrl + ads[(iterStat.index + 1) / 2 - 1].imageUrl}} : @{'/images/icons/profile-default.png'}" style="height: 250px; object-fit: cover;">
                         </div>
                         <div class="block2-txt flex-w flex-t p-t-14">
                             <div class="block2-txt-child1 flex-col-l ">

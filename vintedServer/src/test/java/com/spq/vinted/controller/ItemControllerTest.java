@@ -587,7 +587,7 @@ public class ItemControllerTest {
         List<Clothes> clothesList = List.of(item);
         Page<Clothes> clothesPage = new PageImpl<>(clothesList);
 
-        when(itemService.getClothesByCategory(category, 0)).thenReturn(clothesPage);
+        when(itemService.getClothesByCategory(category, 0,null)).thenReturn(clothesPage);
 
         mockMvc.perform(get("/items/clothes/{category}", category)
                 .param("page", "0"))

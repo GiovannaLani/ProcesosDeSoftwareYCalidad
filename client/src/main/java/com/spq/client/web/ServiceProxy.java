@@ -328,20 +328,20 @@ public class ServiceProxy implements IVintedServiceProxy {
 		}
 	}
 
-	// @Override
-	// public void deleteItem(Long token, Long itemId) {
-	// 	try {
-	// 		System.out.println("borrar" + itemId);
-	// 		String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
-	// 		restTemplate.delete(url);
-	// 	} catch (HttpStatusCodeException e) {
-	// 		switch (e.getStatusCode().value()) {
-	// 			case 404 -> throw new RuntimeException("Item not found");
-	// 			case 403 -> throw new RuntimeException("Not authorized to delete this item");
-	// 			default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
-	// 		}
-	// 	}
-	// }
+	@Override
+	public void deleteItem(Long token, Long itemId) {
+		try {
+			System.out.println("borrar" + itemId);
+			String url = apiBaseUrl + "/items/delete/" + itemId + "?token=" + token;
+			restTemplate.delete(url);
+		} catch (HttpStatusCodeException e) {
+			switch (e.getStatusCode().value()) {
+				case 404 -> throw new RuntimeException("Item not found");
+				case 403 -> throw new RuntimeException("Not authorized to delete this item");
+				default -> throw new RuntimeException("Failed to delete item: " + e.getStatusText());
+			}
+		}
+	}
 
 	public void deleteUser(long token) {
 		try {

@@ -50,6 +50,7 @@ public class PurchaseController {
 
     @PostMapping("/pay")
     public ResponseEntity<Map<String, String>> processPayment(@RequestParam long token, @RequestParam long purchaseId, @RequestParam String paymentMethod) {
+        System.out.println("PROBANDO PURCHASE: " + token + purchaseId + paymentMethod);
         boolean success = purchaseService.processPayment(token, purchaseId, paymentMethod);
         Map<String, String> response = new HashMap<>();
         if (success) {

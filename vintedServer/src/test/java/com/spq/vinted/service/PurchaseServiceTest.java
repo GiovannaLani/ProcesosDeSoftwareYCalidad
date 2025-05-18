@@ -3,6 +3,9 @@ package com.spq.vinted.service;
 import com.spq.vinted.dto.PurchaseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,11 +14,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PurchaseServiceTest {
 
-    private PurchaseService purchaseService;
+    @Mock
+    private UserService userService;
 
+    @InjectMocks
+    private PurchaseService purchaseService;
+    
     @BeforeEach
     void setUp() {
-        //purchaseService = new PurchaseService();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

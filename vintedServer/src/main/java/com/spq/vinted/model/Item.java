@@ -75,8 +75,9 @@ public abstract class Item {
     @OneToOne(optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
-
-    private boolean isSold = false;
+    
+    @Column(nullable = false)
+    private boolean isSold;
 
     public Item() {
     }
