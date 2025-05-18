@@ -1,11 +1,13 @@
 package com.spq.vinted.service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.spq.vinted.dto.ItemDTO;
@@ -97,4 +99,27 @@ public class ShipmentService {
         System.out.println("shipments: " + shipments);
         return shipments;
     }
+    
+    @Scheduled(fixedRate = 60000)
+    public void autoUpdateShipmentStatuses() {
+        List<Shipment> shipments = shipmentRepository.findByStatusNot(ShipmentStatus.DELIVERED);
+        
+        shipments.forEach(shipment -> {
+            long minutesElapsed = ChronoUnit.MINUTES.between(
+                shipment.getCreatedDate(), 
+                LocalDateTime.now()
+            );
+            
+            if (shipment.getStatus() == ShipmentStatus.SHIPPED && minutesElapsed >= 1) {
+                shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+            } else if (shipment.getStatus() == ShipmentStatus.IN_TRANSIT && minutesElapsed >= 2) {
+                shipment.setStatus(ShipmentStatus.DELIVERED);
+            }
+        });
+        
+        shipmentRepository.saveAll(shipments);
+    }
+    
 }
+
+
