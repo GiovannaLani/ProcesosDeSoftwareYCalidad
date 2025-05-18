@@ -294,7 +294,11 @@
 												</td>
 
 												<td class="align-middle text-center">
-													<span th:text="${shipment.status.getDisplayName}"> </span>
+													<span class="dynamic-status" 
+														th:data-status="${shipment.status.name()}"
+														th:data-created="${#temporals.format(shipment.createdDate, 'yyyy-MM-dd HH:mm:ss')}">
+														<span th:text="${shipment.status.getDisplayName()}"></span>
+													</span>
 												</td>
 											</tr>
 										</tbody>
@@ -540,35 +544,52 @@
 		}
 	</script>
 
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const searchForm = document.getElementById("search-form");
-		const searchType = document.getElementById("search-type");
-		const searchText = document.getElementById("search_text");
-	
-		function updateFormBeforeSubmit() {
-			if (searchType.value === "miembros") {
-				searchForm.action = "/searchUser";
-				searchText.name = "username"; 
-			} else {
-				searchForm.action = "/search";
-				searchText.name = "search_text";
-			}
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const STATUS_TIMING = {
+			SHIPPED: 1,    // 1 minuto para cambiar a EN_CAMINO
+			IN_TRANSIT: 2  // 2 minutos totales para ENTREGADO
+		};
+
+		function updateStatus() {
+			document.querySelectorAll('.dynamic-status').forEach(element => {
+				const status = element.dataset.status;
+				const created = new Date(element.dataset.created);
+				const now = new Date();
+				
+				// Calcular diferencia en minutos
+				const diffMinutes = Math.floor((now - created) / (1000 * 60));
+				
+				let newStatus = status;
+				if (status === 'SHIPPED' && diffMinutes >= STATUS_TIMING.SHIPPED) {
+					newStatus = 'IN_TRANSIT';
+				}
+				if (status === 'IN_TRANSIT' && diffMinutes >= (STATUS_TIMING.SHIPPED + STATUS_TIMING.IN_TRANSIT)) {
+					newStatus = 'DELIVERED';
+				}
+
+				// Actualizar UI
+				element.innerHTML = `
+					<span class="status-badge ${newStatus.toLowerCase()}">
+						${getStatusText(newStatus)} 
+						${newStatus === 'IN_TRANSIT' ? `(${diffMinutes}m)` : ''}
+					</span>
+				`;
+			});
 		}
-	
-		searchType.addEventListener("change", function () {
-			updateFormBeforeSubmit();
-		});
-	
-		searchForm.addEventListener("submit", function (event) {
-			const text = searchText.value.trim();
-			if (!text) {
-				event.preventDefault();
-				alert("Por favor, introduce un término de búsqueda.");
-				return;
-			}
-			updateFormBeforeSubmit();
-		});
+
+		function getStatusText(status) {
+			const statusMap = {
+				'SHIPPED': '🟡 ENVIADO',
+				'IN_TRANSIT': '🟠 EN CAMINO',
+				'DELIVERED': '🟢 ENTREGADO'
+			};
+			return statusMap[status] || 'DESCONOCIDO';
+		}
+
+		// Ejecutar cada 60 segundos
+		setInterval(updateStatus, 60000);
+		updateStatus(); // Forzar primera actualización
 	});
 	</script>
 

@@ -1,5 +1,6 @@
 package com.spq.vinted.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,8 @@ public class ShipmentService {
         shipment.setBuyer(user);
         System.out.println("buyer: " + user);
         shipment.setStatus(status);
-        System.out.println("shipment: " + shipment.getBuyer() + " " + shipment.getItem() + " " + shipment.getStatus());
+        shipment.setCreatedDate(LocalDateTime.now());
+        System.out.println("shipment: " + shipment.getBuyer() + " " + shipment.getItem() + " " + shipment.getStatus() + " " + shipment.getCreatedDate());
         return shipmentRepository.save(shipment);
     }
 
@@ -75,6 +77,7 @@ public class ShipmentService {
         dto.setItem(itemDTO);
         dto.setBuyerId(shipment.getBuyer().getId());
         dto.setBuyer(shipment.getBuyer().toDTO());
+        dto.setCreatedDate(shipment.getCreatedDate());
         return dto;
     }
 
