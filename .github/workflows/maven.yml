@@ -18,11 +18,13 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: spq
-          MYSQL_DATABASE: spq
+          MYSQL_USER: spq
+          MYSQL_PASSWORD: spq
+          MYSQL_DATABASE: restapidb
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pspq"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uspq -pspq"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -51,14 +53,15 @@ jobs:
       - name: Wait for MySQL to be ready
         run: |
           echo "Waiting for MySQL..."
-          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
+          until mysqladmin ping -h 127.0.0.1 -uspq -pspq --silent; do
             sleep 2
           done
+          echo "MySQL is ready!"
 
       - name: Run DB initialization script
         run: |
           echo "Running DB setup..."
-          mysql -h 127.0.0.1 -uroot -proot < vintedServer/src/main/resources/dbsetup.sql
+          mysql -h 127.0.0.1 -uspq -pspq < vintedServer/src/main/resources/dbsetup.sql
 
       - name: Run Unit tests and generate coverage report
         run: mvn test jacoco:report
