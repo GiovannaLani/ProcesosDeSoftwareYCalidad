@@ -6,8 +6,8 @@ viinted,com.spq.vinted.model,Offer,0,107,0,0,0,39,0,19,0,19
 viinted,com.spq.vinted.model,Ad,0,52,0,0,0,18,0,11,0,11
 viinted,com.spq.vinted.model,Home,0,38,0,0,0,9,0,5,0,5
 viinted,com.spq.vinted.model,Species,0,15,0,0,0,3,0,1,0,1
-viinted,com.spq.vinted.model,Message.MessageType,0,15,0,0,0,2,0,1,0,1
 viinted,com.spq.vinted.model,Purchase,0,73,0,0,0,31,0,16,0,16
+viinted,com.spq.vinted.model,Message.MessageType,0,15,0,0,0,2,0,1,0,1
 viinted,com.spq.vinted.model,Entertainment,0,38,0,0,0,9,0,5,0,5
 viinted,com.spq.vinted.model,ClothesType,0,45,0,0,0,8,0,1,0,1
 viinted,com.spq.vinted.model,HomeType,0,15,0,0,0,3,0,1,0,1
@@ -37,9 +37,9 @@ viinted,com.spq.vinted.dto,SignupDTO,0,18,0,0,0,1,0,1,0,1
 viinted,com.spq.vinted.dto,LoginDTO,0,9,0,0,0,1,0,1,0,1
 viinted,com.spq.vinted.dto,EditUserDTO,0,12,0,0,0,1,0,1,0,1
 viinted,com.spq.vinted.dto,OfferDTO,0,76,0,0,0,32,0,16,0,16
+viinted,com.spq.vinted.dto,RatingInfoDTO,12,44,0,0,6,17,3,9,3,9
 viinted,com.spq.vinted.dto,OfferReturnerDTO,4,88,0,0,2,36,1,18,1,18
 viinted,com.spq.vinted.dto,ItemDTO,0,80,0,0,0,31,0,16,0,16
-viinted,com.spq.vinted.dto,RatingInfoDTO,12,44,0,0,6,17,3,9,3,9
 viinted,com.spq.vinted.dto,PaginatedResponseDTO,12,21,0,0,6,8,3,4,3,4
 viinted,com.spq.vinted.dto,ChatMessageDTO,0,63,0,0,0,27,0,14,0,14
 viinted,com.spq.vinted.dto,PetDTO,0,22,0,0,0,8,0,4,0,4
