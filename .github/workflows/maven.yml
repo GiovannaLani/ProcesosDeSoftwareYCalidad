@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - '**'
-  schedule:
-    - cron: '0 18-23/2 * * *'  # 20:00–01:00 CET
-    - cron: '0 0-6/2 * * *'    # 02:00–08:00 CET
   workflow_dispatch:
 
 jobs:
